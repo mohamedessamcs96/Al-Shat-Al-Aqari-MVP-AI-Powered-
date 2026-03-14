@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Phone, CheckCircle, AlertCircle } from "lucide-react";
+import { Phone, CheckCircle, AlertCircle, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router";
 import mockApi from "../lib/mock-api";
 import { mockCities } from "../lib/mock-data";
 import { Button } from "./ui/button";
@@ -12,6 +13,7 @@ import { Badge } from "./ui/badge";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "./ui/input-otp";
 
 export function DemandForm() {
+  const navigate = useNavigate();
   const [step, setStep] = React.useState<"form" | "otp" | "success">("form");
   const [buyerName, setBuyerName] = React.useState("");
   const [cityId, setCityId] = React.useState(mockCities[0]?.id || "1");
@@ -72,6 +74,10 @@ export function DemandForm() {
       {/* Header */}
       <header className="bg-white border-b shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+          <Button variant="ghost" onClick={() => navigate('/chat')}>
+            <ArrowLeft className="w-5 h-5 ml-2" />
+            رجوع
+          </Button>
           <div>
             <h1 className="text-xl font-bold text-gray-900" dir="rtl">اطلب عقارك</h1>
             <p className="text-sm text-gray-500" dir="rtl">نموذج طلب عقار مخصص</p>
