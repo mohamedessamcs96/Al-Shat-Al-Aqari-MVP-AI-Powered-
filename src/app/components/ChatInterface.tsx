@@ -207,37 +207,37 @@ export function ChatInterface() {
                     {message.listings.map((listing) => (
                       <Card
                         key={listing.id}
-                        className="p-4 hover:shadow-md transition-shadow cursor-pointer bg-white"
+                        className="p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer bg-white"
                         onClick={() => navigate(`/listings/${listing.id}`)}
                       >
-                        <div className="flex gap-4">
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                           <img
                             src={listing.images[0]}
                             alt={listing.property_type}
-                            className="w-32 h-24 object-cover rounded-lg"
+                            className="w-full sm:w-32 h-40 sm:h-24 object-cover rounded-lg flex-shrink-0"
                           />
                           <div className="flex-1" dir="rtl">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <h3 className="font-semibold text-gray-900">{listing.property_type}</h3>
-                                <p className="text-sm text-gray-600">{listing.address}</p>
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                              <div className="min-w-0">
+                                <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{listing.property_type}</h3>
+                                <p className="text-xs sm:text-sm text-gray-600 truncate">{listing.address}</p>
                               </div>
-                              <Badge className="bg-blue-100 text-blue-700 border-blue-200">
+                              <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs sm:text-sm w-fit">
                                 {formatPrice(listing.price)}
                               </Badge>
                             </div>
-                            <div className="flex gap-4 mt-2 text-sm text-gray-600">
+                            <div className="flex gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-gray-600 flex-wrap">
                               <span>{listing.bedrooms} غرف</span>
                               <span>•</span>
                               <span>{listing.area} م²</span>
-                              <span>•</span>
-                              <span>{getCityName(listing.city_id)}</span>
+                              <span className="hidden sm:inline">•</span>
+                              <span className="hidden sm:inline">{getCityName(listing.city_id)}</span>
                             </div>
-                            <div className="flex gap-2 mt-3">
+                            <div className="flex gap-2 mt-3 flex-wrap">
                               <Badge variant="outline" className="text-xs">
                                 جودة {listing.quality_score}%
                               </Badge>
-                              {listing.features.slice(0, 2).map((feature, idx) => (
+                              {listing.features.slice(0, 1).map((feature, idx) => (
                                 <Badge key={idx} variant="outline" className="text-xs">
                                   {feature}
                                 </Badge>
@@ -258,7 +258,7 @@ export function ChatInterface() {
                         key={idx}
                         variant="outline"
                         size="sm"
-                        className="bg-white hover:bg-blue-50 border-blue-200"
+                        className="bg-white hover:bg-blue-50 border-blue-200 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 h-fit"
                         onClick={() => handleSuggestionClick(suggestion)}
                       >
                         {suggestion}
