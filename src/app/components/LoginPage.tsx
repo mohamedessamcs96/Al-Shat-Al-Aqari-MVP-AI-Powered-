@@ -61,18 +61,18 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-5xl">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-3 sm:p-4">
+      <div className="w-full max-w-6xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-block bg-gradient-to-br from-blue-600 to-indigo-600 p-4 rounded-2xl mb-4">
-            <Building2 className="w-12 h-12 text-white" />
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="inline-block bg-gradient-to-br from-blue-600 to-indigo-600 p-3 sm:p-4 rounded-2xl mb-3 sm:mb-4">
+            <Building2 className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2" dir="rtl"></h1>
-          <p className="text-gray-600" dir="rtl">منصة البحث الذكي عن العقارات</p>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 sm:mb-2" dir="rtl">الشات العقاري</h1>
+          <p className="text-sm sm:text-base text-gray-600" dir="rtl">منصة البحث الذكي عن العقارات</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Buyer Login */}
           <Card className="p-8">
             <div className="text-center mb-6">

@@ -22,51 +22,54 @@ export function OfficeDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate('/chat')}>
-            <ArrowLeft className="w-5 h-5 ml-2" />
-            رجوع
-          </Button>
-          <div className="text-center">
-            <h1 className="text-xl font-bold text-gray-900">لوحة تحكم المكتب</h1>
-            <p className="text-sm text-gray-500">Prime Real Estate</p>
+      <header className="bg-white border-b shadow-sm sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-2 sm:py-4">
+          <div className="flex items-center justify-between gap-2">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/chat')} className="flex-shrink-0">
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 ml-1 sm:ml-2" />
+            </Button>
+            <div className="text-center min-w-0 flex-1">
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">لوحة تحكم المكتب</h1>
+              <p className="text-xs sm:text-sm text-gray-500 truncate">Prime Real Estate</p>
+            </div>
+            <div className="flex gap-1 sm:gap-2 flex-wrap justify-end flex-shrink-0">
+              <Button size="sm" onClick={() => navigate('/office/listings')} className="text-xs px-2 sm:px-3 py-1">
+                <Building2 className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
+                <span className="hidden sm:inline">العقارات</span>
+              </Button>
+              <Button size="sm" onClick={() => navigate('/office/leads')} className="text-xs px-2 sm:px-3 py-1">
+                <Users className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
+                <span className="hidden sm:inline">العملاء</span>
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => navigate('/office/campaigns')} className="text-xs px-2 sm:px-3 py-1">
+                الحملات
+              </Button>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button size="sm" onClick={() => navigate('/office/listings')}>
-              <Building2 className="w-4 h-4 ml-2" />
-              العقارات
-            </Button>
-            <Button size="sm" onClick={() => navigate('/office/leads')}>
-              <Users className="w-4 h-4 ml-2" />
-              العملاء
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => navigate('/office/campaigns')}>
-              الحملات
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => navigate('/office/mini-page-editor')}>
-              <Settings className="w-4 h-4 ml-2" />
+          <div className="flex gap-1 sm:gap-2 mt-2 flex-wrap">
+            <Button size="sm" variant="outline" onClick={() => navigate('/office/mini-page-editor')} className="text-xs px-2 sm:px-3 py-1 flex-1 sm:flex-initial">
+              <Settings className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
               ملفي
             </Button>
-            <Button size="sm" variant="outline" onClick={() => navigate('/office/subscription')}>
-              <CreditCard className="w-4 h-4 ml-2" />
+            <Button size="sm" variant="outline" onClick={() => navigate('/office/subscription')} className="text-xs px-2 sm:px-3 py-1 flex-1 sm:flex-initial">
+              <CreditCard className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
               الاشتراك
             </Button>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card className="p-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <Card className="p-3 sm:p-6">
             <div className="flex items-center justify-between" dir="rtl">
               <div>
-                <p className="text-sm text-gray-600">إجمالي العقارات</p>
-                <p className="text-3xl font-bold text-gray-900">{officeListings.length}</p>
+                <p className="text-xs sm:text-sm text-gray-600">إجمالي العقارات</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900">{officeListings.length}</p>
                 <p className="text-xs text-green-600 mt-1">+3 هذا الشهر</p>
               </div>
-              <Building2 className="w-10 h-10 text-blue-500" />
+              <Building2 className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500 flex-shrink-0" />
             </div>
           </Card>
 
