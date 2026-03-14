@@ -10,14 +10,10 @@ import { NegotiationView } from "./components/NegotiationView";
 import { LoginPage } from "./components/LoginPage";
 import { DemandForm } from "./components/DemandForm";
 
-const Root = () => {
-  return <ChatInterface />;
-};
-
 export const router = createBrowserRouter([
   {
     path: "/",
-    Component: Root,
+    Component: LoginPage,
   },
   {
     path: "/login",
