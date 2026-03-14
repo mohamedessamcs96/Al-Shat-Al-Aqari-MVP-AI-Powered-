@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Building2, User, Mail, Lock, Phone } from 'lucide-react';
+import { Building2, User, Mail, Lock, Phone, ShieldAlert } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Input } from './ui/input';
@@ -17,6 +17,7 @@ export function LoginPage() {
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPhone, setRegisterPhone] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
 
   const handleBuyerLogin = () => {
     if (!buyerPhone) {
@@ -45,6 +46,20 @@ export function LoginPage() {
     navigate('/office/dashboard');
   };
 
+  const handleAdminLogin = () => {
+    if (!adminPassword) {
+      toast.error('الرجاء إدخال كلمة المرور');
+      return;
+    }
+    // Demo password for testing
+    if (adminPassword === 'admin123') {
+      toast.success('مرحباً بك في لوحة تحكم المنصة!');
+      navigate('/admin/dashboard');
+    } else {
+      toast.error('كلمة المرور غير صحيحة');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-5xl">
@@ -57,7 +72,7 @@ export function LoginPage() {
           <p className="text-gray-600" dir="rtl">منصة البحث الذكي عن العقارات</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Buyer Login */}
           <Card className="p-8">
             <div className="text-center mb-6">
@@ -239,6 +254,48 @@ export function LoginPage() {
                 </div>
               </TabsContent>
             </Tabs>
+          </Card>
+
+          {/* Admin Console */}
+          <Card className="p-8">
+            <div className="text-center mb-6">
+              <div className="inline-block bg-red-100 p-3 rounded-full mb-3">
+                <ShieldAlert className="w-8 h-8 text-red-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900" dir="rtl">لوحة الإدارة</h2>
+              <p className="text-sm text-gray-600 mt-2" dir="rtl">
+                إدارة المنصة والتحليلات والامتثال
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="admin-password" className="text-right block">كلمة المرور</Label>
+                <div className="relative mt-1">
+                  <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    id="admin-password"
+                    type="password"
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="pr-10 text-right"
+                    dir="rtl"
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-2 text-right" dir="rtl">للاختبار: admin123</p>
+              </div>
+
+              <Button onClick={handleAdminLogin} className="w-full bg-red-600 hover:bg-red-700">
+                دخول الإدارة
+              </Button>
+
+              <div className="bg-red-50 p-4 rounded-lg">
+                <p className="text-sm text-red-700 text-center" dir="rtl">
+                  ⚠️ وصول مقتصر على المسؤولين فقط
+                </p>
+              </div>
+            </div>
           </Card>
         </div>
       </div>

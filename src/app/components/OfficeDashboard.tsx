@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Building2, TrendingUp, Users, Eye, MessageSquare, ArrowLeft, Plus, BarChart3 } from 'lucide-react';
+import { Building2, TrendingUp, Users, Eye, MessageSquare, ArrowLeft, Plus, BarChart3, Settings, CreditCard } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
@@ -33,12 +33,24 @@ export function OfficeDashboard() {
             <p className="text-sm text-gray-500">Prime Real Estate</p>
           </div>
           <div className="flex gap-2">
+            <Button size="sm" onClick={() => navigate('/office/listings')}>
+              <Building2 className="w-4 h-4 ml-2" />
+              العقارات
+            </Button>
             <Button size="sm" onClick={() => navigate('/office/leads')}>
               <Users className="w-4 h-4 ml-2" />
               العملاء
             </Button>
             <Button size="sm" variant="outline" onClick={() => navigate('/office/campaigns')}>
               الحملات
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => navigate('/office/mini-page-editor')}>
+              <Settings className="w-4 h-4 ml-2" />
+              ملفي
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => navigate('/office/subscription')}>
+              <CreditCard className="w-4 h-4 ml-2" />
+              الاشتراك
             </Button>
           </div>
         </div>
