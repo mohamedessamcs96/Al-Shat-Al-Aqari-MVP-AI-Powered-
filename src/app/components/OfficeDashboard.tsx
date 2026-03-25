@@ -5,6 +5,7 @@ import {
   Plus, BarChart3, Settings, CreditCard, Star, MapPin, Phone,
   Mail, CheckCircle2, Bell, LogOut, ChevronRight, Home, Megaphone,
   QrCode, Download, Copy, Check, ExternalLink,
+  Search, Filter, Clock, Play, Pause, Target, X,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Button } from './ui/button';
@@ -13,13 +14,35 @@ import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Progress } from './ui/progress';
 import { Separator } from './ui/separator';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Textarea } from './ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { mockListings, mockDemandRequests, mockCampaigns, mockOffices, formatPrice, getCityName } from '../lib/mock-data';
+import { toast } from 'sonner';
 
 export function OfficeDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [qrCopied, setQrCopied] = useState(false);
   const qrRef = useRef<SVGSVGElement>(null);
+
+  // Leads state
+  const [leadsSearch, setLeadsSearch] = useState('');
+  const [responseMessage, setResponseMessage] = useState('');
+  const [selectedLead, setSelectedLead] = useState<string | null>(null);
+  const [leadsSubTab, setLeadsSubTab] = useState('all');
+
+  // Campaigns state
+  const [campaignName, setCampaignName] = useState('');
+  const [selectedListing, setSelectedListing] = useState('');
+  const [audienceFilter, setAudienceFilter] = useState('');
+  const [isCampaignDialogOpen, setIsCampaignDialogOpen] = useState(false);
+
+  // Subscription state
+  const [billingCycle, setBillingCycle] = useState('monthly');
+  const [currentPlan, setCurrentPlan] = useState('professional');
 
   const officeId = 'office-1';
   const office = mockOffices.find(o => o.id === officeId)!;
@@ -37,6 +60,71 @@ export function OfficeDashboard() {
     setQrCopied(true);
     setTimeout(() => setQrCopied(false), 2000);
   };
+
+  const handleRespond = () => {
+    if (!responseMessage.trim()) { toast.error('الرجاء كتابة رسالة'); return; }
+    toast.success('تم إرسال الرد بنجاح!');
+    setResponseMessage('');
+    setSelectedLead(null);
+  };
+
+  const handleToggleCampaign = (campaignId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'active' ? 'paused' : 'active';
+    toast.success(`تم ${newStatus === 'active' ? 'تفعيل' : 'إيقاف'} الحملة`);
+  };
+
+  const handleCreateCampaign = () => {
+    if (!campaignName || !selectedListing) { toast.error('الرجاء ملء جميع الحقول المطلوبة'); return; }
+    toast.success('تم إنشاء الحملة بنجاح!');
+    setCampaignName(''); setSelectedListing(''); setAudienceFilter('');
+    setIsCampaignDialogOpen(false);
+  };
+
+  const handleUpgradePlan = (planId: string) => {
+    setCurrentPlan(planId);
+    toast.success(`تم الترقية إلى خطة ${subPlans.find(p => p.id === planId)?.name}!`);
+  };
+
+  const subPlans = [
+    {
+      id: 'starter', name: 'ستارتر', monthlyPrice: 299, annualPrice: 2990, description: 'للمكاتب الناشئة',
+      features: [
+        { name: 'عقارات غير محدودة', included: true },
+        { name: 'حملات تسويقية', included: false },
+        { name: 'إدارة العملاء المحتملين', included: true },
+        { name: 'تقارير متقدمة', included: false },
+        { name: 'صفحة مكتب مخصصة', included: true },
+        { name: 'دعم 24/7', included: false },
+      ],
+    },
+    {
+      id: 'professional', name: 'احترافي', monthlyPrice: 799, annualPrice: 7990, description: 'الأكثر شيوعاً', popular: true,
+      features: [
+        { name: 'عقارات غير محدودة', included: true },
+        { name: 'حملات تسويقية', included: true },
+        { name: 'إدارة العملاء المحتملين', included: true },
+        { name: 'تقارير متقدمة', included: true },
+        { name: 'صفحة مكتب مخصصة', included: true },
+        { name: 'دعم الأولوية', included: true },
+      ],
+    },
+    {
+      id: 'enterprise', name: 'مؤسسي', monthlyPrice: 1999, annualPrice: 19990, description: 'للمكاتب الكبيرة',
+      features: [
+        { name: 'عقارات غير محدودة', included: true },
+        { name: 'حملات تسويقية', included: true },
+        { name: 'إدارة العملاء المحتملين', included: true },
+        { name: 'تقارير متقدمة', included: true },
+        { name: 'صفحة مكتب مخصصة', included: true },
+        { name: 'دعم 24/7 مخصص', included: true },
+      ],
+    },
+  ];
+
+  const filteredLeads = mockDemandRequests.filter(l =>
+    l.buyer_name.toLowerCase().includes(leadsSearch.toLowerCase()) ||
+    l.property_type.toLowerCase().includes(leadsSearch.toLowerCase())
+  );
 
   const handleQrDownload = () => {
     const svg = qrRef.current;
@@ -167,16 +255,16 @@ export function OfficeDashboard() {
               {[
                 { label: 'لوحة التحكم', icon: <Home className="w-3.5 h-3.5" />, tab: 'overview' },
                 { label: 'عقاراتي', icon: <Building2 className="w-3.5 h-3.5" />, tab: 'listings' },
-                { label: 'العملاء', icon: <Users className="w-3.5 h-3.5" />, route: '/office/leads' },
-                { label: 'الحملات', icon: <Megaphone className="w-3.5 h-3.5" />, route: '/office/campaigns' },
+                { label: 'العملاء', icon: <Users className="w-3.5 h-3.5" />, tab: 'leads' },
+                { label: 'الحملات', icon: <Megaphone className="w-3.5 h-3.5" />, tab: 'campaigns' },
                 { label: 'الأداء', icon: <BarChart3 className="w-3.5 h-3.5" />, tab: 'performance' },
-                { label: 'الاشتراك', icon: <CreditCard className="w-3.5 h-3.5" />, route: '/office/subscription' },
+                { label: 'الاشتراك', icon: <CreditCard className="w-3.5 h-3.5" />, tab: 'subscription' },
               ].map((item) => (
                 <button
                   key={item.label}
-                  onClick={() => item.route ? navigate(item.route) : item.tab && setActiveTab(item.tab)}
+                  onClick={() => setActiveTab(item.tab)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap
-                    ${item.tab && activeTab === item.tab
+                    ${activeTab === item.tab
                       ? 'bg-blue-600 text-white shadow-sm'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
@@ -212,6 +300,9 @@ export function OfficeDashboard() {
             <TabsTrigger value="overview" />
             <TabsTrigger value="listings" />
             <TabsTrigger value="performance" />
+            <TabsTrigger value="leads" />
+            <TabsTrigger value="campaigns" />
+            <TabsTrigger value="subscription" />
           </TabsList>
 
           {/* ── Overview ── */}
@@ -219,13 +310,13 @@ export function OfficeDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Recent Leads */}
               <Card className="p-5 border-0 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-4" dir="rtl">
                   <h3 className="font-semibold text-gray-900">أحدث العملاء المحتملين</h3>
                   <button
                     className="text-sm text-blue-600 hover:underline flex items-center gap-1"
-                    onClick={() => navigate('/office/leads')}
+                    onClick={() => setActiveTab('leads')}
                   >
-                    عرض الكل <ChevronRight className="w-3.5 h-3.5" />
+                    <ChevronRight className="w-3.5 h-3.5" /> عرض الكل
                   </button>
                 </div>
                 <div className="space-y-2.5">
@@ -266,13 +357,13 @@ export function OfficeDashboard() {
 
               {/* Active Campaigns */}
               <Card className="p-5 border-0 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-4" dir="rtl">
                   <h3 className="font-semibold text-gray-900">الحملات النشطة</h3>
                   <button
                     className="text-sm text-blue-600 hover:underline flex items-center gap-1"
-                    onClick={() => navigate('/office/campaigns')}
+                    onClick={() => setActiveTab('campaigns')}
                   >
-                    عرض الكل <ChevronRight className="w-3.5 h-3.5" />
+                    <ChevronRight className="w-3.5 h-3.5" /> عرض الكل
                   </button>
                 </div>
                 <div className="space-y-3">
@@ -305,21 +396,21 @@ export function OfficeDashboard() {
 
             {/* Quick Actions */}
             <Card className="p-5 border-0 shadow-sm">
-              <h3 className="font-semibold text-gray-900 mb-4">إجراءات سريعة</h3>
+              <h3 className="font-semibold text-gray-900 mb-4 text-right">إجراءات سريعة</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
-                  { icon: <Plus className="w-5 h-5 text-blue-600" />, label: 'إضافة عقار جديد', bg: 'bg-blue-50', onClick: () => navigate('/office/listings') },
-                  { icon: <BarChart3 className="w-5 h-5 text-purple-600" />, label: 'إنشاء حملة تسويقية', bg: 'bg-purple-50', onClick: () => navigate('/office/campaigns') },
-                  { icon: <MessageSquare className="w-5 h-5 text-green-600" />, label: 'الرد على العملاء', bg: 'bg-green-50', onClick: () => navigate('/office/leads') },
+                  { icon: <Plus className="w-5 h-5 text-blue-600" />, label: 'إضافة عقار جديد', bg: 'bg-blue-50', onClick: () => setActiveTab('listings') },
+                  { icon: <BarChart3 className="w-5 h-5 text-purple-600" />, label: 'إنشاء حملة تسويقية', bg: 'bg-purple-50', onClick: () => setActiveTab('campaigns') },
+                  { icon: <MessageSquare className="w-5 h-5 text-green-600" />, label: 'الرد على العملاء', bg: 'bg-green-50', onClick: () => setActiveTab('leads') },
                 ].map(action => (
                   <button
                     key={action.label}
                     onClick={action.onClick}
-                    className="flex items-center gap-3 p-4 rounded-xl border-2 border-dashed border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all text-right"
+                    className="flex items-center justify-end gap-3 p-4 rounded-xl border-2 border-dashed border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all"
+                    dir="rtl"
                   >
                     <div className={`${action.bg} p-2.5 rounded-xl flex-shrink-0`}>{action.icon}</div>
                     <span className="font-medium text-gray-700 text-sm">{action.label}</span>
-                    <ArrowRight className="w-4 h-4 text-gray-400 mr-auto rotate-180" />
                   </button>
                 ))}
               </div>
@@ -602,6 +693,419 @@ export function OfficeDashboard() {
                 </div>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* ── Leads ── */}
+          <TabsContent value="leads" className="mt-0 space-y-4">
+            {/* Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { label: 'إجمالي العملاء', value: mockDemandRequests.length, color: 'text-gray-900' },
+                { label: 'عملاء جدد', value: mockDemandRequests.filter(l => l.validation_status === 'pending').length, color: 'text-green-600' },
+                { label: 'عملاء عاجلون', value: mockDemandRequests.filter(l => l.intent_level === 'urgent').length, color: 'text-red-600' },
+                { label: 'معدل الاستجابة', value: '85%', color: 'text-blue-600' },
+              ].map(s => (
+                <Card key={s.label} className="p-4 border-0 shadow-sm">
+                  <p className="text-sm text-gray-500 mb-1">{s.label}</p>
+                  <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
+                </Card>
+              ))}
+            </div>
+
+            {/* Search */}
+            <Card className="p-4 border-0 shadow-sm">
+              <div className="flex gap-3">
+                <div className="flex-1 relative">
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    value={leadsSearch}
+                    onChange={(e) => setLeadsSearch(e.target.value)}
+                    placeholder="ابحث عن عميل أو نوع عقار..."
+                    className="pr-10 text-right rounded-xl"
+                    dir="rtl"
+                  />
+                </div>
+                <Button variant="outline" className="gap-1.5 rounded-xl">
+                  <Filter className="w-4 h-4" />
+                  تصفية
+                </Button>
+              </div>
+            </Card>
+
+            {/* Sub-tabs */}
+            <div className="flex gap-2 flex-wrap">
+              {[
+                { label: `الكل (${mockDemandRequests.length})`, value: 'all' },
+                { label: `جديد (${mockDemandRequests.filter(l => l.validation_status === 'pending').length})`, value: 'new' },
+                { label: `عاجل (${mockDemandRequests.filter(l => l.intent_level === 'urgent').length})`, value: 'urgent' },
+                { label: 'تم الرد', value: 'responded' },
+              ].map(tab => (
+                <button
+                  key={tab.value}
+                  onClick={() => setLeadsSubTab(tab.value)}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                    leadsSubTab === tab.value ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Leads list */}
+            <div className="space-y-3">
+              {filteredLeads
+                .filter(l =>
+                  leadsSubTab === 'all' ? true :
+                  leadsSubTab === 'new' ? l.validation_status === 'pending' :
+                  leadsSubTab === 'urgent' ? l.intent_level === 'urgent' :
+                  false
+                )
+                .map((lead) => (
+                  <Card key={lead.id} className="p-5 border-0 shadow-sm">
+                    <div className="flex items-start justify-between" dir="rtl">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-3 flex-wrap">
+                          <h3 className="font-semibold text-gray-900">{lead.buyer_name}</h3>
+                          <Badge className={
+                            lead.intent_level === 'urgent' ? 'bg-red-100 text-red-700 border-red-200 text-xs' :
+                            lead.intent_level === 'serious' ? 'bg-orange-100 text-orange-700 border-orange-200 text-xs' :
+                            'bg-blue-100 text-blue-700 border-blue-200 text-xs'
+                          }>
+                            {lead.intent_level === 'urgent' ? 'عاجل' : lead.intent_level === 'serious' ? 'جاد' : 'تصفح'}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3 text-sm">
+                          <div><p className="text-gray-500">نوع العقار</p><p className="font-medium text-gray-900">{lead.property_type}</p></div>
+                          <div><p className="text-gray-500">المدينة</p><p className="font-medium text-gray-900">{getCityName(lead.city_id)}</p></div>
+                          <div><p className="text-gray-500">الميزانية</p><p className="font-medium text-gray-900">{formatPrice(lead.budget_min)} – {formatPrice(lead.budget_max)}</p></div>
+                          <div><p className="text-gray-500">الغرف</p><p className="font-medium text-gray-900">{lead.bedrooms_min}+ غرف</p></div>
+                        </div>
+                        {lead.notes && <div className="bg-blue-50 p-3 rounded-xl text-sm text-gray-700 mb-3">{lead.notes}</div>}
+                        <p className="text-xs text-gray-400 flex items-center gap-1"><Clock className="w-3 h-3" />{new Date(lead.created_at).toLocaleDateString('ar-SA')}</p>
+                      </div>
+                      <div className="flex flex-col gap-2 mr-4 shrink-0">
+                        <Dialog open={selectedLead === lead.id} onOpenChange={(open) => !open && setSelectedLead(null)}>
+                          <DialogTrigger asChild>
+                            <Button size="sm" className="gap-1.5" onClick={() => setSelectedLead(lead.id)}>
+                              <MessageSquare className="w-3.5 h-3.5" />
+                              الرد
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent dir="rtl">
+                            <DialogHeader><DialogTitle>الرد على {lead.buyer_name}</DialogTitle></DialogHeader>
+                            <div className="space-y-4 mt-4">
+                              <div className="bg-gray-50 p-3 rounded-xl text-sm text-gray-700">
+                                يبحث عن {lead.property_type} في {getCityName(lead.city_id)}<br />
+                                الميزانية: {formatPrice(lead.budget_min)} – {formatPrice(lead.budget_max)}
+                              </div>
+                              <div>
+                                <Label>رسالتك</Label>
+                                <Textarea value={responseMessage} onChange={(e) => setResponseMessage(e.target.value)} placeholder="مرحباً، لدينا عدة عقارات تناسب متطلباتك..." rows={5} className="mt-1" />
+                              </div>
+                              <div className="flex gap-2">
+                                <Button onClick={handleRespond} className="flex-1">إرسال</Button>
+                                <Button variant="outline" className="flex-1" onClick={() => setSelectedLead(null)}>إلغاء</Button>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                        <Button size="sm" variant="outline" className="gap-1.5"><Phone className="w-3.5 h-3.5" />اتصال</Button>
+                        <Button size="sm" variant="outline" className="gap-1.5"><Mail className="w-3.5 h-3.5" />بريد</Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              {filteredLeads.length === 0 && (
+                <Card className="p-12 text-center border-0 shadow-sm">
+                  <MessageSquare className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500">لا توجد نتائج</p>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* ── Campaigns ── */}
+          <TabsContent value="campaigns" className="mt-0 space-y-4">
+            {/* Header row */}
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-gray-900">الحملات التسويقية</h3>
+              <Dialog open={isCampaignDialogOpen} onOpenChange={setIsCampaignDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-700">
+                    <Plus className="w-4 h-4" />
+                    حملة جديدة
+                  </Button>
+                </DialogTrigger>
+                <DialogContent dir="rtl">
+                  <DialogHeader><DialogTitle>إنشاء حملة تسويقية جديدة</DialogTitle></DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    <div>
+                      <Label>اسم الحملة</Label>
+                      <Input value={campaignName} onChange={(e) => setCampaignName(e.target.value)} placeholder="مثال: حملة الفلل الفاخرة" className="mt-1" />
+                    </div>
+                    <div>
+                      <Label>اختر العقار</Label>
+                      <Select value={selectedListing} onValueChange={setSelectedListing}>
+                        <SelectTrigger className="mt-1"><SelectValue placeholder="اختر عقار للترويج له" /></SelectTrigger>
+                        <SelectContent>
+                          {mockListings.slice(0, 5).map(l => (
+                            <SelectItem key={l.id} value={l.id}>{l.property_type} - {l.address}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>استهداف الجمهور</Label>
+                      <Textarea value={audienceFilter} onChange={(e) => setAudienceFilter(e.target.value)} placeholder="مثال: ميزانية 1-2 مليون، مدينة الرياض، 3+ غرف" className="mt-1" rows={3} />
+                    </div>
+                    <div className="bg-blue-50 p-3 rounded-xl text-sm text-blue-700">
+                      سيتم إرسال الحملة تلقائياً للعملاء المحتملين المطابقين للمعايير
+                    </div>
+                    <Button onClick={handleCreateCampaign} className="w-full">إنشاء الحملة</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { label: 'إجمالي الحملات', value: mockCampaigns.length, color: 'text-gray-900', Icon: Target },
+                { label: 'الحملات النشطة', value: mockCampaigns.filter(c => c.status === 'active').length, color: 'text-green-600', Icon: Play },
+                { label: 'إجمالي الوصول', value: mockCampaigns.reduce((s, c) => s + c.sent_count, 0), color: 'text-gray-900', Icon: Users },
+                { label: 'إجمالي العملاء', value: mockCampaigns.reduce((s, c) => s + c.lead_count, 0), color: 'text-orange-600', Icon: BarChart3 },
+              ].map(s => (
+                <Card key={s.label} className="p-4 border-0 shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <s.Icon className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
+                </Card>
+              ))}
+            </div>
+
+            {/* Campaigns list */}
+            <div className="space-y-3">
+              {mockCampaigns.map((campaign) => {
+                const listing = mockListings.find(l => l.id === campaign.listing_id);
+                const clickRate = campaign.sent_count > 0 ? (campaign.click_count / campaign.sent_count) * 100 : 0;
+                const conversionRate = campaign.click_count > 0 ? (campaign.lead_count / campaign.click_count) * 100 : 0;
+                return (
+                  <Card key={campaign.id} className="p-5 border-0 shadow-sm">
+                    <div className="flex items-start justify-between mb-4" dir="rtl">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-3 flex-wrap">
+                          <h3 className="font-semibold text-gray-900">{campaign.name}</h3>
+                          <Badge className={
+                            campaign.status === 'active' ? 'bg-green-100 text-green-700 border-green-200 text-xs' :
+                            campaign.status === 'paused' ? 'bg-yellow-100 text-yellow-700 border-yellow-200 text-xs' :
+                            campaign.status === 'completed' ? 'bg-blue-100 text-blue-700 border-blue-200 text-xs' :
+                            'bg-gray-100 text-gray-700 border-gray-200 text-xs'
+                          }>
+                            {campaign.status === 'active' ? 'نشط' : campaign.status === 'paused' ? 'متوقف' : campaign.status === 'completed' ? 'مكتمل' : 'مسودة'}
+                          </Badge>
+                        </div>
+                        {listing && (
+                          <div className="flex items-center gap-3 mb-3">
+                            <img src={listing.images[0]} alt="" className="w-14 h-14 rounded-xl object-cover" />
+                            <div>
+                              <p className="font-medium text-gray-900 text-sm">{listing.property_type}</p>
+                              <p className="text-xs text-gray-500">{listing.address}</p>
+                            </div>
+                          </div>
+                        )}
+                        <div className="bg-gray-50 p-3 rounded-xl text-sm mb-4">
+                          <span className="font-medium">الاستهداف:</span> {campaign.audience_filter}
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div>
+                            <div className="flex justify-between text-xs mb-1"><span className="text-gray-500">معدل النقر</span><span className="font-medium">{clickRate.toFixed(1)}%</span></div>
+                            <Progress value={clickRate} className="h-1.5" />
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-xs mb-1"><span className="text-gray-500">معدل التحويل</span><span className="font-medium">{conversionRate.toFixed(1)}%</span></div>
+                            <Progress value={conversionRate} className="h-1.5" />
+                          </div>
+                          <div className="grid grid-cols-3 gap-1.5 text-center text-xs">
+                            <div className="p-2 bg-blue-50 rounded-lg"><p className="text-gray-500">إرسال</p><p className="font-semibold text-blue-600">{campaign.sent_count}</p></div>
+                            <div className="p-2 bg-purple-50 rounded-lg"><p className="text-gray-500">نقرات</p><p className="font-semibold text-purple-600">{campaign.click_count}</p></div>
+                            <div className="p-2 bg-green-50 rounded-lg"><p className="text-gray-500">عملاء</p><p className="font-semibold text-green-600">{campaign.lead_count}</p></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-2 mr-4 shrink-0">
+                        {campaign.status === 'active' && (
+                          <Button size="sm" variant="outline" className="gap-1.5" onClick={() => handleToggleCampaign(campaign.id, campaign.status)}>
+                            <Pause className="w-3.5 h-3.5" />إيقاف
+                          </Button>
+                        )}
+                        {campaign.status === 'paused' && (
+                          <Button size="sm" className="gap-1.5" onClick={() => handleToggleCampaign(campaign.id, campaign.status)}>
+                            <Play className="w-3.5 h-3.5" />تفعيل
+                          </Button>
+                        )}
+                        {campaign.status === 'draft' && (
+                          <Button size="sm" className="gap-1.5"><Play className="w-3.5 h-3.5" />بدء الحملة</Button>
+                        )}
+                        <Button size="sm" variant="outline" className="gap-1.5">
+                          <BarChart3 className="w-3.5 h-3.5" />التقرير
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </TabsContent>
+
+          {/* ── Subscription ── */}
+          <TabsContent value="subscription" className="mt-0 space-y-5">
+            {/* Current plan summary */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <Card className="p-5 border-0 shadow-sm lg:col-span-2">
+                <h3 className="font-semibold text-gray-900 mb-4" dir="rtl">خطتك الحالية</h3>
+                <div className="space-y-4" dir="rtl">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-gray-500">الخطة</p>
+                      <p className="text-2xl font-bold text-gray-900">{subPlans.find(p => p.id === currentPlan)?.name}</p>
+                    </div>
+                    <Badge className="bg-blue-100 text-blue-700 border-blue-200">نشطة</Badge>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      { label: 'السعر الشهري', value: `${subPlans.find(p => p.id === currentPlan)?.monthlyPrice} ر.س` },
+                      { label: 'تاريخ التجديد', value: '15 أبريل 2026' },
+                      { label: 'الحالة', value: 'مدفوع', green: true },
+                    ].map(item => (
+                      <div key={item.label} className="p-3 bg-gray-50 rounded-xl text-center">
+                        <p className="text-xs text-gray-500 mb-1">{item.label}</p>
+                        <p className={`font-bold text-sm ${'green' in item ? 'text-green-600' : 'text-gray-900'}`}>{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <Button variant="outline" size="sm" className="gap-1.5">
+                      <CreditCard className="w-4 h-4" />
+                      تحديث بيانات الدفع
+                    </Button>
+                    <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50">
+                      إلغاء الاشتراك
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-5 border-0 shadow-sm">
+                <h3 className="font-semibold text-gray-900 mb-4" dir="rtl">معلومات الفواتير</h3>
+                <div className="space-y-3 text-sm" dir="rtl">
+                  <div><p className="text-gray-500">الاسم</p><p className="font-medium">Prime Real Estate</p></div>
+                  <div><p className="text-gray-500">البريد الإلكتروني</p><p className="font-medium">info@prime.com</p></div>
+                  <div><p className="text-gray-500">العنوان</p><p className="font-medium">الرياض، السعودية</p></div>
+                  <Button variant="outline" size="sm" className="w-full">تعديل البيانات</Button>
+                </div>
+              </Card>
+            </div>
+
+            {/* Plans */}
+            <div>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-5" dir="rtl">
+                <h3 className="font-semibold text-gray-900">خطط الاشتراك</h3>
+                <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1">
+                  {['monthly', 'annual'].map(cycle => (
+                    <button
+                      key={cycle}
+                      onClick={() => setBillingCycle(cycle)}
+                      className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${
+                        billingCycle === cycle ? 'bg-gray-900 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      {cycle === 'monthly' ? 'شهري' : 'سنوي'}
+                      {cycle === 'annual' && <span className="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">16%</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {subPlans.map((plan) => {
+                  const isActive = currentPlan === plan.id;
+                  const price = billingCycle === 'monthly' ? plan.monthlyPrice : Math.round(plan.annualPrice / 12);
+                  return (
+                    <div
+                      key={plan.id}
+                      className={`relative bg-white rounded-2xl p-5 flex flex-col ${
+                        plan.popular ? 'border-2 border-blue-500 shadow-xl shadow-blue-100' : 'border border-gray-200 shadow-sm'
+                      }`}
+                    >
+                      {plan.popular && (
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                          <span className="bg-blue-600 text-white text-xs font-bold px-4 py-1 rounded-full shadow">الأكثر شيوعاً</span>
+                        </div>
+                      )}
+                      <div className="text-right mb-4">
+                        <h4 className="text-lg font-bold text-gray-900">{plan.name}</h4>
+                        <p className="text-sm text-gray-500">{plan.description}</p>
+                      </div>
+                      <div className="text-right mb-5">
+                        <div className="flex items-baseline justify-end gap-1">
+                          <span className="text-3xl font-extrabold text-gray-900">{price.toLocaleString()}</span>
+                          <span className="text-gray-500 text-sm">ر.س / شهر</span>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => handleUpgradePlan(plan.id)}
+                        className={`w-full mb-4 h-10 rounded-xl font-semibold ${
+                          isActive ? 'bg-green-600 hover:bg-green-700' : plan.popular ? 'bg-blue-600 hover:bg-blue-700' : ''
+                        }`}
+                        variant={isActive || plan.popular ? 'default' : 'outline'}
+                      >
+                        {isActive ? 'الخطة الحالية' : 'الاختيار'}
+                      </Button>
+                      <div className="space-y-2">
+                        {plan.features.map((f, i) => (
+                          <div key={i} className="flex items-center justify-end gap-2" dir="rtl">
+                            <span className={`text-sm ${f.included ? 'text-gray-800' : 'text-gray-400'}`}>{f.name}</span>
+                            {f.included ? <Check className="w-4 h-4 text-green-500 shrink-0" /> : <X className="w-4 h-4 text-gray-300 shrink-0" />}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Invoice history */}
+            <Card className="p-5 border-0 shadow-sm">
+              <h3 className="font-semibold text-gray-900 mb-4" dir="rtl">سجل الفواتير</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b" dir="rtl">
+                      {['التاريخ', 'الوصف', 'المبلغ', 'الحالة', 'الإجراء'].map(h => (
+                        <th key={h} className="text-right py-3 px-3 font-semibold text-gray-700">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { date: '2026-03-15', desc: 'اشتراك احترافي - مارس', amount: 799 },
+                      { date: '2026-02-15', desc: 'اشتراك احترافي - فبراير', amount: 799 },
+                      { date: '2026-01-15', desc: 'اشتراك احترافي - يناير', amount: 799 },
+                    ].map((inv, i) => (
+                      <tr key={i} className="border-b hover:bg-gray-50" dir="rtl">
+                        <td className="py-3 px-3 text-gray-500">{inv.date}</td>
+                        <td className="py-3 px-3 font-medium text-gray-900">{inv.desc}</td>
+                        <td className="py-3 px-3 font-semibold text-gray-900">{inv.amount} ر.س</td>
+                        <td className="py-3 px-3"><Badge className="bg-green-100 text-green-700 border-green-200 text-xs">مدفوع</Badge></td>
+                        <td className="py-3 px-3"><Button variant="outline" size="sm" className="text-xs">تحميل PDF</Button></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

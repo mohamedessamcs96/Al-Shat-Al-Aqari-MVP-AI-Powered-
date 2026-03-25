@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Home, Building2, User, MessageSquare, Sparkles, LogOut } from 'lucide-react';
+import { Send, User, MessageSquare, Sparkles, LogOut, ChevronRight } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
@@ -143,169 +143,167 @@ export function ChatInterface() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="flex flex-col h-screen" style={{ background: 'linear-gradient(160deg, #f0f4ff 0%, #eef2ff 60%, #f5f0ff 100%)' }}>
       {/* Header */}
-      <header className="bg-white border-b shadow-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-2 sm:py-4">
-          <div className="flex items-center justify-between gap-2 mb-2 sm:mb-0">
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-2 rounded-xl flex-shrink-0">
-                <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-              </div>
-              <div className="hidden sm:block min-w-0">
-                <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">الشات العقاري</h1>
-                <p className="text-xs sm:text-sm text-gray-500 truncate">مساعدك الذكي للعقارات</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-end">
-              <Button variant="ghost" size="sm" onClick={() => navigate('/buyer/dashboard')} className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
-                <User className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2 flex-shrink-0" />
-                <span className="hidden sm:inline">لوحة التحكم</span>
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/demand')} className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
-                <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2 flex-shrink-0" />
-                <span className="hidden sm:inline">طلب</span>
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
-                <LogOut className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2 flex-shrink-0" />
+      <header className="sticky top-0 z-10 shadow-lg" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #312e81 100%)' }}>
+        <div className="max-w-4xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-2" dir="ltr">
+            {/* Left: nav buttons */}
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="sm" onClick={() => navigate('/')}
+                className="text-white/70 hover:text-white hover:bg-white/10 text-xs px-2 py-1.5 h-auto">
+                <LogOut className="w-3.5 h-3.5 mr-1" />
                 <span className="hidden sm:inline">خروج</span>
               </Button>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/buyer/dashboard')}
+                className="text-white/70 hover:text-white hover:bg-white/10 text-xs px-2 py-1.5 h-auto">
+                <User className="w-3.5 h-3.5 mr-1" />
+                <span className="hidden sm:inline">حسابي</span>
+              </Button>
             </div>
+            {/* Center: brand */}
+            <div className="flex items-center gap-2.5 absolute left-1/2 -translate-x-1/2">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-inner"
+                style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}>
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-base sm:text-lg font-bold text-white leading-none">الشات العقاري</h1>
+                <p className="text-[10px] sm:text-xs text-blue-300 mt-0.5">مساعدك الذكي للعقارات</p>
+              </div>
+            </div>
+            {/* Right: demand button */}
+            <Button variant="ghost" size="sm" onClick={() => navigate('/demand')}
+              className="text-white/70 hover:text-white hover:bg-white/10 text-xs px-2 py-1.5 h-auto">
+              <MessageSquare className="w-3.5 h-3.5 mr-1" />
+              <span className="hidden sm:inline">طلب عقار</span>
+            </Button>
           </div>
         </div>
       </header>
 
       {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto px-2 sm:px-4 py-4 sm:py-6">
-        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+      <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-5 sm:py-7">
+        <div className="max-w-3xl mx-auto space-y-5 sm:space-y-7">
           {messages.map((message) => (
             <div
               key={message.id}
               dir="ltr"
-              className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex gap-3 items-start ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {message.role === 'assistant' && (
-                <Avatar className="bg-gradient-to-br from-blue-600 to-indigo-600 border-2 border-white shadow-md">
-                  <AvatarFallback className="bg-transparent">
-                    <Sparkles className="w-5 h-5 text-white" />
-                  </AvatarFallback>
-                </Avatar>
+                <div className="w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md mt-0.5"
+                  style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}>
+                  <Sparkles className="w-4 h-4 text-white" />
+                </div>
               )}
-              
-              <div className={`flex-1 max-w-2xl ${message.role === 'user' ? 'text-right' : ''}`}>
-                <Card className={`p-4 ${
-                  message.role === 'user' 
-                    ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white border-none shadow-md' 
-                    : 'bg-white border shadow-sm'
-                }`}>
-                  <p className="whitespace-pre-wrap" dir="rtl">{message.content}</p>
-                </Card>
 
-                {/* Listings Results */}
+              <div className={`flex-1 max-w-xl flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
+                {/* Bubble */}
+                <div className={`rounded-2xl px-4 py-3 shadow-sm ${
+                  message.role === 'user'
+                    ? 'text-white rounded-tr-sm'
+                    : 'bg-white border border-gray-100 rounded-tl-sm'
+                }`} style={message.role === 'user' ? { background: 'linear-gradient(135deg, #2563eb, #4f46e5)' } : {}}>
+                  <p className="text-sm sm:text-base leading-relaxed" dir="rtl">{message.content}</p>
+                </div>
+
+                {/* Property cards */}
                 {message.listings && message.listings.length > 0 && (
-                  <div className="mt-4 space-y-3">
+                  <div className="mt-3 w-full space-y-3">
                     {message.listings.map((listing) => (
-                      <Card
+                      <div
                         key={listing.id}
-                        className="p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer bg-white"
+                        className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-pointer border border-gray-100"
                         onClick={() => navigate(`/listings/${listing.id}`)}
                       >
-                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                        <div className="relative">
                           <img
                             src={listing.images[0]}
                             alt={listing.property_type}
-                            className="w-full sm:w-32 h-40 sm:h-24 object-cover rounded-lg flex-shrink-0"
+                            className="w-full h-44 sm:h-52 object-cover"
                           />
-                          <div className="flex-1" dir="rtl">
-                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                              <div className="min-w-0">
-                                <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{listing.property_type}</h3>
-                                <p className="text-xs sm:text-sm text-gray-600 truncate">{listing.address}</p>
-                              </div>
-                              <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs sm:text-sm w-fit">
-                                {formatPrice(listing.price)}
-                              </Badge>
-                            </div>
-                            <div className="flex gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-gray-600 flex-wrap">
-                              <span>{listing.bedrooms} غرف</span>
-                              <span>•</span>
-                              <span>{listing.area} م²</span>
-                              <span className="hidden sm:inline">•</span>
-                              <span className="hidden sm:inline">{getCityName(listing.city_id)}</span>
-                            </div>
-                            <div className="flex gap-2 mt-3 flex-wrap">
-                              <Badge variant="outline" className="text-xs">
-                                جودة {listing.quality_score}%
-                              </Badge>
-                              {listing.features.slice(0, 1).map((feature, idx) => (
-                                <Badge key={idx} variant="outline" className="text-xs">
-                                  {feature}
-                                </Badge>
-                              ))}
-                            </div>
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
+                          <span className="absolute top-3 right-3 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow">
+                            {formatPrice(listing.price)}
+                          </span>
+                          {listing.quality_score >= 90 && (
+                            <span className="absolute top-3 left-3 bg-amber-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow">
+                              ⭐ مميز
+                            </span>
+                          )}
+                          <div className="absolute bottom-3 right-3" dir="rtl">
+                            <h3 className="text-white font-bold text-sm sm:text-base drop-shadow-md">{listing.property_type}</h3>
+                            <p className="text-white/85 text-xs drop-shadow">{listing.address}</p>
                           </div>
                         </div>
-                      </Card>
+                        <div className="px-4 py-3 flex items-center justify-between" dir="rtl">
+                          <div className="flex gap-3 text-xs sm:text-sm text-gray-600">
+                            <span><span className="font-semibold text-gray-800">{listing.bedrooms}</span> غرف</span>
+                            <span className="text-gray-300">|</span>
+                            <span><span className="font-semibold text-gray-800">{listing.area}</span> م²</span>
+                            <span className="text-gray-300">|</span>
+                            <span>{getCityName(listing.city_id)}</span>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}
 
-                {/* Suggestions */}
+                {/* Suggestion pills */}
                 {message.suggestions && message.suggestions.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-3" dir="rtl">
                     {message.suggestions.map((suggestion, idx) => (
-                      <Button
+                      <button
                         key={idx}
-                        variant="outline"
-                        size="sm"
-                        className="bg-white hover:bg-blue-50 border-blue-200 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 h-fit"
+                        className="bg-white border border-blue-200 text-blue-700 text-xs sm:text-sm px-3 py-1.5 rounded-full hover:bg-blue-50 hover:border-blue-400 transition-colors shadow-sm font-medium"
                         onClick={() => handleSuggestionClick(suggestion)}
                       >
                         {suggestion}
-                      </Button>
+                      </button>
                     ))}
                   </div>
                 )}
 
-                {/* No Results CTA - Demand Form */}
+                {/* No-results demand CTA */}
                 {message.hasNoDemandCTA && (
-                  <div className="mt-4">
-                    <Button
+                  <div className="mt-3 w-full">
+                    <button
                       onClick={() => navigate('/demand')}
-                      className="w-full bg-gradient-to-br from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold"
+                      className="w-full text-white font-semibold py-3 px-4 rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2"
+                      style={{ background: 'linear-gradient(135deg, #16a34a, #059669)' }}
                     >
-                      <MessageSquare className="w-4 h-4 ml-2" />
-                      أنشئ طلب عقار مخصص الآن
-                    </Button>
+                      <MessageSquare className="w-4 h-4" />
+                      <span dir="rtl">أنشئ طلب عقار مخصص الآن</span>
+                    </button>
                   </div>
                 )}
               </div>
 
               {message.role === 'user' && (
-                <Avatar className="bg-gray-200">
-                  <AvatarFallback>
-                    <User className="w-5 h-5 text-gray-600" />
-                  </AvatarFallback>
-                </Avatar>
+                <div className="w-9 h-9 rounded-2xl bg-gray-200 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <User className="w-4 h-4 text-gray-600" />
+                </div>
               )}
             </div>
           ))}
 
+          {/* Typing indicator */}
           {isTyping && (
-            <div dir="ltr" className="flex gap-3 justify-start">
-              <Avatar className="bg-gradient-to-br from-blue-600 to-indigo-600 border-2 border-white shadow-md">
-                <AvatarFallback className="bg-transparent">
-                  <Sparkles className="w-5 h-5 text-white" />
-                </AvatarFallback>
-              </Avatar>
-              <Card className="p-4 bg-white">
-                <div className="flex gap-2">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" />
-                  <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                  <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
+            <div dir="ltr" className="flex gap-3 items-start">
+              <div className="w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md"
+                style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}>
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
+              <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
+                <div className="flex gap-1.5 items-center h-5">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" />
+                  <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }} />
+                  <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }} />
                 </div>
-              </Card>
+              </div>
             </div>
           )}
 
@@ -314,28 +312,29 @@ export function ChatInterface() {
       </div>
 
       {/* Input Area */}
-      <div className="bg-white border-t shadow-lg sticky bottom-0">
-        <div className="max-w-4xl mx-auto px-2 sm:px-4 py-2 sm:py-4">
-          <div className="flex gap-1 sm:gap-2">
+      <div className="sticky bottom-0 border-t border-gray-200/80 shadow-[0_-4px_24px_rgba(0,0,0,0.06)]"
+        style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(16px)' }}>
+        <div className="max-w-3xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
+          <div className="flex gap-2 items-center">
             <Input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="ابحث... (مثال: فيلا في الرياض)"
-              className="flex-1 text-right text-xs sm:text-sm py-2"
+              placeholder="ابحث عن عقارك المثالي... (مثال: فيلا في الرياض)"
+              className="flex-1 text-right rounded-2xl border-gray-200 bg-gray-50 focus:bg-white text-sm py-5 px-4"
               dir="rtl"
             />
-            <Button
+            <button
               onClick={() => handleSend()}
               disabled={!inputValue.trim()}
-              className="bg-gradient-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 flex-shrink-0"
-              size="sm"
+              className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 text-white shadow-md hover:shadow-lg hover:scale-105 disabled:opacity-40 disabled:scale-100 transition-all"
+              style={{ background: 'linear-gradient(135deg, #2563eb, #4f46e5)' }}
             >
               <Send className="w-4 h-4 sm:w-5 sm:h-5" />
-            </Button>
+            </button>
           </div>
-          <p className="text-xs text-gray-500 text-center mt-2">
-            مدعوم بالذكاء الاصطناعي • البحث الذكي
+          <p className="text-[11px] text-gray-400 text-center mt-2">
+            مدعوم بالذكاء الاصطناعي • الشات العقاري
           </p>
         </div>
       </div>

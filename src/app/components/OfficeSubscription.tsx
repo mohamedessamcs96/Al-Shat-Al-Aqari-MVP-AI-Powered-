@@ -153,80 +153,109 @@ export function OfficeSubscription() {
 
         {/* Plans Comparison */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900" dir="rtl">خطط الاشتراك</h2>
-            <div className="flex gap-2">
-              <Button
-                variant={billingCycle === 'monthly' ? 'default' : 'outline'}
-                size="sm"
+          {/* Section header + billing toggle */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6" dir="rtl">
+            <h2 className="text-2xl font-bold text-gray-900">خطط الاشتراك</h2>
+
+            {/* Pill toggle */}
+            <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1">
+              <button
                 onClick={() => setBillingCycle('monthly')}
+                className={`px-5 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 ${
+                  billingCycle === 'monthly'
+                    ? 'bg-gray-900 text-white shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
               >
                 شهري
-              </Button>
-              <Button
-                variant={billingCycle === 'annual' ? 'default' : 'outline'}
-                size="sm"
+              </button>
+              <button
                 onClick={() => setBillingCycle('annual')}
+                className={`px-5 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
+                  billingCycle === 'annual'
+                    ? 'bg-gray-900 text-white shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
               >
                 سنوي
-                <Badge className="ml-2 bg-green-100 text-green-700 border-green-200">توفير 16%</Badge>
-              </Button>
+                <span className="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                  توفير 16%
+                </span>
+              </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {plans.map((plan) => (
-              <Card
-                key={plan.id}
-                className={`p-6 relative ${plan.popular ? 'border-2 border-blue-600 shadow-lg' : ''}`}
-              >
-                {plan.popular && (
-                  <Badge className="absolute top-4 right-4 bg-blue-600">الأكثر شيوعاً</Badge>
-                )}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {plans.map((plan) => {
+              const isActive = currentPlan === plan.id;
+              const price = billingCycle === 'monthly' ? plan.monthlyPrice : Math.round(plan.annualPrice / 12);
 
-                <h3 className="text-xl font-bold text-gray-900 mb-2" dir="rtl">{plan.name}</h3>
-                <p className="text-sm text-gray-600 mb-4" dir="rtl">{plan.description}</p>
-
-                <div className="mb-6">
-                  <div className="text-3xl font-bold text-gray-900">
-                    {billingCycle === 'monthly' ? plan.monthlyPrice : Math.round(plan.annualPrice / 12)}
-                    <span className="text-lg text-gray-600 ml-1">ر.س</span>
-                  </div>
-                  <p className="text-sm text-gray-600 mt-1" dir="rtl">
-                    {billingCycle === 'monthly' ? 'شهراً' : 'شهراً (بالسنة)'}
-                  </p>
-                </div>
-
-                <Button
-                  onClick={() => handleUpgrade(plan.id)}
-                  className={`w-full mb-6 ${
-                    currentPlan === plan.id
-                      ? 'bg-green-600 hover:bg-green-700'
-                      : plan.popular
-                      ? 'bg-blue-600 hover:bg-blue-700'
-                      : ''
+              return (
+                <div
+                  key={plan.id}
+                  className={`relative bg-white rounded-2xl p-6 flex flex-col transition-all duration-200 ${
+                    plan.popular
+                      ? 'border-2 border-blue-500 shadow-xl shadow-blue-100'
+                      : 'border border-gray-200 shadow-sm hover:shadow-md'
                   }`}
-                  variant={currentPlan === plan.id ? 'default' : plan.popular ? 'default' : 'outline'}
                 >
-                  {currentPlan === plan.id ? 'الخطة الحالية' : 'الاختيار'}
-                </Button>
-
-                <div className="space-y-3">
-                  {plan.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
-                      {feature.included ? (
-                        <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                      ) : (
-                        <X className="w-5 h-5 text-gray-300 flex-shrink-0" />
-                      )}
-                      <span className={feature.included ? 'text-gray-900' : 'text-gray-400'} dir="rtl">
-                        {feature.name}
+                  {/* Popular badge — top-left overlap */}
+                  {plan.popular && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <span className="bg-blue-600 text-white text-xs font-bold px-4 py-1 rounded-full shadow">
+                        الأكثر شيوعاً
                       </span>
                     </div>
-                  ))}
+                  )}
+
+                  {/* Plan name & desc */}
+                  <div className="text-right mb-4">
+                    <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
+                    <p className="text-sm text-gray-500 mt-0.5">{plan.description}</p>
+                  </div>
+
+                  {/* Price */}
+                  <div className="text-right mb-6">
+                    <div className="flex items-baseline justify-end gap-1.5">
+                      <span className="text-4xl font-extrabold text-gray-900">{price.toLocaleString()}</span>
+                      <span className="text-gray-500 font-medium">ر.س</span>
+                    </div>
+                    <p className="text-sm text-gray-400 mt-0.5">شهراً</p>
+                  </div>
+
+                  {/* CTA */}
+                  <Button
+                    onClick={() => handleUpgrade(plan.id)}
+                    className={`w-full mb-6 h-11 rounded-xl font-semibold text-sm ${
+                      isActive
+                        ? 'bg-green-600 hover:bg-green-700 shadow-sm shadow-green-200'
+                        : plan.popular
+                        ? 'bg-blue-600 hover:bg-blue-700 shadow-sm shadow-blue-200'
+                        : ''
+                    }`}
+                    variant={isActive || plan.popular ? 'default' : 'outline'}
+                  >
+                    {isActive ? 'الخطة الحالية' : 'الاختيار'}
+                  </Button>
+
+                  {/* Features */}
+                  <div className="space-y-2.5 flex-1">
+                    {plan.features.map((feature, idx) => (
+                      <div key={idx} className="flex items-center justify-end gap-2.5" dir="rtl">
+                        <span className={`text-sm ${feature.included ? 'text-gray-800' : 'text-gray-400'}`}>
+                          {feature.name}
+                        </span>
+                        {feature.included ? (
+                          <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                        ) : (
+                          <X className="w-4 h-4 text-gray-300 flex-shrink-0" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </Card>
-            ))}
+              );
+            })}
           </div>
         </div>
 

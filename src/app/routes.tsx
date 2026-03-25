@@ -68,6 +68,10 @@ export const router = createBrowserRouter([
     Component: MiniPageEditor,
   },
   {
+    path: "/admin/login",
+    Component: LoginPage,
+  },
+  {
     path: "/admin/dashboard",
     Component: AdminConsole,
   },
