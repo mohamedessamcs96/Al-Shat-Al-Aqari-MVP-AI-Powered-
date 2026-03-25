@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { ArrowLeft, Save, Eye, Code, Settings } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Settings } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
-import { Badge } from './ui/badge';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
@@ -19,7 +18,6 @@ export function MiniPageEditor() {
   const [whatsapp, setWhatsapp] = useState('0550123456');
   const [address, setAddress] = useState('الرياض، حي النرجس');
   const [websiteUrl, setWebsiteUrl] = useState('www.prime-real-estate.com');
-  const [htmlContent, setHtmlContent] = useState('');
   const [savedChanges, setSavedChanges] = useState(true);
 
   const handleSave = () => {
@@ -69,13 +67,12 @@ export function MiniPageEditor() {
         )}
 
         <Tabs defaultValue="basic">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="basic">
               <Settings className="w-4 h-4 ml-2" />
               المعلومات الأساسية
             </TabsTrigger>
             <TabsTrigger value="appearance">معلومات التواصل</TabsTrigger>
-            <TabsTrigger value="html">HTML مخصص</TabsTrigger>
           </TabsList>
 
           {/* Basic Information */}
@@ -225,33 +222,7 @@ export function MiniPageEditor() {
             </Card>
           </TabsContent>
 
-          {/* Custom HTML */}
-          <TabsContent value="html" className="space-y-6 mt-6">
-            <Card className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Code className="w-5 h-5 text-gray-600" />
-                <h2 className="text-lg font-semibold text-gray-900" dir="rtl">HTML مخصص</h2>
-                <Badge className="bg-purple-100 text-purple-700 border-purple-200">للمستخدمين المتقدمين</Badge>
-              </div>
-              <p className="text-sm text-gray-600 mb-4" dir="rtl">
-                أضف HTML مخصص لتخصيص صفحتك بالكامل. يمكنك استخدام CSS و JavaScript محدود.
-              </p>
-              <Textarea
-                value={htmlContent}
-                onChange={(e) => {
-                  setHtmlContent(e.target.value);
-                  setSavedChanges(false);
-                }}
-                placeholder="أدخل HTML مخصص هنا..."
-                rows={12}
-                className="font-mono text-sm"
-                dir="ltr"
-              />
-              <p className="text-xs text-gray-500 mt-2" dir="rtl">
-                ملاحظة: سيتم فحص الكود للأمان. لا يُسمح بـ JavaScript الخطر أو عناصر غير آمنة.
-              </p>
-            </Card>
-          </TabsContent>
+
         </Tabs>
 
         {/* Action Buttons */}

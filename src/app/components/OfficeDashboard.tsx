@@ -409,8 +409,8 @@ export function OfficeDashboard() {
                     className="flex items-center justify-end gap-3 p-4 rounded-xl border-2 border-dashed border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all"
                     dir="rtl"
                   >
-                    <div className={`${action.bg} p-2.5 rounded-xl flex-shrink-0`}>{action.icon}</div>
                     <span className="font-medium text-gray-700 text-sm">{action.label}</span>
+                    <div className={`${action.bg} p-2.5 rounded-xl flex-shrink-0`}>{action.icon}</div>
                   </button>
                 ))}
               </div>
@@ -470,7 +470,7 @@ export function OfficeDashboard() {
 
           {/* ── Listings ── */}
           <TabsContent value="listings" className="mt-0">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4" dir="rtl">
               <h3 className="font-semibold text-gray-900">عقاراتي ({officeListings.length})</h3>
               <Button size="sm" className="gap-1 bg-blue-600 hover:bg-blue-700">
                 <Plus className="w-4 h-4" /> إضافة عقار
@@ -487,7 +487,7 @@ export function OfficeDashboard() {
                       </Badge>
                     </div>
                   </div>
-                  <div className="p-4">
+                  <div className="p-4" dir="rtl">
                     <h4 className="font-semibold text-gray-900 mb-1">{listing.property_type}</h4>
                     <p className="text-xs text-gray-500 flex items-center gap-1 mb-2">
                       <MapPin className="w-3 h-3" /> {listing.address}
@@ -495,28 +495,27 @@ export function OfficeDashboard() {
                     <p className="text-lg font-bold text-blue-600 mb-3">{formatPrice(listing.price)}</p>
                     <div className="mb-3">
                       <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                        <span>{listing.quality_score}%</span>
                         <span>جودة الإعلان</span>
-                        <span className="font-medium">{listing.quality_score}%</span>
                       </div>
                       <Progress value={listing.quality_score} className="h-1.5" />
                     </div>
                     <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
-                      <span>{listing.bedrooms} غرف</span>
+                      <span>م² {listing.area}</span>
                       <span>·</span>
-                      <span>{listing.area} م²</span>
+                      <span>{listing.bedrooms} غرف</span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-                      <div className="text-center p-2 bg-gray-50 rounded-lg">
-                        <p className="text-gray-500">المشاهدات</p>
-                        <p className="font-semibold text-gray-900 mt-0.5">234</p>
-                      </div>
                       <div className="text-center p-2 bg-gray-50 rounded-lg">
                         <p className="text-gray-500">الاستفسارات</p>
                         <p className="font-semibold text-gray-900 mt-0.5">12</p>
                       </div>
+                      <div className="text-center p-2 bg-gray-50 rounded-lg">
+                        <p className="text-gray-500">المشاهدات</p>
+                        <p className="font-semibold text-gray-900 mt-0.5">234</p>
+                      </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline" className="flex-1 text-xs">تعديل</Button>
                       <Button
                         size="sm"
                         className="flex-1 text-xs bg-blue-600 hover:bg-blue-700"
@@ -524,6 +523,7 @@ export function OfficeDashboard() {
                       >
                         عرض
                       </Button>
+                      <Button size="sm" variant="outline" className="flex-1 text-xs">تعديل</Button>
                     </div>
                   </div>
                 </Card>
