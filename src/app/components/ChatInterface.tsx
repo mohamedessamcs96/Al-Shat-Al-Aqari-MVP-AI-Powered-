@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Home, Building2, User, MessageSquare, Sparkles } from 'lucide-react';
+import { Send, Home, Building2, User, MessageSquare, Sparkles, LogOut } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
@@ -166,6 +166,10 @@ export function ChatInterface() {
               <Button variant="ghost" size="sm" onClick={() => navigate('/demand')} className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
                 <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2 flex-shrink-0" />
                 <span className="hidden sm:inline">طلب</span>
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
+                <LogOut className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2 flex-shrink-0" />
+                <span className="hidden sm:inline">خروج</span>
               </Button>
             </div>
           </div>

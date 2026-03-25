@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { ArrowRight, Save, Eye, Code, Settings } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Code, Settings } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
@@ -40,12 +40,12 @@ export function MiniPageEditor() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between" dir="ltr">
           <Button variant="ghost" onClick={() => navigate('/office/dashboard')}>
-            <ArrowRight className="w-5 h-5 mr-2" />
+            <ArrowLeft className="w-5 h-5 mr-2" />
             رجوع
           </Button>
-          <h1 className="text-xl font-bold text-gray-900">محرر صفحة المكتب</h1>
+          <h1 className="text-xl font-bold text-gray-900" dir="rtl">محرر صفحة المكتب</h1>
           <div className="flex gap-2">
             <Button variant="outline" onClick={handlePreview}>
               <Eye className="w-4 h-4 ml-2" />

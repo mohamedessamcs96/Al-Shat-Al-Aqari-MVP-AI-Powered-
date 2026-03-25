@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Phone, CheckCircle, AlertCircle, ArrowLeft } from "lucide-react";
+import { Phone, CheckCircle, AlertCircle, ArrowLeft, LogOut } from "lucide-react";
 import { useNavigate } from "react-router";
 import mockApi from "../lib/mock-api";
 import { mockCities } from "../lib/mock-data";
@@ -73,15 +73,19 @@ export function DemandForm() {
     <div className="flex flex-col h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       {/* Header */}
       <header className="bg-white border-b shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between" dir="ltr">
           <Button variant="ghost" onClick={() => navigate('/chat')}>
-            <ArrowLeft className="w-5 h-5 ml-2" />
+            <ArrowLeft className="w-5 h-5 mr-2" />
             رجوع
           </Button>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900" dir="rtl">اطلب عقارك</h1>
-            <p className="text-sm text-gray-500" dir="rtl">نموذج طلب عقار مخصص</p>
+          <div dir="rtl">
+            <h1 className="text-xl font-bold text-gray-900">اطلب عقارك</h1>
+            <p className="text-sm text-gray-500">نموذج طلب عقار مخصص</p>
           </div>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+            <LogOut className="w-4 h-4 mr-2" />
+            خروج
+          </Button>
         </div>
       </header>
 

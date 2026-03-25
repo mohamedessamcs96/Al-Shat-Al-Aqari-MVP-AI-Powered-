@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { ArrowRight, Phone, Mail, MessageSquare, Filter, Search, Clock } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, MessageSquare, Filter, Search, Clock, LogOut } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
@@ -37,13 +37,16 @@ export function OfficeLeads() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between" dir="ltr">
           <Button variant="ghost" onClick={() => navigate('/office/dashboard')}>
-            <ArrowRight className="w-5 h-5 mr-2" />
+            <ArrowLeft className="w-5 h-5 mr-2" />
             رجوع
           </Button>
-          <h1 className="text-xl font-bold text-gray-900">إدارة العملاء المحتملين</h1>
-          <div className="w-20" />
+          <h1 className="text-xl font-bold text-gray-900" dir="rtl">إدارة العملاء المحتملين</h1>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+            <LogOut className="w-4 h-4 mr-2" />
+            خروج
+          </Button>
         </div>
       </header>
 
