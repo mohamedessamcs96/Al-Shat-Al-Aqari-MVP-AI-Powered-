@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Home, MessageSquare, Calendar, DollarSign, Heart, ArrowLeft, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Home, MessageSquare, Calendar, DollarSign, Heart, ArrowRight, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
@@ -20,7 +20,7 @@ export function BuyerDashboard() {
       <header className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Button variant="ghost" onClick={() => navigate('/chat')}>
-            <ArrowLeft className="w-5 h-5 ml-2" />
+            <ArrowRight className="w-5 h-5 mr-2" />
             رجوع
           </Button>
           <h1 className="text-xl font-bold text-gray-900">لوحة التحكم</h1>

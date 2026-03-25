@@ -167,10 +167,6 @@ export function ChatInterface() {
                 <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2 flex-shrink-0" />
                 <span className="hidden sm:inline">طلب</span>
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/office/dashboard')} className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
-                <Building2 className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2 flex-shrink-0" />
-                <span className="hidden sm:inline">مكتب</span>
-              </Button>
             </div>
           </div>
         </div>
@@ -182,6 +178,7 @@ export function ChatInterface() {
           {messages.map((message) => (
             <div
               key={message.id}
+              dir="ltr"
               className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {message.role === 'assistant' && (
@@ -292,7 +289,7 @@ export function ChatInterface() {
           ))}
 
           {isTyping && (
-            <div className="flex gap-3 justify-start">
+            <div dir="ltr" className="flex gap-3 justify-start">
               <Avatar className="bg-gradient-to-br from-blue-600 to-indigo-600 border-2 border-white shadow-md">
                 <AvatarFallback className="bg-transparent">
                   <Sparkles className="w-5 h-5 text-white" />

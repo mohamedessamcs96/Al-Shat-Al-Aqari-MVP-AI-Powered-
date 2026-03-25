@@ -1,15 +1,53 @@
+import { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { Phone, Mail, MapPin, Star, Building2, MessageSquare, QrCode } from 'lucide-react';
+import { Phone, Mail, MapPin, Star, Building2, MessageSquare, QrCode, Download, X, Copy, Check } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { mockOffices, mockListings, formatPrice, getCityName } from '../lib/mock-data';
 
 export function OfficeMiniPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const [qrOpen, setQrOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const qrRef = useRef<SVGSVGElement>(null);
 
   const office = mockOffices.find(o => o.slug === slug);
+  const pageUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/office/${slug}`
+    : `/office/${slug}`;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(pageUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownload = () => {
+    const svg = qrRef.current;
+    if (!svg) return;
+    const serializer = new XMLSerializer();
+    const svgStr = serializer.serializeToString(svg);
+    const canvas = document.createElement('canvas');
+    const size = 400;
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d')!;
+    const img = new Image();
+    img.onload = () => {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, size, size);
+      ctx.drawImage(img, 0, 0, size, size);
+      const a = document.createElement('a');
+      a.download = `qr-${slug}.png`;
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+    };
+    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
+  };
   const officeListings = office ? mockListings.filter(l => l.office_id === office.id) : [];
 
   if (!office) {
@@ -99,12 +137,59 @@ export function OfficeMiniPage() {
               <MessageSquare className="w-4 h-4 ml-2" />
               تحدث مع المساعد
             </Button>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={() => setQrOpen(true)} title="عرض رمز QR">
               <QrCode className="w-4 h-4" />
             </Button>
           </div>
         </Card>
       </div>
+
+      {/* QR Code Dialog */}
+      <Dialog open={qrOpen} onOpenChange={setQrOpen}>
+        <DialogContent className="max-w-sm" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="text-center">رمز QR لصفحة المكتب</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-5 py-2">
+            {/* QR Code */}
+            <div className="p-4 bg-white rounded-2xl shadow-inner border">
+              <QRCodeSVG
+                ref={qrRef}
+                value={pageUrl}
+                size={200}
+                level="H"
+                includeMargin={false}
+                imageSettings={{
+                  src: office!.logo_url,
+                  x: undefined,
+                  y: undefined,
+                  height: 40,
+                  width: 40,
+                  excavate: true,
+                }}
+              />
+            </div>
+
+            {/* Office name & URL */}
+            <div className="text-center">
+              <p className="font-semibold text-gray-900">{office!.name}</p>
+              <p className="text-xs text-gray-500 mt-0.5 break-all">{pageUrl}</p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2 w-full">
+              <Button className="flex-1 gap-2 bg-blue-600 hover:bg-blue-700" onClick={handleDownload}>
+                <Download className="w-4 h-4" />
+                تحميل PNG
+              </Button>
+              <Button variant="outline" className="flex-1 gap-2" onClick={handleCopy}>
+                {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                {copied ? 'تم النسخ!' : 'نسخ الرابط'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Listings */}
       <div className="max-w-7xl mx-auto px-4 pb-12">

@@ -227,23 +227,18 @@ export function DemandForm() {
                 {/* OTP Input */}
                 <div>
                   <Label className="block text-sm font-medium text-gray-700 mb-4 text-center">أدخل الرمز</Label>
-                  <div className="flex justify-center gap-2 mb-4">
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
-                    </InputOTPGroup>
+                  <div className="flex justify-center mb-4">
+                    <InputOTP maxLength={6} value={otp} onChange={(val) => setOtp(val)}>
+                      <InputOTPGroup>
+                        <InputOTPSlot index={0} />
+                        <InputOTPSlot index={1} />
+                        <InputOTPSlot index={2} />
+                        <InputOTPSlot index={3} />
+                        <InputOTPSlot index={4} />
+                        <InputOTPSlot index={5} />
+                      </InputOTPGroup>
+                    </InputOTP>
                   </div>
-                  <Input
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.slice(0, 6))}
-                    placeholder="000000"
-                    className="w-full text-center text-lg tracking-widest"
-                    maxLength={6}
-                  />
                 </div>
 
                 {/* Error Message */}
@@ -286,6 +281,13 @@ export function DemandForm() {
               <p className="text-sm text-gray-600 mb-6">
                 ستتلقى ردود من المكاتب العقارية قريباً على رقم الجوال المسجل.
               </p>
+              <Button
+                onClick={() => navigate('/chat')}
+                variant="outline"
+                className="px-6 py-2"
+              >
+                العودة إلى البحث
+              </Button>
               <Button
                 onClick={() => {
                   setStep("form");

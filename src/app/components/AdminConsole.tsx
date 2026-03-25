@@ -127,12 +127,12 @@ export function AdminConsole() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b" dir="rtl">
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">المكتب</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">المدينة</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">العقارات</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">العملاء</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">الاشتراك</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">الإجراءات</th>
+                      <th className="text-right py-3 px-4 font-semibold text-gray-900">المكتب</th>
+                      <th className="text-right py-3 px-4 font-semibold text-gray-900">المدينة</th>
+                      <th className="text-right py-3 px-4 font-semibold text-gray-900">العقارات</th>
+                      <th className="text-right py-3 px-4 font-semibold text-gray-900">العملاء</th>
+                      <th className="text-right py-3 px-4 font-semibold text-gray-900">الاشتراك</th>
+                      <th className="text-right py-3 px-4 font-semibold text-gray-900">الإجراءات</th>
                     </tr>
                   </thead>
                   <tbody>

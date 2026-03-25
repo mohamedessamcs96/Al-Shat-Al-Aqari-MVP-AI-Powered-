@@ -234,11 +234,11 @@ export function OfficeSubscription() {
             <table className="w-full">
               <thead>
                 <tr className="border-b" dir="rtl">
-                  <th className="text-left py-3 px-4 font-semibold text-gray-900">التاريخ</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-900">الوصف</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-900">المبلغ</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-900">الحالة</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-900">الإجراء</th>
+                  <th className="text-right py-3 px-4 font-semibold text-gray-900">التاريخ</th>
+                  <th className="text-right py-3 px-4 font-semibold text-gray-900">الوصف</th>
+                  <th className="text-right py-3 px-4 font-semibold text-gray-900">المبلغ</th>
+                  <th className="text-right py-3 px-4 font-semibold text-gray-900">الحالة</th>
+                  <th className="text-right py-3 px-4 font-semibold text-gray-900">الإجراء</th>
                 </tr>
               </thead>
               <tbody>

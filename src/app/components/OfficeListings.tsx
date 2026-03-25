@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { ArrowLeft, Plus, Edit2, Trash2, Eye, Search, Filter } from 'lucide-react';
+import { ArrowRight, Plus, Edit2, Trash2, Eye, Search, Filter } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
@@ -68,7 +68,7 @@ export function OfficeListings() {
       <header className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Button variant="ghost" onClick={() => navigate('/office/dashboard')}>
-            <ArrowLeft className="w-5 h-5 ml-2" />
+            <ArrowRight className="w-5 h-5 mr-2" />
             رجوع
           </Button>
           <h1 className="text-xl font-bold text-gray-900">إدارة العقارات</h1>
@@ -208,12 +208,12 @@ export function OfficeListings() {
         <Card className="p-4 mb-6">
           <div className="flex gap-3">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="ابحث عن عقار..."
-                className="pl-10 text-right"
+                className="pr-10 text-right"
                 dir="rtl"
               />
             </div>
