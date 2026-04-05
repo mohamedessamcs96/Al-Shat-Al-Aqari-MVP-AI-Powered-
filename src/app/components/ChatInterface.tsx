@@ -177,7 +177,7 @@ export function ChatInterface() {
 
       {/* ── Sidebar ── */}
       <aside
-        className={`${sidebarOpen ? 'w-64' : 'w-0 overflow-hidden'} transition-all duration-300 flex-shrink-0 flex flex-col relative`}
+        className={`${sidebarOpen ? 'w-64' : 'w-0'} overflow-hidden transition-all duration-300 flex-shrink-0 flex flex-col relative`}
         style={{ background: 'linear-gradient(145deg,#0a0f1e 0%,#0e2057 45%,#1a1060 100%)' }}
       >
         {/* Decorative blobs — same as login hero */}
@@ -279,7 +279,7 @@ export function ChatInterface() {
               </div>
               <div>
                 <span className="font-bold text-slate-900 text-sm">الشات العقاري</span>
-                <span className="hidden sm:inline text-slate-400 text-xs mr-2">سارة — مساعدة ذكية للعقارات</span>
+                <span className="hidden sm:inline text-slate-400 text-xs ml-2">سارة — مساعدة ذكية للعقارات</span>
               </div>
             </div>
           </div>
@@ -461,7 +461,7 @@ export function ChatInterface() {
         <div className="bg-white border-t border-slate-200 px-4 sm:px-8 py-3 flex-shrink-0">
           <div className="max-w-2xl mx-auto">
             {/* Action chips */}
-            <div className="flex gap-2 mb-2.5 justify-end flex-wrap">
+            <div className="flex gap-2 mb-2.5 justify-start flex-wrap" dir="rtl">
               {ACTION_CHIPS.map(chip => (
                 <button
                   key={chip}
@@ -473,16 +473,7 @@ export function ChatInterface() {
               ))}
             </div>
             {/* Input row */}
-            <div className="flex gap-2 items-center bg-slate-50 rounded-2xl border border-slate-200 px-3 py-1.5 focus-within:border-indigo-400 focus-within:bg-white transition-colors">
-              <button
-                onClick={() => handleSend()}
-                disabled={!inputValue.trim()}
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0 disabled:opacity-40 transition-all hover:scale-105 shadow-md shadow-indigo-900/30"
-                style={{ background: 'linear-gradient(135deg,#0e2057,#1a1060)' }}
-                dir="ltr"
-              >
-                <Send className="w-4 h-4" />
-              </button>
+            <div className="flex gap-2 items-center bg-slate-50 rounded-2xl border border-slate-200 px-3 py-1.5 focus-within:border-indigo-400 focus-within:bg-white transition-colors" dir="rtl">
               <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
@@ -491,6 +482,14 @@ export function ChatInterface() {
                 className="flex-1 border-0 bg-transparent text-right text-sm focus-visible:ring-0 shadow-none px-1 py-2 text-slate-700 placeholder:text-slate-400"
                 dir="rtl"
               />
+              <button
+                onClick={() => handleSend()}
+                disabled={!inputValue.trim()}
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0 disabled:opacity-40 transition-all hover:scale-105 shadow-md shadow-indigo-900/30"
+                style={{ background: 'linear-gradient(135deg,#0e2057,#1a1060)' }}
+              >
+                <Send className="w-4 h-4" />
+              </button>
             </div>
             <p className="text-[11px] text-slate-400 text-center mt-2">مدعوم بالذكاء الاصطناعي • الشات العقاري</p>
           </div>
