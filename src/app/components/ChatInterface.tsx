@@ -173,63 +173,68 @@ export function ChatInterface() {
   const olderChats = conversations.filter(c => c.createdAt < weekMs);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f4f6fb]" dir="rtl">
+    <div className="flex h-screen overflow-hidden bg-slate-50" dir="rtl">
 
       {/* ── Sidebar ── */}
-      <aside className={`${sidebarOpen ? 'w-64' : 'w-0 overflow-hidden'} transition-all duration-300 flex-shrink-0 flex flex-col`}
-        style={{ background: 'linear-gradient(180deg,#111827 0%,#1a2744 100%)' }}>
+      <aside
+        className={`${sidebarOpen ? 'w-64' : 'w-0 overflow-hidden'} transition-all duration-300 flex-shrink-0 flex flex-col relative`}
+        style={{ background: 'linear-gradient(145deg,#0a0f1e 0%,#0e2057 45%,#1a1060 100%)' }}
+      >
+        {/* Decorative blobs — same as login hero */}
+        <div className="absolute top-0 right-0 w-48 h-48 bg-blue-600/10 rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-40 h-40 bg-indigo-600/10 rounded-full translate-y-1/2 -translate-x-1/3 pointer-events-none" />
 
         {/* User header */}
-        <div className="flex items-center gap-3 px-4 py-4 border-b border-white/10 flex-shrink-0">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+        <div className="relative z-10 flex items-center gap-3 px-4 py-4 border-b border-white/10 flex-shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-lg shadow-blue-900/40 ring-1 ring-white/20">
             أ
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-white font-semibold text-sm truncate">أحمد</p>
-            <p className="text-white/40 text-xs">عميل</p>
+            <p className="text-blue-300/50 text-xs">عميل</p>
           </div>
         </div>
 
         {/* New Chat */}
-        <div className="px-3 py-3 flex-shrink-0">
+        <div className="relative z-10 px-3 py-3 flex-shrink-0">
           <button
             onClick={startNewChat}
-            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-white/20 text-white/80 hover:bg-white/10 transition-colors text-sm font-medium"
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-white/20 bg-white/8 text-white/80 hover:bg-white/15 hover:text-white transition-all text-sm font-medium backdrop-blur-sm"
           >
             <Plus className="w-4 h-4" />
-            + New Chat
+            محادثة جديدة
           </button>
         </div>
 
         {/* Conversation history */}
-        <div className="px-2 flex-1 overflow-y-auto space-y-4 pb-2">
+        <div className="relative z-10 px-2 flex-1 overflow-y-auto space-y-4 pb-2">
           {todayChats.length > 0 && (
             <div>
-              <p className="text-white/30 text-[11px] font-semibold uppercase tracking-wider mb-1 px-2">اليوم</p>
+              <p className="text-blue-300/40 text-[10px] font-semibold uppercase tracking-widest mb-1 px-2">اليوم</p>
               <ConvList convs={todayChats} activeId={activeId} onSelect={setActiveId} onDelete={deleteConversation} />
             </div>
           )}
           {weekChats.length > 0 && (
             <div>
-              <p className="text-white/30 text-[11px] font-semibold uppercase tracking-wider mb-1 px-2">هذا الأسبوع</p>
+              <p className="text-blue-300/40 text-[10px] font-semibold uppercase tracking-widest mb-1 px-2">هذا الأسبوع</p>
               <ConvList convs={weekChats} activeId={activeId} onSelect={setActiveId} onDelete={deleteConversation} />
             </div>
           )}
           {olderChats.length > 0 && (
             <div>
-              <p className="text-white/30 text-[11px] font-semibold uppercase tracking-wider mb-1 px-2">محادثات سابقة</p>
+              <p className="text-blue-300/40 text-[10px] font-semibold uppercase tracking-widest mb-1 px-2">محادثات سابقة</p>
               <ConvList convs={olderChats} activeId={activeId} onSelect={setActiveId} onDelete={deleteConversation} />
             </div>
           )}
         </div>
 
         {/* Bottom nav */}
-        <div className="border-t border-white/10 px-3 py-3 space-y-0.5 flex-shrink-0">
+        <div className="relative z-10 border-t border-white/10 px-3 py-3 space-y-0.5 flex-shrink-0">
           {[
             { icon: <Star className="w-4 h-4" />, label: 'المفضلة' },
             { icon: <Bell className="w-4 h-4" />, label: 'التنبيهات' },
           ].map(item => (
-            <button key={item.label} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-white/50 hover:bg-white/8 hover:text-white transition-colors">
+            <button key={item.label} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-white/40 hover:bg-white/8 hover:text-blue-300 transition-colors">
               {item.icon}
               <span>{item.label}</span>
             </button>
@@ -239,7 +244,7 @@ export function ChatInterface() {
             { icon: <Settings className="w-4 h-4" />, label: 'الإعدادات' },
             { icon: <HelpCircle className="w-4 h-4" />, label: 'مساعدة' },
           ].map(item => (
-            <button key={item.label} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-white/50 hover:bg-white/8 hover:text-white transition-colors">
+            <button key={item.label} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-white/40 hover:bg-white/8 hover:text-blue-300 transition-colors">
               {item.icon}
               <span>{item.label}</span>
             </button>
@@ -251,35 +256,41 @@ export function ChatInterface() {
       <div className="flex-1 flex flex-col min-w-0">
 
         {/* Top bar */}
-        <header className="bg-white border-b border-gray-200 px-4 sm:px-6 h-14 flex items-center justify-between flex-shrink-0 shadow-sm">
+        <header className="bg-white border-b border-slate-200 px-4 sm:px-6 h-14 flex items-center justify-between flex-shrink-0 shadow-sm">
           <div className="flex items-center gap-3">
             {/* Toggle sidebar */}
-            <button onClick={() => setSidebarOpen(v => !v)} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors">
+            <button
+              onClick={() => setSidebarOpen(v => !v)}
+              className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 transition-colors"
+            >
               <div className="space-y-1">
-                <span className="block w-4 h-0.5 bg-gray-500" />
-                <span className="block w-4 h-0.5 bg-gray-500" />
-                <span className="block w-3 h-0.5 bg-gray-500" />
+                <span className="block w-4 h-0.5 bg-slate-500" />
+                <span className="block w-4 h-0.5 bg-slate-500" />
+                <span className="block w-3 h-0.5 bg-slate-500" />
               </div>
             </button>
             {/* Brand */}
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#1e3a8a,#312e81)' }}>
+              <div
+                className="w-8 h-8 rounded-xl flex items-center justify-center shadow-md shadow-blue-900/30 ring-1 ring-white/20"
+                style={{ background: 'linear-gradient(135deg,#0e2057,#1a1060)' }}
+              >
                 <Building2 className="w-4 h-4 text-white" />
               </div>
               <div>
-                <span className="font-bold text-gray-900 text-sm">الشات العقاري</span>
-                <span className="hidden sm:inline text-gray-400 text-xs mr-2">سارة — مساعدة ذكية للعقارات</span>
+                <span className="font-bold text-slate-900 text-sm">الشات العقاري</span>
+                <span className="hidden sm:inline text-slate-400 text-xs mr-2">سارة — مساعدة ذكية للعقارات</span>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <button onClick={() => navigate('/demand')} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
+            <button onClick={() => navigate('/demand')} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
               <MessageSquare className="w-4 h-4" />
             </button>
-            <button onClick={() => navigate('/buyer/dashboard')} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
+            <button onClick={() => navigate('/buyer/dashboard')} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
               <User className="w-4 h-4" />
             </button>
-            <button onClick={() => navigate('/')} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
+            <button onClick={() => navigate('/')} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
               <LogOut className="w-4 h-4" />
             </button>
           </div>
@@ -289,20 +300,25 @@ export function ChatInterface() {
         <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6">
           <div className="max-w-2xl mx-auto space-y-6">
 
-            {/* Welcome headline — shown only before any user message */}
+            {/* Welcome headline */}
             {messages.length === 1 && messages[0].role === 'assistant' && (
-              <div className="text-center pt-6 pb-2">
-                <h2 className="text-2xl font-bold text-gray-900 mb-1">أنا سارة، مساعدتك العقارية الذكية ✨</h2>
-                <p className="text-gray-500 text-sm">كيف يمكنني مساعدتك اليوم؟</p>
-                {/* Quick prompt pills */}
+              <div className="text-center pt-8 pb-2">
+                <div
+                  className="inline-flex items-center justify-center w-14 h-14 rounded-2xl text-white font-bold text-xl mb-4 shadow-lg shadow-indigo-900/30 ring-1 ring-white/10"
+                  style={{ background: 'linear-gradient(135deg,#0e2057,#1a1060)' }}
+                >
+                  س
+                </div>
+                <h2 className="text-2xl font-extrabold text-slate-900 mb-1">أنا سارة، مساعدتك العقارية الذكية</h2>
+                <p className="text-slate-400 text-sm">كيف يمكنني مساعدتك اليوم؟</p>
                 <div className="flex flex-wrap gap-2 justify-center mt-5">
                   {QUICK_PROMPTS.map(p => (
                     <button
                       key={p.label}
                       onClick={() => handleSend(p.label)}
-                      className="flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 text-sm text-gray-700 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 transition-all shadow-sm"
+                      className="flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 text-sm text-slate-700 hover:border-indigo-400 hover:text-indigo-700 hover:bg-indigo-50/60 transition-all shadow-sm"
                     >
-                      <span className="text-gray-400">{p.icon}</span>
+                      <span className="text-indigo-400">{p.icon}</span>
                       {p.label}
                     </button>
                   ))}
@@ -316,22 +332,27 @@ export function ChatInterface() {
                 dir="ltr"
                 className={`flex gap-3 items-start ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                {/* AI avatar */}
+                {/* Sara avatar */}
                 {message.role === 'assistant' && (
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow mt-0.5 text-white font-bold text-sm"
-                    style={{ background: 'linear-gradient(135deg,#1e3a8a,#312e81)' }}>
+                  <div
+                    className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md shadow-indigo-900/30 mt-0.5 text-white font-bold text-sm ring-1 ring-white/10"
+                    style={{ background: 'linear-gradient(135deg,#0e2057,#1a1060)' }}
+                  >
                     س
                   </div>
                 )}
 
                 <div className={`flex-1 max-w-lg flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
                   {/* Bubble */}
-                  <div className={`rounded-2xl px-4 py-3 shadow-sm text-sm leading-relaxed ${
-                    message.role === 'user'
-                      ? 'text-white rounded-tr-sm'
-                      : 'bg-white border border-gray-100 text-gray-800 rounded-tl-sm'
-                  }`} style={message.role === 'user' ? { background: 'linear-gradient(135deg,#1e3a8a,#312e81)' } : {}}
-                    dir="rtl">
+                  <div
+                    className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                      message.role === 'user'
+                        ? 'text-white rounded-tr-sm shadow-md shadow-indigo-900/30'
+                        : 'bg-white border border-slate-100 text-slate-800 rounded-tl-sm shadow-sm'
+                    }`}
+                    style={message.role === 'user' ? { background: 'linear-gradient(135deg,#0e2057,#1a1060)' } : {}}
+                    dir="rtl"
+                  >
                     {message.content}
                   </div>
 
@@ -341,13 +362,16 @@ export function ChatInterface() {
                       {message.listings.map((listing) => (
                         <div
                           key={listing.id}
-                          className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer border border-gray-100"
+                          className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer border border-slate-100"
                           onClick={() => navigate(`/listings/${listing.id}`)}
                         >
                           <div className="relative">
                             <img src={listing.images[0]} alt="" className="w-full h-40 object-cover" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                            <span className="absolute top-2 right-2 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                            <span
+                              className="absolute top-2 right-2 text-white text-xs font-bold px-2.5 py-1 rounded-full"
+                              style={{ background: 'linear-gradient(135deg,#0e2057,#1a1060)' }}
+                            >
                               {formatPrice(listing.price)}
                             </span>
                             {listing.quality_score >= 90 && (
@@ -359,14 +383,14 @@ export function ChatInterface() {
                             </div>
                           </div>
                           <div className="px-4 py-2.5 flex items-center justify-between" dir="rtl">
-                            <div className="flex gap-3 text-xs text-gray-500">
-                              <span><b className="text-gray-800">{listing.bedrooms}</b> غرف</span>
-                              <span className="text-gray-300">·</span>
-                              <span><b className="text-gray-800">{listing.area}</b> م²</span>
-                              <span className="text-gray-300">·</span>
+                            <div className="flex gap-3 text-xs text-slate-500">
+                              <span><b className="text-slate-800">{listing.bedrooms}</b> غرف</span>
+                              <span className="text-slate-300">·</span>
+                              <span><b className="text-slate-800">{listing.area}</b> م²</span>
+                              <span className="text-slate-300">·</span>
                               <span>{getCityName(listing.city_id)}</span>
                             </div>
-                            <ChevronRight className="w-4 h-4 text-blue-500" />
+                            <ChevronRight className="w-4 h-4 text-indigo-400" />
                           </div>
                         </div>
                       ))}
@@ -380,7 +404,7 @@ export function ChatInterface() {
                         <button
                           key={i}
                           onClick={() => handleSend(s)}
-                          className="bg-white border border-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-full hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 transition-all shadow-sm"
+                          className="bg-white border border-slate-200 text-slate-600 text-xs px-3 py-1.5 rounded-full hover:border-indigo-400 hover:text-indigo-700 hover:bg-indigo-50/60 transition-all shadow-sm"
                         >
                           {s}
                         </button>
@@ -392,7 +416,7 @@ export function ChatInterface() {
                   {message.hasNoDemandCTA && (
                     <button
                       onClick={() => navigate('/demand')}
-                      className="mt-3 w-full text-white font-semibold py-2.5 px-4 rounded-xl shadow hover:shadow-md hover:-translate-y-0.5 transition-all text-sm flex items-center justify-center gap-2"
+                      className="mt-3 w-full text-white font-semibold py-2.5 px-4 rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all text-sm flex items-center justify-center gap-2"
                       style={{ background: 'linear-gradient(135deg,#16a34a,#059669)' }}
                     >
                       <MessageSquare className="w-4 h-4" />
@@ -403,7 +427,7 @@ export function ChatInterface() {
 
                 {/* User avatar */}
                 {message.role === 'user' && (
-                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 mt-0.5 text-gray-600 font-bold text-sm">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 mt-0.5 text-white font-bold text-sm shadow-md shadow-indigo-900/30 ring-1 ring-white/20">
                     أ
                   </div>
                 )}
@@ -413,15 +437,17 @@ export function ChatInterface() {
             {/* Typing indicator */}
             {isTyping && (
               <div dir="ltr" className="flex gap-3 items-start">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-sm"
-                  style={{ background: 'linear-gradient(135deg,#1e3a8a,#312e81)' }}>
+                <div
+                  className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-white font-bold text-sm ring-1 ring-white/10"
+                  style={{ background: 'linear-gradient(135deg,#0e2057,#1a1060)' }}
+                >
                   س
                 </div>
-                <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
-                  <div className="flex gap-1 items-center h-4">
-                    <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" />
-                    <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }} />
-                    <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }} />
+                <div className="bg-white border border-slate-100 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
+                  <div className="flex gap-1.5 items-center h-4">
+                    <span className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" />
+                    <span className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }} />
+                    <span className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }} />
                   </div>
                 </div>
               </div>
@@ -432,7 +458,7 @@ export function ChatInterface() {
         </div>
 
         {/* Input area */}
-        <div className="bg-white border-t border-gray-200 px-4 sm:px-8 py-3 flex-shrink-0">
+        <div className="bg-white border-t border-slate-200 px-4 sm:px-8 py-3 flex-shrink-0">
           <div className="max-w-2xl mx-auto">
             {/* Action chips */}
             <div className="flex gap-2 mb-2.5 justify-end flex-wrap">
@@ -440,19 +466,19 @@ export function ChatInterface() {
                 <button
                   key={chip}
                   onClick={() => handleSend(chip)}
-                  className="px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-medium hover:bg-blue-100 hover:text-blue-700 transition-colors"
+                  className="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-medium hover:bg-indigo-100 hover:text-indigo-700 transition-colors"
                 >
                   {chip}
                 </button>
               ))}
             </div>
             {/* Input row */}
-            <div className="flex gap-2 items-center bg-gray-50 rounded-2xl border border-gray-200 px-3 py-1.5 focus-within:border-blue-400 focus-within:bg-white transition-colors">
+            <div className="flex gap-2 items-center bg-slate-50 rounded-2xl border border-slate-200 px-3 py-1.5 focus-within:border-indigo-400 focus-within:bg-white transition-colors">
               <button
                 onClick={() => handleSend()}
                 disabled={!inputValue.trim()}
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0 disabled:opacity-40 transition-all hover:scale-105"
-                style={{ background: 'linear-gradient(135deg,#1e3a8a,#312e81)' }}
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0 disabled:opacity-40 transition-all hover:scale-105 shadow-md shadow-indigo-900/30"
+                style={{ background: 'linear-gradient(135deg,#0e2057,#1a1060)' }}
                 dir="ltr"
               >
                 <Send className="w-4 h-4" />
@@ -462,11 +488,11 @@ export function ChatInterface() {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                 placeholder="اكتب طلبك هنا... (مثال: فيلا في الرياض بميزانية مليون)"
-                className="flex-1 border-0 bg-transparent text-right text-sm focus-visible:ring-0 shadow-none px-1 py-2"
+                className="flex-1 border-0 bg-transparent text-right text-sm focus-visible:ring-0 shadow-none px-1 py-2 text-slate-700 placeholder:text-slate-400"
                 dir="rtl"
               />
             </div>
-            <p className="text-[11px] text-gray-400 text-center mt-2">مدعوم بالذكاء الاصطناعي • الشات العقاري</p>
+            <p className="text-[11px] text-slate-400 text-center mt-2">مدعوم بالذكاء الاصطناعي • الشات العقاري</p>
           </div>
         </div>
       </div>
