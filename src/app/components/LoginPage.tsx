@@ -153,10 +153,13 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex">
-      {/* ── Left Hero Panel ── */}
+    <div className="min-h-screen flex flex-col lg:flex-row" dir="rtl">
+
+      {/* ── Hero Panel — full width on mobile, left half on desktop ── */}
       <div
-        className="hidden lg:flex w-1/2 xl:w-[58%] flex-col justify-between p-12 xl:p-16 relative overflow-hidden"
+        className="relative overflow-hidden flex flex-col justify-between
+                   px-6 pt-12 pb-0 min-h-[260px]
+                   lg:min-h-screen lg:w-1/2 xl:w-[58%] lg:p-12 xl:p-16"
         style={{ background: 'linear-gradient(145deg,#0a0f1e 0%,#0e2057 45%,#1a1060 100%)' }}
       >
         {/* Decorative blobs */}
@@ -164,28 +167,40 @@ export function LoginPage() {
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-600/10 rounded-full translate-y-1/2 -translate-x-1/3 pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-purple-700/10 rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
 
-        {/* Top content */}
-        <div className="relative z-10" dir="rtl">
-          {/* Brand */}
-          <div className="flex items-center gap-3 mb-16">
-            <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-sm ring-1 ring-white/20 flex items-center justify-center shadow-lg">
-              <Building2 className="w-6 h-6 text-white" />
+        {/* Brand + headline — always visible */}
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-5 lg:mb-16">
+            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-2xl bg-white/10 backdrop-blur-sm ring-1 ring-white/20 flex items-center justify-center shadow-lg shrink-0">
+              <Building2 className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
             </div>
-            <span className="text-white text-2xl font-bold tracking-tight">الشات العقاري</span>
+            <span className="text-white text-xl lg:text-2xl font-bold tracking-tight">الشات العقاري</span>
           </div>
 
-          {/* Headline */}
-          <h2 className="text-4xl xl:text-5xl font-extrabold text-white leading-tight mb-5">
+          <h2 className="text-2xl lg:text-5xl xl:text-5xl font-extrabold text-white leading-tight mb-2 lg:mb-5">
             ابحث عن عقارك المثالي
             <br />
             <span className="text-blue-300">بمساعدة الذكاء الاصطناعي</span>
           </h2>
-          <p className="text-slate-300 text-lg mb-12 leading-relaxed max-w-md">
+          <p className="text-slate-300/80 text-sm lg:text-lg mb-5 lg:mb-12 leading-relaxed lg:max-w-md">
             منصة عقارية ذكية تربط المشترين بأفضل المكاتب العقارية في المملكة
           </p>
 
-          {/* Features */}
-          <div className="space-y-5">
+          {/* Mobile: horizontal mini-stats */}
+          <div className="flex gap-3 lg:hidden overflow-x-auto pb-4 -mx-1 px-1 scrollbar-hide">
+            {[
+              { value: '+500', label: 'مكتب عقاري' },
+              { value: '+10K', label: 'عقار متاح' },
+              { value: '+50K', label: 'مستخدم' },
+            ].map(s => (
+              <div key={s.label} className="flex-shrink-0 rounded-2xl bg-white/10 border border-white/10 px-4 py-2 text-center backdrop-blur-sm">
+                <p className="text-white font-bold text-base">{s.value}</p>
+                <p className="text-blue-200/70 text-xs mt-0.5">{s.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: feature list */}
+          <div className="hidden lg:block space-y-5">
             {[
               { Icon: Bot, title: 'مساعد ذكي', desc: 'يفهم احتياجاتك ويقترح العقارات المناسبة', color: 'text-blue-400' },
               { Icon: Building2, title: 'آلاف العقارات', desc: 'من مكاتب موثوقة في جميع المدن السعودية', color: 'text-indigo-400' },
@@ -204,12 +219,12 @@ export function LoginPage() {
           </div>
         </div>
 
-        {/* Bottom stats */}
-        <div className="relative z-10 grid grid-cols-3 gap-3" dir="rtl">
+        {/* Desktop: bottom stats */}
+        <div className="relative z-10 hidden lg:grid grid-cols-3 gap-3">
           {[
-            { value: '500+', label: 'مكتب عقاري', Icon: Building2 },
-            { value: '10K+', label: 'عقار متاح', Icon: MapPin },
-            { value: '50K+', label: 'مستخدم نشط', Icon: User },
+            { value: '+500', label: 'مكتب عقاري', Icon: Building2 },
+            { value: '+10K', label: 'عقار متاح', Icon: MapPin },
+            { value: '+50K', label: 'مستخدم نشط', Icon: User },
           ].map(({ value, label, Icon }) => (
             <div key={label} className="rounded-2xl bg-white/8 backdrop-blur-sm border border-white/10 p-4 text-center">
               <Icon className="w-4 h-4 text-blue-300 mx-auto mb-2" />
@@ -220,22 +235,21 @@ export function LoginPage() {
         </div>
       </div>
 
-      {/* ── Right Forms Panel ── */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-10 bg-slate-50">
+      {/* ── Forms Panel — card that overlaps hero on mobile ── */}
+      <div className="flex-1 flex items-start lg:items-center justify-center
+                      bg-slate-50 rounded-t-3xl lg:rounded-none
+                      -mt-5 lg:mt-0 z-10
+                      px-5 pt-6 pb-8 sm:px-8 lg:p-10">
         <div className="w-full max-w-md">
-          {/* Mobile logo */}
-          <div className="lg:hidden text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 mb-4 shadow-lg shadow-blue-500/30">
-              <Building2 className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900" dir="rtl">الشات العقاري</h1>
-            <p className="text-gray-500 text-sm mt-1" dir="rtl">منصة البحث الذكي عن العقارات</p>
+          {/* Mobile: drag handle indicator */}
+          <div className="lg:hidden flex justify-center mb-5">
+            <div className="w-10 h-1 rounded-full bg-slate-300" />
           </div>
 
-          {/* Desktop welcome */}
-          <div className="hidden lg:block mb-8" dir="rtl">
-            <h2 className="text-2xl font-bold text-gray-900">مرحباً بك</h2>
-            <p className="text-gray-500 mt-1">اختر طريقة الدخول للمتابعة</p>
+          {/* Welcome text */}
+          <div className="mb-6" dir="rtl">
+            <h2 className="text-xl lg:text-2xl font-bold text-slate-900">مرحباً بك 👋</h2>
+            <p className="text-slate-500 text-sm mt-1">اختر طريقة الدخول للمتابعة</p>
           </div>
 
           {/* ── Role Selector ── */}
@@ -245,27 +259,35 @@ export function LoginPage() {
                 <button
                   key={role.id}
                   onClick={() => setActiveRole(role.id)}
-                  className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-100 bg-white shadow-sm hover:shadow-md transition-all duration-200 ${role.hoverBorder} ${role.hoverBg}`}
+                  className={`w-full flex items-center gap-4 p-4 sm:p-5 rounded-2xl border-2 border-slate-100 bg-white shadow-sm active:scale-[0.98] transition-all duration-150 ${role.hoverBorder} ${role.hoverBg}`}
                   dir="rtl"
                 >
                   <div className={`${role.iconBg} p-3 rounded-xl shrink-0`}>{role.icon}</div>
                   <div className="text-right flex-1">
-                    <p className="font-bold text-gray-900">{role.title}</p>
-                    <p className="text-sm text-gray-500 mt-0.5">{role.desc}</p>
+                    <p className="font-bold text-slate-900 text-base">{role.title}</p>
+                    <p className="text-sm text-slate-500 mt-0.5">{role.desc}</p>
                   </div>
-                  <ChevronLeft className="w-5 h-5 text-gray-300 shrink-0" />
+                  <ChevronLeft className="w-5 h-5 text-slate-300 shrink-0" />
                 </button>
               ))}
 
-              {/* Guest browse */}
-              <div className="pt-1">
-                <button
-                  onClick={() => navigate('/chat')}
-                  className="w-full flex items-center justify-center gap-2 py-3 text-sm text-gray-500 hover:text-blue-600 transition-colors rounded-xl hover:bg-blue-50/60 border border-dashed border-gray-200 hover:border-blue-200"
-                >
-                  <Bot className="w-4 h-4" />
-                  تصفح بدون تسجيل
-                </button>
+              {/* Guest browse — prominent on mobile */}
+              <button
+                onClick={() => navigate('/chat')}
+                className="w-full flex items-center justify-center gap-2 py-3.5 text-sm text-slate-500
+                           active:scale-[0.98] transition-all rounded-2xl
+                           border border-dashed border-slate-200 hover:border-indigo-300
+                           hover:text-indigo-600 hover:bg-indigo-50/50 bg-white"
+              >
+                <Bot className="w-4 h-4" />
+                تصفح بدون تسجيل
+              </button>
+
+              {/* Mobile trust badges */}
+              <div className="lg:hidden pt-2 flex items-center justify-center gap-4 text-xs text-slate-400">
+                <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5 text-green-500" /> آمن ومشفر</span>
+                <span className="w-px h-3 bg-slate-200" />
+                <span className="flex items-center gap-1"><User className="w-3.5 h-3.5 text-blue-400" /> +50K مستخدم</span>
               </div>
             </div>
           )}
@@ -281,32 +303,33 @@ export function LoginPage() {
                 desc="ابدأ رحلة البحث عن عقارك"
               />
               <Tabs defaultValue="login">
-                <TabsList className="grid w-full grid-cols-2 mb-5">
-                  <TabsTrigger value="login" className="gap-1.5">
+                <TabsList className="grid w-full grid-cols-2 mb-5 h-11">
+                  <TabsTrigger value="login" className="gap-1.5 text-sm">
                     <LogIn className="w-3.5 h-3.5" />
                     دخول
                   </TabsTrigger>
-                  <TabsTrigger value="register" className="gap-1.5">
+                  <TabsTrigger value="register" className="gap-1.5 text-sm">
                     <UserPlus className="w-3.5 h-3.5" />
                     حساب جديد
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="login" className="space-y-4">
-                  <FieldWithIcon icon={<Phone className="w-4 h-4 text-gray-400" />}>
+                <TabsContent value="login" className="space-y-3">
+                  <FieldWithIcon icon={<Phone className="w-4 h-4 text-slate-400" />}>
                     <Input
                       id="buyer-phone"
                       type="tel"
+                      inputMode="tel"
                       value={buyerPhone}
                       onChange={(e) => setBuyerPhone(e.target.value)}
                       placeholder="05xxxxxxxx"
-                      className="pr-10 text-right rounded-xl"
+                      className="pr-10 text-right rounded-xl h-12 text-base"
                       dir="rtl"
                     />
                   </FieldWithIcon>
                   <Button
                     onClick={handleBuyerLogin}
-                    className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl h-11 font-semibold shadow-sm shadow-blue-500/25 gap-2"
+                    className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl h-12 font-semibold shadow-md shadow-blue-500/20 gap-2 text-base"
                   >
                     <LogIn className="w-4 h-4" />
                     دخول سريع
@@ -314,42 +337,45 @@ export function LoginPage() {
                   <Divider />
                   <button
                     onClick={() => navigate('/chat')}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-gray-500 hover:text-blue-600 transition-colors rounded-xl hover:bg-blue-50/60"
+                    className="w-full flex items-center justify-center gap-2 py-3 text-sm text-slate-500 hover:text-blue-600 transition-colors rounded-xl hover:bg-blue-50/60"
                   >
                     <Bot className="w-4 h-4" />
                     تصفح بدون تسجيل
                   </button>
                 </TabsContent>
 
-                <TabsContent value="register" className="space-y-4">
-                  <FieldWithIcon icon={<User className="w-4 h-4 text-gray-400" />}>
+                <TabsContent value="register" className="space-y-3">
+                  <FieldWithIcon icon={<User className="w-4 h-4 text-slate-400" />}>
                     <Input
                       type="text"
+                      autoComplete="name"
                       value={buyerName}
                       onChange={(e) => setBuyerName(e.target.value)}
                       placeholder="الاسم الكامل"
-                      className="pr-10 text-right rounded-xl"
+                      className="pr-10 text-right rounded-xl h-12 text-base"
                       dir="rtl"
                     />
                   </FieldWithIcon>
-                  <FieldWithIcon icon={<Phone className="w-4 h-4 text-gray-400" />}>
+                  <FieldWithIcon icon={<Phone className="w-4 h-4 text-slate-400" />}>
                     <Input
                       type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
                       value={buyerPhone}
                       onChange={(e) => setBuyerPhone(e.target.value)}
                       placeholder="05xxxxxxxx"
-                      className="pr-10 text-right rounded-xl"
+                      className="pr-10 text-right rounded-xl h-12 text-base"
                       dir="rtl"
                     />
                   </FieldWithIcon>
                   <Button
                     onClick={handleBuyerRegister}
-                    className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl h-11 font-semibold shadow-sm shadow-blue-500/25 gap-2"
+                    className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl h-12 font-semibold shadow-md shadow-blue-500/20 gap-2 text-base"
                   >
                     <UserPlus className="w-4 h-4" />
                     إنشاء حساب
                   </Button>
-                  <p className="text-xs text-center text-gray-400">بالتسجيل، أنت توافق على شروط الخدمة</p>
+                  <p className="text-xs text-center text-slate-400">بالتسجيل، أنت توافق على شروط الخدمة</p>
                 </TabsContent>
               </Tabs>
             </FormCard>
@@ -366,108 +392,116 @@ export function LoginPage() {
                 desc="دخول وإدارة مكتبك"
               />
               <Tabs defaultValue="login">
-                <TabsList className="grid w-full grid-cols-2 mb-5">
-                  <TabsTrigger value="login" className="gap-1.5">
+                <TabsList className="grid w-full grid-cols-2 mb-5 h-11">
+                  <TabsTrigger value="login" className="gap-1.5 text-sm">
                     <LogIn className="w-3.5 h-3.5" />
                     دخول
                   </TabsTrigger>
-                  <TabsTrigger value="register" className="gap-1.5">
+                  <TabsTrigger value="register" className="gap-1.5 text-sm">
                     <UserPlus className="w-3.5 h-3.5" />
                     تسجيل جديد
                   </TabsTrigger>
                 </TabsList>
-                <TabsContent value="login" className="space-y-4">
-                  <FieldWithIcon icon={<Mail className="w-4 h-4 text-gray-400" />}>
+                <TabsContent value="login" className="space-y-3">
+                  <FieldWithIcon icon={<Mail className="w-4 h-4 text-slate-400" />}>
                     <Input
                       type="email"
+                      inputMode="email"
+                      autoComplete="email"
                       value={officeEmail}
                       onChange={(e) => setOfficeEmail(e.target.value)}
                       placeholder="office@example.com"
-                      className="pr-10 text-right rounded-xl"
+                      className="pr-10 text-right rounded-xl h-12 text-base"
                       dir="rtl"
                     />
                   </FieldWithIcon>
-                  <FieldWithIcon icon={<Lock className="w-4 h-4 text-gray-400" />}>
+                  <FieldWithIcon icon={<Lock className="w-4 h-4 text-slate-400" />}>
                     <Input
                       type={showOfficePass ? 'text' : 'password'}
+                      autoComplete="current-password"
                       value={officePassword}
                       onChange={(e) => setOfficePassword(e.target.value)}
                       placeholder="••••••••"
-                      className="pr-10 pl-10 text-right rounded-xl"
+                      className="pr-10 pl-10 text-right rounded-xl h-12 text-base"
                       dir="rtl"
                     />
                     <button
                       type="button"
                       onClick={() => setShowOfficePass((v) => !v)}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1"
                     >
                       {showOfficePass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </FieldWithIcon>
                   <Button
                     onClick={handleOfficeLogin}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 rounded-xl h-11 font-semibold shadow-sm shadow-indigo-500/25 gap-2"
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 rounded-xl h-12 font-semibold shadow-md shadow-indigo-500/20 gap-2 text-base"
                   >
                     <LogIn className="w-4 h-4" />
                     دخول المكتب
                   </Button>
-                  <Button variant="link" className="w-full text-sm text-gray-400 h-fit py-1">نسيت كلمة المرور؟</Button>
+                  <Button variant="link" className="w-full text-sm text-slate-400 h-fit py-1">نسيت كلمة المرور؟</Button>
                 </TabsContent>
                 <TabsContent value="register" className="space-y-3">
-                  <FieldWithIcon icon={<Building2 className="w-4 h-4 text-gray-400" />}>
+                  <FieldWithIcon icon={<Building2 className="w-4 h-4 text-slate-400" />}>
                     <Input
                       value={registerOfficeName}
                       onChange={(e) => setRegisterOfficeName(e.target.value)}
                       placeholder="اسم المكتب"
-                      className="pr-10 text-right rounded-xl"
+                      className="pr-10 text-right rounded-xl h-12 text-base"
                       dir="rtl"
                     />
                   </FieldWithIcon>
-                  <FieldWithIcon icon={<Mail className="w-4 h-4 text-gray-400" />}>
+                  <FieldWithIcon icon={<Mail className="w-4 h-4 text-slate-400" />}>
                     <Input
                       type="email"
+                      inputMode="email"
+                      autoComplete="email"
                       value={registerEmail}
                       onChange={(e) => setRegisterEmail(e.target.value)}
                       placeholder="البريد الإلكتروني"
-                      className="pr-10 text-right rounded-xl"
+                      className="pr-10 text-right rounded-xl h-12 text-base"
                       dir="rtl"
                     />
                   </FieldWithIcon>
-                  <FieldWithIcon icon={<Phone className="w-4 h-4 text-gray-400" />}>
+                  <FieldWithIcon icon={<Phone className="w-4 h-4 text-slate-400" />}>
                     <Input
                       type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
                       value={registerPhone}
                       onChange={(e) => setRegisterPhone(e.target.value)}
                       placeholder="رقم الهاتف"
-                      className="pr-10 text-right rounded-xl"
+                      className="pr-10 text-right rounded-xl h-12 text-base"
                       dir="rtl"
                     />
                   </FieldWithIcon>
-                  <FieldWithIcon icon={<Lock className="w-4 h-4 text-gray-400" />}>
+                  <FieldWithIcon icon={<Lock className="w-4 h-4 text-slate-400" />}>
                     <Input
                       type={showRegisterPass ? 'text' : 'password'}
+                      autoComplete="new-password"
                       value={registerPassword}
                       onChange={(e) => setRegisterPassword(e.target.value)}
                       placeholder="كلمة المرور"
-                      className="pr-10 pl-10 text-right rounded-xl"
+                      className="pr-10 pl-10 text-right rounded-xl h-12 text-base"
                       dir="rtl"
                     />
                     <button
                       type="button"
                       onClick={() => setShowRegisterPass((v) => !v)}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1"
                     >
                       {showRegisterPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </FieldWithIcon>
                   <Button
                     onClick={handleOfficeRegister}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 rounded-xl h-11 font-semibold shadow-sm shadow-indigo-500/25 gap-2 mt-1"
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 rounded-xl h-12 font-semibold shadow-md shadow-indigo-500/20 gap-2 text-base mt-1"
                   >
                     <UserPlus className="w-4 h-4" />
                     إنشاء حساب مكتب
                   </Button>
-                  <p className="text-xs text-center text-gray-400 pt-1">بالتسجيل، أنت توافق على شروط الخدمة</p>
+                  <p className="text-xs text-center text-slate-400 pt-1">بالتسجيل، أنت توافق على شروط الخدمة</p>
                 </TabsContent>
               </Tabs>
             </FormCard>
