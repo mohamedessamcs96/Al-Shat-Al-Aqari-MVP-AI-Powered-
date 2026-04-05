@@ -80,7 +80,9 @@ export function ChatInterface() {
   const [activeId, setActiveId] = useState(newConvId);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Default closed on mobile (< 1024px), open on desktop
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1024);
+  const isDesktop = () => window.innerWidth >= 1024;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -154,6 +156,12 @@ export function ChatInterface() {
     setConversations(prev => [{ id, title: 'محادثة جديدة', createdAt: Date.now(), messages: [greeting] }, ...prev]);
     setActiveId(id);
     setInputValue('');
+    if (!isDesktop()) setSidebarOpen(false);
+  };
+
+  const selectConversation = (id: string) => {
+    setActiveId(id);
+    if (!isDesktop()) setSidebarOpen(false);
   };
 
   const deleteConversation = (id: string, e: React.MouseEvent) => {
@@ -175,9 +183,21 @@ export function ChatInterface() {
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50" dir="rtl">
 
+      {/* ── Mobile backdrop ── */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* ── Sidebar ── */}
       <aside
-        className={`${sidebarOpen ? 'w-64' : 'w-0'} overflow-hidden transition-all duration-300 flex-shrink-0 flex flex-col relative`}
+        className={`
+          fixed lg:relative inset-y-0 right-0 z-30 lg:z-auto
+          ${sidebarOpen ? 'translate-x-0 w-72 lg:w-64' : 'translate-x-full lg:translate-x-0 lg:w-0'}
+          overflow-hidden transition-all duration-300 flex-shrink-0 flex flex-col
+        `}
         style={{ background: 'linear-gradient(145deg,#0a0f1e 0%,#0e2057 45%,#1a1060 100%)' }}
       >
         {/* Decorative blobs — same as login hero */}
@@ -211,19 +231,19 @@ export function ChatInterface() {
           {todayChats.length > 0 && (
             <div>
               <p className="text-blue-300/40 text-[10px] font-semibold uppercase tracking-widest mb-1 px-2">اليوم</p>
-              <ConvList convs={todayChats} activeId={activeId} onSelect={setActiveId} onDelete={deleteConversation} />
+              <ConvList convs={todayChats} activeId={activeId} onSelect={selectConversation} onDelete={deleteConversation} />
             </div>
           )}
           {weekChats.length > 0 && (
             <div>
               <p className="text-blue-300/40 text-[10px] font-semibold uppercase tracking-widest mb-1 px-2">هذا الأسبوع</p>
-              <ConvList convs={weekChats} activeId={activeId} onSelect={setActiveId} onDelete={deleteConversation} />
+              <ConvList convs={weekChats} activeId={activeId} onSelect={selectConversation} onDelete={deleteConversation} />
             </div>
           )}
           {olderChats.length > 0 && (
             <div>
               <p className="text-blue-300/40 text-[10px] font-semibold uppercase tracking-widest mb-1 px-2">محادثات سابقة</p>
-              <ConvList convs={olderChats} activeId={activeId} onSelect={setActiveId} onDelete={deleteConversation} />
+              <ConvList convs={olderChats} activeId={activeId} onSelect={selectConversation} onDelete={deleteConversation} />
             </div>
           )}
         </div>
@@ -253,15 +273,16 @@ export function ChatInterface() {
       </aside>
 
       {/* ── Main Area ── */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 lg:transition-all lg:duration-300">
 
         {/* Top bar */}
-        <header className="bg-white border-b border-slate-200 px-4 sm:px-6 h-14 flex items-center justify-between flex-shrink-0 shadow-sm">
-          <div className="flex items-center gap-3">
+        <header className="bg-white border-b border-slate-200 px-3 sm:px-6 h-14 flex items-center justify-between flex-shrink-0 shadow-sm">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {/* Toggle sidebar */}
             <button
               onClick={() => setSidebarOpen(v => !v)}
-              className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 transition-colors"
+              className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0"
+              aria-label="القائمة"
             >
               <div className="space-y-1">
                 <span className="block w-4 h-0.5 bg-slate-500" />
@@ -270,27 +291,27 @@ export function ChatInterface() {
               </div>
             </button>
             {/* Brand */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <div
-                className="w-8 h-8 rounded-xl flex items-center justify-center shadow-md shadow-blue-900/30 ring-1 ring-white/20"
+                className="w-8 h-8 rounded-xl flex items-center justify-center shadow-md shadow-blue-900/30 ring-1 ring-white/20 flex-shrink-0"
                 style={{ background: 'linear-gradient(135deg,#0e2057,#1a1060)' }}
               >
                 <Building2 className="w-4 h-4 text-white" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <span className="font-bold text-slate-900 text-sm">الشات العقاري</span>
                 <span className="hidden sm:inline text-slate-400 text-xs ml-2">سارة — مساعدة ذكية للعقارات</span>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-1">
-            <button onClick={() => navigate('/demand')} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <button onClick={() => navigate('/demand')} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
               <MessageSquare className="w-4 h-4" />
             </button>
-            <button onClick={() => navigate('/buyer/dashboard')} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
+            <button onClick={() => navigate('/buyer/dashboard')} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
               <User className="w-4 h-4" />
             </button>
-            <button onClick={() => navigate('/')} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
+            <button onClick={() => navigate('/')} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
               <LogOut className="w-4 h-4" />
             </button>
           </div>
