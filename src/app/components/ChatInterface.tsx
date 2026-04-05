@@ -1,343 +1,476 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, User, MessageSquare, Sparkles, LogOut, ChevronRight } from 'lucide-react';
-import { Button } from './ui/button';
+import {
+  Send, User, MessageSquare, LogOut, ChevronRight,
+  Plus, Star, Bell, Settings, HelpCircle,
+  Building2, Scale, Wallet, Search, Trash2,
+} from 'lucide-react';
 import { Input } from './ui/input';
-import { Card } from './ui/card';
-import { Badge } from './ui/badge';
-import { Avatar, AvatarFallback } from './ui/avatar';
 import { useNavigate } from 'react-router';
 import { mockListings, formatPrice, getCityName, type ChatMessage } from '../lib/mock-data';
 
+type Conversation = {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  createdAt: number;
+};
+
+const makeSaraGreeting = (id: string): ChatMessage => ({
+  id,
+  role: 'assistant',
+  content: 'مرحباً! أنا سارة، مساعدتك الذكية في الشات العقاري. أنا هنا لمساعدتك في البحث عن العقار المثالي، مقارنة الأسعار، والتفاوض. كيف يمكنني مساعدتك اليوم؟',
+  timestamp: new Date().toISOString(),
+  suggestions: ['أبحث عن فيلا في الرياض', 'شقة بسعر 800 ألف', 'عقار بجوار البحر في جدة', 'أريد رؤية أفضل العروض'],
+});
+
+const SEED_CONVERSATIONS: Conversation[] = [
+  { id: 'h1', title: 'شراء شقة في الرياض', createdAt: Date.now() - 86400000, messages: [makeSaraGreeting('h1g')] },
+  { id: 'h2', title: 'إستثمار في جدة', createdAt: Date.now() - 172800000, messages: [makeSaraGreeting('h2g')] },
+  { id: 'h3', title: 'مقارنة الفيلا', createdAt: Date.now() - 259200000, messages: [makeSaraGreeting('h3g')] },
+  { id: 'h4', title: 'تقييم المكاسة', createdAt: Date.now() - 345600000, messages: [makeSaraGreeting('h4g')] },
+];
+
+const QUICK_PROMPTS = [
+  { label: 'عقارات الشركات', icon: <Building2 className="w-3.5 h-3.5" /> },
+  { label: 'مقارنة عقارات', icon: <Scale className="w-3.5 h-3.5" /> },
+  { label: 'هل السعر مناسب؟', icon: <Wallet className="w-3.5 h-3.5" /> },
+];
+
+const ACTION_CHIPS = ['اشراء', 'مقارنة', 'تفاوض', 'إستثمار'];
+
+function ConvList({ convs, activeId, onSelect, onDelete }: {
+  convs: Conversation[];
+  activeId: string;
+  onSelect: (id: string) => void;
+  onDelete: (id: string, e: React.MouseEvent) => void;
+}) {
+  return (
+    <div className="space-y-0.5">
+      {convs.map(conv => (
+        <button
+          key={conv.id}
+          onClick={() => onSelect(conv.id)}
+          className={`group w-full flex items-center gap-2.5 px-2 py-2 rounded-xl text-sm text-right transition-all ${
+            activeId === conv.id
+              ? 'bg-white/15 text-white'
+              : 'text-white/60 hover:bg-white/8 hover:text-white'
+          }`}
+        >
+          <MessageSquare className={`w-3.5 h-3.5 flex-shrink-0 ${activeId === conv.id ? 'text-blue-400' : 'text-white/30'}`} />
+          <span className="flex-1 truncate text-xs leading-5">{conv.title}</span>
+          <span
+            role="button"
+            onClick={(e) => onDelete(conv.id, e)}
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:text-red-400 text-white/30"
+          >
+            <Trash2 className="w-3 h-3" />
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function ChatInterface() {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: '1',
-      role: 'assistant',
-      content: 'مرحباً! أنا مساعدك الذكي في البحث عن العقارات. كيف يمكنني مساعدتك اليوم؟',
-      timestamp: new Date().toISOString(),
-      suggestions: [
-        'أبحث عن فيلا في الرياض',
-        'شقة بسعر 800 ألف',
-        'عقار بجوار البحر في جدة',
-        'أريد رؤية أفضل العروض',
-      ],
-    },
+  const newConvId = 'current';
+  const [conversations, setConversations] = useState<Conversation[]>([
+    { id: newConvId, title: 'محادثة جديدة', createdAt: Date.now(), messages: [makeSaraGreeting('g0')] },
+    ...SEED_CONVERSATIONS,
   ]);
+  const [activeId, setActiveId] = useState(newConvId);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const activeConv = conversations.find(c => c.id === activeId) ?? conversations[0];
+  const messages = activeConv.messages;
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isTyping]);
 
   const generateAIResponse = (userMessage: string): ChatMessage => {
-    const messageLower = userMessage.toLowerCase();
-    
-    // Search for properties based on user query
+    const lower = userMessage.toLowerCase();
     let relevantListings = mockListings;
-    
-    if (messageLower.includes('فيلا') || messageLower.includes('villa')) {
-      relevantListings = mockListings.filter(l => l.property_type === 'Villa');
-    }
-    
-    if (messageLower.includes('شقة') || messageLower.includes('apartment')) {
-      relevantListings = mockListings.filter(l => l.property_type === 'Apartment');
-    }
-    
-    if (messageLower.includes('الرياض') || messageLower.includes('riyadh')) {
-      relevantListings = relevantListings.filter(l => l.city_id === '1');
-    }
-    
-    if (messageLower.includes('جدة') || messageLower.includes('jeddah')) {
-      relevantListings = relevantListings.filter(l => l.city_id === '2');
-    }
 
-    // Price range detection
-    if (messageLower.includes('800') || messageLower.includes('٨٠٠')) {
-      relevantListings = relevantListings.filter(l => l.price >= 600000 && l.price <= 1000000);
-    }
-    
-    if (messageLower.includes('مليون') || messageLower.includes('million')) {
-      relevantListings = relevantListings.filter(l => l.price >= 1000000);
-    }
+    if (lower.includes('فيلا') || lower.includes('villa')) relevantListings = mockListings.filter(l => l.property_type === 'Villa');
+    if (lower.includes('شقة') || lower.includes('apartment')) relevantListings = mockListings.filter(l => l.property_type === 'Apartment');
+    if (lower.includes('الرياض') || lower.includes('riyadh')) relevantListings = relevantListings.filter(l => l.city_id === '1');
+    if (lower.includes('جدة') || lower.includes('jeddah')) relevantListings = relevantListings.filter(l => l.city_id === '2');
+    if (lower.includes('800') || lower.includes('٨٠٠')) relevantListings = relevantListings.filter(l => l.price >= 600000 && l.price <= 1000000);
+    if (lower.includes('مليون') || lower.includes('million')) relevantListings = relevantListings.filter(l => l.price >= 1000000);
 
-    // Generate contextual response
-    let responseText = '';
-    const hasResults = relevantListings.length > 0;
-
-    if (hasResults) {
-      const limitedListings = relevantListings.slice(0, 3);
-      responseText = `عثرت على ${relevantListings.length} عقار يطابق معاييرك. إليك أفضل الخيارات:`;
-      
+    if (relevantListings.length > 0) {
       return {
         id: Date.now().toString(),
         role: 'assistant',
-        content: responseText,
+        content: `عثرت على ${relevantListings.length} عقار يطابق معاييرك. إليك أفضل الخيارات:`,
         timestamp: new Date().toISOString(),
-        listings: limitedListings,
-        suggestions: [
-          'أريد رؤية المزيد من التفاصيل',
-          'هل يمكن ترتيب زيارة؟',
-          'أريد التفاوض على السعر',
-          'ابحث عن خيارات أخرى',
-        ],
-      };
-    } else {
-      responseText = 'أفهم متطلباتك. دعني أساعدك في العثور على العقار المثالي. يمكنك أيضاً تقديم طلب عقار مخصص وسيتم توزيعه على المكاتب العقارية.';
-      
-      return {
-        id: Date.now().toString(),
-        role: 'assistant',
-        content: responseText,
-        timestamp: new Date().toISOString(),
-        suggestions: [
-          'ميزانيتي 800 ألف إلى مليون',
-          'أفضل شمال الرياض',
-          'أبحث عن 3 غرف نوم على الأقل',
-          'أريد عقار بحديقة',
-        ],
-        hasNoDemandCTA: true,
+        listings: relevantListings.slice(0, 3),
+        suggestions: ['أريد رؤية المزيد', 'هل يمكن ترتيب زيارة؟', 'أريد التفاوض على السعر', 'ابحث عن خيارات أخرى'],
       };
     }
+    return {
+      id: Date.now().toString(),
+      role: 'assistant',
+      content: 'أفهم متطلباتك. دعني أساعدك في العثور على العقار المثالي. يمكنك أيضاً تقديم طلب عقار مخصص.',
+      timestamp: new Date().toISOString(),
+      suggestions: ['ميزانيتي 800 ألف إلى مليون', 'أفضل شمال الرياض', '3 غرف نوم على الأقل', 'عقار بحديقة'],
+      hasNoDemandCTA: true,
+    };
   };
 
-  const handleSend = async (messageText?: string) => {
-    const textToSend = messageText || inputValue.trim();
+  const handleSend = (text?: string) => {
+    const textToSend = text || inputValue.trim();
     if (!textToSend) return;
 
-    // Add user message
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: textToSend,
-      timestamp: new Date().toISOString(),
-    };
+    const userMsg: ChatMessage = { id: Date.now().toString(), role: 'user', content: textToSend, timestamp: new Date().toISOString() };
 
-    setMessages(prev => [...prev, userMessage]);
+    setConversations(prev => prev.map(c => {
+      if (c.id !== activeId) return c;
+      const hasUserMsg = c.messages.some(m => m.role === 'user');
+      return {
+        ...c,
+        title: hasUserMsg ? c.title : textToSend.slice(0, 32),
+        messages: [...c.messages, userMsg],
+      };
+    }));
     setInputValue('');
     setIsTyping(true);
-
-    // Simulate AI thinking time
     setTimeout(() => {
-      const aiResponse = generateAIResponse(textToSend);
-      setMessages(prev => [...prev, aiResponse]);
+      const aiMsg = generateAIResponse(textToSend);
+      setConversations(prev => prev.map(c =>
+        c.id !== activeId ? c : { ...c, messages: [...c.messages, aiMsg] }
+      ));
       setIsTyping(false);
     }, 1000);
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
-    handleSend(suggestion);
+  const startNewChat = () => {
+    const id = `chat_${Date.now()}`;
+    const greeting = makeSaraGreeting(`${id}_g`);
+    setConversations(prev => [{ id, title: 'محادثة جديدة', createdAt: Date.now(), messages: [greeting] }, ...prev]);
+    setActiveId(id);
+    setInputValue('');
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+  const deleteConversation = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setConversations(prev => {
+      const next = prev.filter(c => c.id !== id);
+      if (activeId === id && next.length > 0) setActiveId(next[0].id);
+      return next;
+    });
   };
+
+  // Group conversations by recency
+  const todayMs = Date.now() - 86400000;
+  const weekMs = Date.now() - 7 * 86400000;
+  const todayChats = conversations.filter(c => c.createdAt >= todayMs);
+  const weekChats = conversations.filter(c => c.createdAt >= weekMs && c.createdAt < todayMs);
+  const olderChats = conversations.filter(c => c.createdAt < weekMs);
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: 'linear-gradient(160deg, #f0f4ff 0%, #eef2ff 60%, #f5f0ff 100%)' }}>
-      {/* Header */}
-      <header className="sticky top-0 z-10 shadow-lg" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #312e81 100%)' }}>
-        <div className="max-w-4xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
-          <div className="flex items-center justify-between gap-2" dir="ltr">
-            {/* Left: nav buttons */}
-            <div className="flex items-center gap-1">
-              <Button variant="ghost" size="sm" onClick={() => navigate('/')}
-                className="text-white/70 hover:text-white hover:bg-white/10 text-xs px-2 py-1.5 h-auto">
-                <LogOut className="w-3.5 h-3.5 mr-1" />
-                <span className="hidden sm:inline">خروج</span>
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/buyer/dashboard')}
-                className="text-white/70 hover:text-white hover:bg-white/10 text-xs px-2 py-1.5 h-auto">
-                <User className="w-3.5 h-3.5 mr-1" />
-                <span className="hidden sm:inline">حسابي</span>
-              </Button>
-            </div>
-            {/* Center: brand */}
-            <div className="flex items-center gap-2.5 absolute left-1/2 -translate-x-1/2">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-inner"
-                style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}>
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-base sm:text-lg font-bold text-white leading-none">الشات العقاري</h1>
-                <p className="text-[10px] sm:text-xs text-blue-300 mt-0.5">مساعدك الذكي للعقارات</p>
-              </div>
-            </div>
-            {/* Right: demand button */}
-            <Button variant="ghost" size="sm" onClick={() => navigate('/demand')}
-              className="text-white/70 hover:text-white hover:bg-white/10 text-xs px-2 py-1.5 h-auto">
-              <MessageSquare className="w-3.5 h-3.5 mr-1" />
-              <span className="hidden sm:inline">طلب عقار</span>
-            </Button>
+    <div className="flex h-screen overflow-hidden bg-[#f4f6fb]" dir="rtl">
+
+      {/* ── Sidebar ── */}
+      <aside className={`${sidebarOpen ? 'w-64' : 'w-0 overflow-hidden'} transition-all duration-300 flex-shrink-0 flex flex-col`}
+        style={{ background: 'linear-gradient(180deg,#111827 0%,#1a2744 100%)' }}>
+
+        {/* User header */}
+        <div className="flex items-center gap-3 px-4 py-4 border-b border-white/10 flex-shrink-0">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+            أ
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white font-semibold text-sm truncate">أحمد</p>
+            <p className="text-white/40 text-xs">عميل</p>
           </div>
         </div>
-      </header>
 
-      {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-5 sm:py-7">
-        <div className="max-w-3xl mx-auto space-y-5 sm:space-y-7">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              dir="ltr"
-              className={`flex gap-3 items-start ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              {message.role === 'assistant' && (
-                <div className="w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md mt-0.5"
-                  style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}>
-                  <Sparkles className="w-4 h-4 text-white" />
+        {/* New Chat */}
+        <div className="px-3 py-3 flex-shrink-0">
+          <button
+            onClick={startNewChat}
+            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-white/20 text-white/80 hover:bg-white/10 transition-colors text-sm font-medium"
+          >
+            <Plus className="w-4 h-4" />
+            + New Chat
+          </button>
+        </div>
+
+        {/* Conversation history */}
+        <div className="px-2 flex-1 overflow-y-auto space-y-4 pb-2">
+          {todayChats.length > 0 && (
+            <div>
+              <p className="text-white/30 text-[11px] font-semibold uppercase tracking-wider mb-1 px-2">اليوم</p>
+              <ConvList convs={todayChats} activeId={activeId} onSelect={setActiveId} onDelete={deleteConversation} />
+            </div>
+          )}
+          {weekChats.length > 0 && (
+            <div>
+              <p className="text-white/30 text-[11px] font-semibold uppercase tracking-wider mb-1 px-2">هذا الأسبوع</p>
+              <ConvList convs={weekChats} activeId={activeId} onSelect={setActiveId} onDelete={deleteConversation} />
+            </div>
+          )}
+          {olderChats.length > 0 && (
+            <div>
+              <p className="text-white/30 text-[11px] font-semibold uppercase tracking-wider mb-1 px-2">محادثات سابقة</p>
+              <ConvList convs={olderChats} activeId={activeId} onSelect={setActiveId} onDelete={deleteConversation} />
+            </div>
+          )}
+        </div>
+
+        {/* Bottom nav */}
+        <div className="border-t border-white/10 px-3 py-3 space-y-0.5 flex-shrink-0">
+          {[
+            { icon: <Star className="w-4 h-4" />, label: 'المفضلة' },
+            { icon: <Bell className="w-4 h-4" />, label: 'التنبيهات' },
+          ].map(item => (
+            <button key={item.label} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-white/50 hover:bg-white/8 hover:text-white transition-colors">
+              {item.icon}
+              <span>{item.label}</span>
+            </button>
+          ))}
+          <div className="h-px bg-white/10 my-1" />
+          {[
+            { icon: <Settings className="w-4 h-4" />, label: 'الإعدادات' },
+            { icon: <HelpCircle className="w-4 h-4" />, label: 'مساعدة' },
+          ].map(item => (
+            <button key={item.label} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-white/50 hover:bg-white/8 hover:text-white transition-colors">
+              {item.icon}
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </aside>
+
+      {/* ── Main Area ── */}
+      <div className="flex-1 flex flex-col min-w-0">
+
+        {/* Top bar */}
+        <header className="bg-white border-b border-gray-200 px-4 sm:px-6 h-14 flex items-center justify-between flex-shrink-0 shadow-sm">
+          <div className="flex items-center gap-3">
+            {/* Toggle sidebar */}
+            <button onClick={() => setSidebarOpen(v => !v)} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors">
+              <div className="space-y-1">
+                <span className="block w-4 h-0.5 bg-gray-500" />
+                <span className="block w-4 h-0.5 bg-gray-500" />
+                <span className="block w-3 h-0.5 bg-gray-500" />
+              </div>
+            </button>
+            {/* Brand */}
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#1e3a8a,#312e81)' }}>
+                <Building2 className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <span className="font-bold text-gray-900 text-sm">الشات العقاري</span>
+                <span className="hidden sm:inline text-gray-400 text-xs mr-2">سارة — مساعدة ذكية للعقارات</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <button onClick={() => navigate('/demand')} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
+              <MessageSquare className="w-4 h-4" />
+            </button>
+            <button onClick={() => navigate('/buyer/dashboard')} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
+              <User className="w-4 h-4" />
+            </button>
+            <button onClick={() => navigate('/')} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        </header>
+
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6">
+          <div className="max-w-2xl mx-auto space-y-6">
+
+            {/* Welcome headline — shown only before any user message */}
+            {messages.length === 1 && messages[0].role === 'assistant' && (
+              <div className="text-center pt-6 pb-2">
+                <h2 className="text-2xl font-bold text-gray-900 mb-1">أنا سارة، مساعدتك العقارية الذكية ✨</h2>
+                <p className="text-gray-500 text-sm">كيف يمكنني مساعدتك اليوم؟</p>
+                {/* Quick prompt pills */}
+                <div className="flex flex-wrap gap-2 justify-center mt-5">
+                  {QUICK_PROMPTS.map(p => (
+                    <button
+                      key={p.label}
+                      onClick={() => handleSend(p.label)}
+                      className="flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 text-sm text-gray-700 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 transition-all shadow-sm"
+                    >
+                      <span className="text-gray-400">{p.icon}</span>
+                      {p.label}
+                    </button>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
 
-              <div className={`flex-1 max-w-xl flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
-                {/* Bubble */}
-                <div className={`rounded-2xl px-4 py-3 shadow-sm ${
-                  message.role === 'user'
-                    ? 'text-white rounded-tr-sm'
-                    : 'bg-white border border-gray-100 rounded-tl-sm'
-                }`} style={message.role === 'user' ? { background: 'linear-gradient(135deg, #2563eb, #4f46e5)' } : {}}>
-                  <p className="text-sm sm:text-base leading-relaxed" dir="rtl">{message.content}</p>
-                </div>
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                dir="ltr"
+                className={`flex gap-3 items-start ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                {/* AI avatar */}
+                {message.role === 'assistant' && (
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow mt-0.5 text-white font-bold text-sm"
+                    style={{ background: 'linear-gradient(135deg,#1e3a8a,#312e81)' }}>
+                    س
+                  </div>
+                )}
 
-                {/* Property cards */}
-                {message.listings && message.listings.length > 0 && (
-                  <div className="mt-3 w-full space-y-3">
-                    {message.listings.map((listing) => (
-                      <div
-                        key={listing.id}
-                        className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-pointer border border-gray-100"
-                        onClick={() => navigate(`/listings/${listing.id}`)}
-                      >
-                        <div className="relative">
-                          <img
-                            src={listing.images[0]}
-                            alt={listing.property_type}
-                            className="w-full h-44 sm:h-52 object-cover"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
-                          <span className="absolute top-3 right-3 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow">
-                            {formatPrice(listing.price)}
-                          </span>
-                          {listing.quality_score >= 90 && (
-                            <span className="absolute top-3 left-3 bg-amber-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow">
-                              ⭐ مميز
+                <div className={`flex-1 max-w-lg flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
+                  {/* Bubble */}
+                  <div className={`rounded-2xl px-4 py-3 shadow-sm text-sm leading-relaxed ${
+                    message.role === 'user'
+                      ? 'text-white rounded-tr-sm'
+                      : 'bg-white border border-gray-100 text-gray-800 rounded-tl-sm'
+                  }`} style={message.role === 'user' ? { background: 'linear-gradient(135deg,#1e3a8a,#312e81)' } : {}}
+                    dir="rtl">
+                    {message.content}
+                  </div>
+
+                  {/* Property cards */}
+                  {message.listings && message.listings.length > 0 && (
+                    <div className="mt-3 w-full space-y-2.5">
+                      {message.listings.map((listing) => (
+                        <div
+                          key={listing.id}
+                          className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer border border-gray-100"
+                          onClick={() => navigate(`/listings/${listing.id}`)}
+                        >
+                          <div className="relative">
+                            <img src={listing.images[0]} alt="" className="w-full h-40 object-cover" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                            <span className="absolute top-2 right-2 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                              {formatPrice(listing.price)}
                             </span>
-                          )}
-                          <div className="absolute bottom-3 right-3" dir="rtl">
-                            <h3 className="text-white font-bold text-sm sm:text-base drop-shadow-md">{listing.property_type}</h3>
-                            <p className="text-white/85 text-xs drop-shadow">{listing.address}</p>
+                            {listing.quality_score >= 90 && (
+                              <span className="absolute top-2 left-2 bg-amber-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">مميز</span>
+                            )}
+                            <div className="absolute bottom-2 right-3" dir="rtl">
+                              <p className="text-white font-bold text-sm drop-shadow">{listing.property_type}</p>
+                              <p className="text-white/80 text-xs">{listing.address}</p>
+                            </div>
+                          </div>
+                          <div className="px-4 py-2.5 flex items-center justify-between" dir="rtl">
+                            <div className="flex gap-3 text-xs text-gray-500">
+                              <span><b className="text-gray-800">{listing.bedrooms}</b> غرف</span>
+                              <span className="text-gray-300">·</span>
+                              <span><b className="text-gray-800">{listing.area}</b> م²</span>
+                              <span className="text-gray-300">·</span>
+                              <span>{getCityName(listing.city_id)}</span>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-blue-500" />
                           </div>
                         </div>
-                        <div className="px-4 py-3 flex items-center justify-between" dir="rtl">
-                          <div className="flex gap-3 text-xs sm:text-sm text-gray-600">
-                            <span><span className="font-semibold text-gray-800">{listing.bedrooms}</span> غرف</span>
-                            <span className="text-gray-300">|</span>
-                            <span><span className="font-semibold text-gray-800">{listing.area}</span> م²</span>
-                            <span className="text-gray-300">|</span>
-                            <span>{getCityName(listing.city_id)}</span>
-                          </div>
-                          <ChevronRight className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  )}
 
-                {/* Suggestion pills */}
-                {message.suggestions && message.suggestions.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3" dir="rtl">
-                    {message.suggestions.map((suggestion, idx) => (
-                      <button
-                        key={idx}
-                        className="bg-white border border-blue-200 text-blue-700 text-xs sm:text-sm px-3 py-1.5 rounded-full hover:bg-blue-50 hover:border-blue-400 transition-colors shadow-sm font-medium"
-                        onClick={() => handleSuggestionClick(suggestion)}
-                      >
-                        {suggestion}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                  {/* Suggestion pills */}
+                  {message.suggestions && message.suggestions.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3" dir="rtl">
+                      {message.suggestions.map((s, i) => (
+                        <button
+                          key={i}
+                          onClick={() => handleSend(s)}
+                          className="bg-white border border-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-full hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 transition-all shadow-sm"
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
-                {/* No-results demand CTA */}
-                {message.hasNoDemandCTA && (
-                  <div className="mt-3 w-full">
+                  {/* Demand CTA */}
+                  {message.hasNoDemandCTA && (
                     <button
                       onClick={() => navigate('/demand')}
-                      className="w-full text-white font-semibold py-3 px-4 rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2"
-                      style={{ background: 'linear-gradient(135deg, #16a34a, #059669)' }}
+                      className="mt-3 w-full text-white font-semibold py-2.5 px-4 rounded-xl shadow hover:shadow-md hover:-translate-y-0.5 transition-all text-sm flex items-center justify-center gap-2"
+                      style={{ background: 'linear-gradient(135deg,#16a34a,#059669)' }}
                     >
                       <MessageSquare className="w-4 h-4" />
                       <span dir="rtl">أنشئ طلب عقار مخصص الآن</span>
                     </button>
+                  )}
+                </div>
+
+                {/* User avatar */}
+                {message.role === 'user' && (
+                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 mt-0.5 text-gray-600 font-bold text-sm">
+                    أ
                   </div>
                 )}
               </div>
+            ))}
 
-              {message.role === 'user' && (
-                <div className="w-9 h-9 rounded-2xl bg-gray-200 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <User className="w-4 h-4 text-gray-600" />
+            {/* Typing indicator */}
+            {isTyping && (
+              <div dir="ltr" className="flex gap-3 items-start">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-sm"
+                  style={{ background: 'linear-gradient(135deg,#1e3a8a,#312e81)' }}>
+                  س
                 </div>
-              )}
-            </div>
-          ))}
-
-          {/* Typing indicator */}
-          {isTyping && (
-            <div dir="ltr" className="flex gap-3 items-start">
-              <div className="w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md"
-                style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}>
-                <Sparkles className="w-4 h-4 text-white" />
-              </div>
-              <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
-                <div className="flex gap-1.5 items-center h-5">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" />
-                  <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }} />
-                  <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }} />
+                <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
+                  <div className="flex gap-1 items-center h-4">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" />
+                    <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }} />
+                    <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }} />
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
-
-      {/* Input Area */}
-      <div className="sticky bottom-0 border-t border-gray-200/80 shadow-[0_-4px_24px_rgba(0,0,0,0.06)]"
-        style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(16px)' }}>
-        <div className="max-w-3xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
-          <div className="flex gap-2 items-center">
-            <Input
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="ابحث عن عقارك المثالي... (مثال: فيلا في الرياض)"
-              className="flex-1 text-right rounded-2xl border-gray-200 bg-gray-50 focus:bg-white text-sm py-5 px-4"
-              dir="rtl"
-            />
-            <button
-              onClick={() => handleSend()}
-              disabled={!inputValue.trim()}
-              className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 text-white shadow-md hover:shadow-lg hover:scale-105 disabled:opacity-40 disabled:scale-100 transition-all"
-              style={{ background: 'linear-gradient(135deg, #2563eb, #4f46e5)' }}
-            >
-              <Send className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
+            <div ref={messagesEndRef} />
           </div>
-          <p className="text-[11px] text-gray-400 text-center mt-2">
-            مدعوم بالذكاء الاصطناعي • الشات العقاري
-          </p>
+        </div>
+
+        {/* Input area */}
+        <div className="bg-white border-t border-gray-200 px-4 sm:px-8 py-3 flex-shrink-0">
+          <div className="max-w-2xl mx-auto">
+            {/* Action chips */}
+            <div className="flex gap-2 mb-2.5 justify-end flex-wrap">
+              {ACTION_CHIPS.map(chip => (
+                <button
+                  key={chip}
+                  onClick={() => handleSend(chip)}
+                  className="px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-medium hover:bg-blue-100 hover:text-blue-700 transition-colors"
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+            {/* Input row */}
+            <div className="flex gap-2 items-center bg-gray-50 rounded-2xl border border-gray-200 px-3 py-1.5 focus-within:border-blue-400 focus-within:bg-white transition-colors">
+              <button
+                onClick={() => handleSend()}
+                disabled={!inputValue.trim()}
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0 disabled:opacity-40 transition-all hover:scale-105"
+                style={{ background: 'linear-gradient(135deg,#1e3a8a,#312e81)' }}
+                dir="ltr"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+              <Input
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                placeholder="اكتب طلبك هنا... (مثال: فيلا في الرياض بميزانية مليون)"
+                className="flex-1 border-0 bg-transparent text-right text-sm focus-visible:ring-0 shadow-none px-1 py-2"
+                dir="rtl"
+              />
+            </div>
+            <p className="text-[11px] text-gray-400 text-center mt-2">مدعوم بالذكاء الاصطناعي • الشات العقاري</p>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
