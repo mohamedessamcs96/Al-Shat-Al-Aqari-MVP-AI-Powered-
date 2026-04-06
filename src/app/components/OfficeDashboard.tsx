@@ -8,6 +8,7 @@ import {
   Search, Filter, Clock, Play, Pause, Target, X,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import { PageAnalyticsDashboard } from './PageAnalyticsDashboard';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
@@ -238,9 +239,9 @@ export function OfficeDashboard() {
 
               {/* Action buttons */}
               <div className="flex gap-2 sm:pb-2 flex-shrink-0">
-                <Button size="sm" variant="outline" className="gap-1.5" onClick={() => navigate('/office/mini-page-editor')}>
+                <Button size="sm" variant="outline" className="gap-1.5" onClick={() => navigate('/office/page-builder')}>
                   <Settings className="w-3.5 h-3.5" />
-                  تعديل الملف
+                  محرر الصفحة
                 </Button>
                 <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-700" onClick={() => navigate('/office/listings')}>
                   <Plus className="w-3.5 h-3.5" />
@@ -533,6 +534,15 @@ export function OfficeDashboard() {
 
           {/* ── Performance ── */}
           <TabsContent value="performance" className="mt-0 space-y-4">
+            {/* Page builder analytics */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-3 text-sm flex items-center gap-2" dir="rtl">
+                <BarChart3 className="w-4 h-4 text-blue-600" />
+                تحليلات صفحة المكتب العامة
+              </h3>
+              <PageAnalyticsDashboard officeId="office-1" />
+            </div>
+            <div className="h-px bg-gray-100" />
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               {[
                 { label: 'الاستفسارات', value: '187', delta: '↑ 12% من الشهر الماضي', green: true },

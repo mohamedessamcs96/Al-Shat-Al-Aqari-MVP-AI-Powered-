@@ -3,6 +3,8 @@ import { ChatInterface } from "./components/ChatInterface";
 import { ListingDetail } from "./components/ListingDetail";
 import { OfficeDashboard } from "./components/OfficeDashboard";
 import { OfficeMiniPage } from "./components/OfficeMiniPage";
+import { PublicOfficePage } from "./components/PublicOfficePage";
+import { PageBuilder } from "./components/PageBuilder";
 import { OfficeLeads } from "./components/OfficeLeads";
 import { OfficeCampaigns } from "./components/OfficeCampaigns";
 import { OfficeListings } from "./components/OfficeListings";
@@ -68,6 +70,10 @@ export const router = createBrowserRouter([
     Component: MiniPageEditor,
   },
   {
+    path: "/office/page-builder",
+    Component: PageBuilder,
+  },
+  {
     path: "/admin/login",
     Component: LoginPage,
   },
@@ -77,6 +83,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/office/:slug",
+    Component: PublicOfficePage,
+  },
+  {
+    // Keep old route for backwards compat
+    path: "/office-legacy/:slug",
     Component: OfficeMiniPage,
   },
 ]);
