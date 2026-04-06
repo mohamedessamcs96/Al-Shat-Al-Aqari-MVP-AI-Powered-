@@ -6,6 +6,7 @@ import {
   Mail, CheckCircle2, Bell, LogOut, ChevronRight, Home, Megaphone,
   QrCode, Download, Copy, Check, ExternalLink,
   Search, Filter, Clock, Play, Pause, Target, X,
+  ArrowUpRight, Activity, Zap,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { PageAnalyticsDashboard } from './PageAnalyticsDashboard';
@@ -22,6 +23,29 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { mockListings, mockDemandRequests, mockCampaigns, mockOffices, formatPrice, getCityName } from '../lib/mock-data';
 import { toast } from 'sonner';
+
+function DashSparkline({ data, color }: { data: number[]; color: string }) {
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const pts = data.map((v, i) =>
+    `${(i / (data.length - 1)) * 100},${100 - ((v - min) / range) * 80 + 10}`
+  ).join(' ');
+  return (
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-10">
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="3"
+        strokeLinecap="round" strokeLinejoin="round" opacity="0.75" />
+    </svg>
+  );
+}
+
+const RECENT_ACTIVITY = [
+  { text: 'عميل جديد: أحمد الرشيدي', sub: 'يبحث عن فيلا في الرياض · 800K–1.5M', time: 'منذ 5 د', dot: 'bg-emerald-500' },
+  { text: '43 مشاهدة جديدة اليوم', sub: 'فيلا 5 غرف – حي النرجس', time: 'منذ 15 د', dot: 'bg-blue-500' },
+  { text: 'حملة "Luxury Villa" حققت 12 عميل', sub: 'معدل النقر: 31.2%', time: 'منذ ساعة', dot: 'bg-purple-500' },
+  { text: 'رسالة من عميل', sub: 'سارة محمد – استفسار حول السعر', time: 'منذ 2 س', dot: 'bg-amber-500' },
+  { text: 'تحديث جودة إعلان', sub: 'شقة 3 غرف – جدة · رُفعت الجودة إلى 87%', time: 'أمس', dot: 'bg-slate-400' },
+];
 
 export function OfficeDashboard() {
   const navigate = useNavigate();
@@ -151,10 +175,10 @@ export function OfficeDashboard() {
   };
 
   const stats = [
-    { label: 'إجمالي العقارات', value: officeListings.length, delta: '+3 هذا الشهر', icon: <Building2 className="w-5 h-5" />, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'المشاهدات', value: totalViews.toLocaleString(), delta: '+12% هذا الأسبوع', icon: <Eye className="w-5 h-5" />, color: 'text-purple-600', bg: 'bg-purple-50' },
-    { label: 'العملاء المحتملون', value: totalLeads, delta: '+8 جديد', icon: <Users className="w-5 h-5" />, color: 'text-green-600', bg: 'bg-green-50' },
-    { label: 'معدل التحويل', value: `${conversionRate}%`, delta: '+2.3% هذا الشهر', icon: <TrendingUp className="w-5 h-5" />, color: 'text-orange-600', bg: 'bg-orange-50' },
+    { label: 'إجمالي العقارات', value: officeListings.length, delta: '+3 هذا الشهر', positive: true, sparkColor: '#3b82f6', sparkData: [1,1,2,2,2,2,3,2,3,3,2,3,3,2,3], icon: <Building2 className="w-5 h-5" />, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'المشاهدات', value: totalViews.toLocaleString(), delta: '+12% هذا الأسبوع', positive: true, sparkColor: '#8b5cf6', sparkData: [20,35,22,40,38,55,48,62,58,70,75,68,82,79,90], icon: <Eye className="w-5 h-5" />, color: 'text-purple-600', bg: 'bg-purple-50' },
+    { label: 'العملاء المحتملون', value: totalLeads, delta: '+8 جديد', positive: true, sparkColor: '#10b981', sparkData: [5,8,6,10,12,9,14,16,13,18,17,20,22,19,24], icon: <Users className="w-5 h-5" />, color: 'text-green-600', bg: 'bg-green-50' },
+    { label: 'معدل التحويل', value: `${conversionRate}%`, delta: '+2.3% هذا الشهر', positive: true, sparkColor: '#f97316', sparkData: [5,6,5.5,7,6.5,7.5,7,8,7.5,8.5,8,8.5,9,8.5,9], icon: <TrendingUp className="w-5 h-5" />, color: 'text-orange-600', bg: 'bg-orange-50' },
   ];
 
   return (
@@ -183,7 +207,7 @@ export function OfficeDashboard() {
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* ─── Company Hero Card ─── */}
-        <Card className="mb-6 overflow-hidden border-0 shadow-md">
+        <Card className="mb-0 overflow-hidden border-0 shadow-md">
           {/* Banner */}
           <div className="h-24 sm:h-32 bg-gradient-to-l from-blue-600 via-indigo-600 to-purple-700 relative">
             <div
@@ -250,46 +274,57 @@ export function OfficeDashboard() {
               </div>
             </div>
 
-            {/* Nav pills */}
-            <Separator className="mt-5 mb-4" />
-            <div className="flex gap-2 flex-wrap">
-              {[
-                { label: 'لوحة التحكم', icon: <Home className="w-3.5 h-3.5" />, tab: 'overview' },
-                { label: 'عقاراتي', icon: <Building2 className="w-3.5 h-3.5" />, tab: 'listings' },
-                { label: 'العملاء', icon: <Users className="w-3.5 h-3.5" />, tab: 'leads' },
-                { label: 'الحملات', icon: <Megaphone className="w-3.5 h-3.5" />, tab: 'campaigns' },
-                { label: 'الأداء', icon: <BarChart3 className="w-3.5 h-3.5" />, tab: 'performance' },
-                { label: 'الاشتراك', icon: <CreditCard className="w-3.5 h-3.5" />, tab: 'subscription' },
-              ].map((item) => (
-                <button
-                  key={item.label}
-                  onClick={() => setActiveTab(item.tab)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap
-                    ${activeTab === item.tab
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                >
-                  {item.icon}
-                  {item.label}
-                </button>
-              ))}
-            </div>
           </div>
         </Card>
+
+        {/* ─── Sticky Tab Nav ─── */}
+        <div className="sticky top-14 z-10 bg-white border-b border-t border-gray-200 mb-6 shadow-sm overflow-x-auto">
+          <div className="flex">
+            {[
+              { label: 'لوحة التحكم', icon: <Home className="w-4 h-4" />, tab: 'overview', badge: 0 },
+              { label: 'عقاراتي', icon: <Building2 className="w-4 h-4" />, tab: 'listings', badge: officeListings.length },
+              { label: 'العملاء', icon: <Users className="w-4 h-4" />, tab: 'leads', badge: mockDemandRequests.filter(l => l.validation_status === 'pending').length },
+              { label: 'الحملات', icon: <Megaphone className="w-4 h-4" />, tab: 'campaigns', badge: mockCampaigns.filter(c => c.status === 'active').length },
+              { label: 'الأداء', icon: <BarChart3 className="w-4 h-4" />, tab: 'performance', badge: 0 },
+              { label: 'الاشتراك', icon: <CreditCard className="w-4 h-4" />, tab: 'subscription', badge: 0 },
+            ].map((item) => (
+              <button
+                key={item.tab}
+                onClick={() => setActiveTab(item.tab)}
+                className={`flex items-center gap-2 px-4 py-3.5 text-sm font-medium border-b-2 whitespace-nowrap transition-all ${
+                  activeTab === item.tab
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                {item.icon}
+                {item.label}
+                {item.badge > 0 && (
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
+                    activeTab === item.tab ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'
+                  }`}>{item.badge}</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* ─── Stats Grid ─── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
           {stats.map((stat) => (
-            <Card key={stat.label} className="p-4 sm:p-5 border-0 shadow-sm">
-              <div className="flex items-start justify-between mb-3">
+            <Card key={stat.label} className="p-4 sm:p-5 border-0 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+              <div className="flex items-start justify-between mb-2">
                 <div className={`${stat.bg} ${stat.color} p-2 rounded-xl`}>{stat.icon}</div>
-                <span className="text-xs text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full font-medium">
+                <span className={`text-xs font-semibold flex items-center gap-0.5 px-1.5 py-0.5 rounded-full ${
+                  stat.positive ? 'text-emerald-700 bg-emerald-50' : 'text-red-700 bg-red-50'
+                }`}>
+                  <ArrowUpRight className="w-3 h-3" />
                   {stat.delta}
                 </span>
               </div>
-              <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stat.value}</p>
-              <p className="text-xs sm:text-sm text-gray-500 mt-0.5">{stat.label}</p>
+              <p className="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-3">{stat.value}</p>
+              <p className="text-xs sm:text-sm text-gray-500 mt-0.5 mb-1">{stat.label}</p>
+              <DashSparkline data={stat.sparkData} color={stat.sparkColor} />
             </Card>
           ))}
         </div>
@@ -308,6 +343,36 @@ export function OfficeDashboard() {
 
           {/* ── Overview ── */}
           <TabsContent value="overview" className="mt-0 space-y-4">
+            {/* Welcome Banner */}
+            <div
+              className="flex flex-col sm:flex-row items-center gap-4 p-5 rounded-2xl text-white"
+              style={{ background: 'linear-gradient(135deg, #1e40af 0%, #4f46e5 100%)' }}
+              dir="rtl"
+            >
+              <div className="flex-1">
+                <p className="text-xs text-blue-200 font-medium mb-0.5 flex items-center gap-1">
+                  <Zap className="w-3 h-3" /> لوحة التحكم
+                </p>
+                <h2 className="text-lg font-extrabold">مرحباً، {office.name}!</h2>
+                <p className="text-blue-100 text-sm mt-0.5">
+                  لديك{' '}
+                  <span className="font-bold text-white">{mockDemandRequests.filter(l => l.validation_status === 'pending').length} عملاء جدد</span>
+                  {' '}و{' '}
+                  <span className="font-bold text-white">{mockCampaigns.filter(c => c.status === 'active').length} حملات نشطة</span>
+                  {' '}الآن.
+                </p>
+              </div>
+              <div className="flex gap-2 flex-shrink-0">
+                <button
+                  onClick={() => setActiveTab('leads')}
+                  className="bg-white/20 hover:bg-white/30 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors border border-white/30 whitespace-nowrap"
+                >عرض العملاء</button>
+                <button
+                  onClick={() => setActiveTab('campaigns')}
+                  className="bg-white text-indigo-700 text-sm font-semibold px-4 py-2 rounded-xl transition-colors hover:bg-blue-50 whitespace-nowrap"
+                >الحملات</button>
+              </div>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Recent Leads */}
               <Card className="p-5 border-0 shadow-sm">
@@ -413,6 +478,26 @@ export function OfficeDashboard() {
                     <span className="font-medium text-gray-700 text-sm">{action.label}</span>
                     <div className={`${action.bg} p-2.5 rounded-xl flex-shrink-0`}>{action.icon}</div>
                   </button>
+                ))}
+              </div>
+            </Card>
+
+            {/* ── Recent Activity ── */}
+            <Card className="p-5 border-0 shadow-sm">
+              <div className="flex items-center justify-between mb-4" dir="rtl">
+                <h3 className="font-semibold text-gray-900">النشاط الأخير</h3>
+                <Activity className="w-4 h-4 text-gray-400" />
+              </div>
+              <div className="space-y-0.5" dir="rtl">
+                {RECENT_ACTIVITY.map((item, i) => (
+                  <div key={i} className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">
+                    <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${item.dot}`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-800">{item.text}</p>
+                      <p className="text-xs text-gray-400 mt-0.5 truncate">{item.sub}</p>
+                    </div>
+                    <span className="text-[11px] text-gray-400 flex-shrink-0 mt-0.5 whitespace-nowrap">{item.time}</span>
+                  </div>
                 ))}
               </div>
             </Card>
