@@ -516,6 +516,139 @@ export function ChatInterface() {
           </div>
         </div>
       </div>
+
+      {/* ── Side Panels ── */}
+      <Sheet open={sidebarPanel !== null} onOpenChange={(open) => { if (!open) setSidebarPanel(null); }}>
+        <SheetContent side="right" className="w-80 sm:w-96" dir="rtl">
+          {sidebarPanel === 'favorites' && (
+            <>
+              <SheetHeader className="mb-4">
+                <SheetTitle className="flex items-center gap-2">
+                  <Heart className="w-5 h-5 text-rose-500" />
+                  المفضلة
+                </SheetTitle>
+              </SheetHeader>
+              <div className="space-y-3">
+                {mockListings.slice(0, 4).map(l => (
+                  <div
+                    key={l.id}
+                    className="flex gap-3 p-3 rounded-xl border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/40 cursor-pointer transition-all"
+                    onClick={() => { setSidebarPanel(null); navigate(`/listings/${l.id}`); }}
+                  >
+                    <img src={l.images[0]} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-800 truncate">{l.property_type} — {l.address}</p>
+                      <p className="text-xs text-indigo-600 font-bold mt-0.5">{formatPrice(l.price)}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">{l.bedrooms} غرف · {l.area} م²</p>
+                    </div>
+                    <Heart className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5 fill-rose-400" />
+                  </div>
+                ))}
+                <p className="text-xs text-slate-400 text-center pt-2">احفظ العقارات من الشات لتظهر هنا</p>
+              </div>
+            </>
+          )}
+
+          {sidebarPanel === 'notifications' && (
+            <>
+              <SheetHeader className="mb-4">
+                <SheetTitle className="flex items-center gap-2">
+                  <BellRing className="w-5 h-5 text-amber-500" />
+                  التنبيهات
+                </SheetTitle>
+              </SheetHeader>
+              <div className="space-y-3">
+                {[
+                  { title: 'عقار جديد في الرياض', body: 'فيلا 5 غرف بسعر 1.2 مليون — حي النرجس', time: 'منذ 10 دقائق', dot: 'bg-blue-500' },
+                  { title: 'انخفاض سعر عقار محفوظ', body: 'شقة 3 غرف في جدة — انخفض السعر 8%', time: 'منذ ساعة', dot: 'bg-emerald-500' },
+                  { title: 'رد من مكتب عقاري', body: 'مكتب برايم يرد على استفسارك', time: 'منذ 3 ساعات', dot: 'bg-indigo-500' },
+                  { title: 'عرض خاص', body: 'خصم 5% على عقارات المدينة المنورة هذا الأسبوع', time: 'أمس', dot: 'bg-rose-500' },
+                ].map((n, i) => (
+                  <div key={i} className="flex gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 cursor-pointer transition-colors">
+                    <span className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${n.dot}`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-800">{n.title}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{n.body}</p>
+                      <p className="text-[11px] text-slate-400 mt-1">{n.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {sidebarPanel === 'settings' && (
+            <>
+              <SheetHeader className="mb-4">
+                <SheetTitle className="flex items-center gap-2">
+                  <SlidersHorizontal className="w-5 h-5 text-slate-600" />
+                  الإعدادات
+                </SheetTitle>
+              </SheetHeader>
+              <div className="space-y-5">
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">الحساب</p>
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm">أ</div>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-800">أحمد</p>
+                      <p className="text-xs text-slate-400">ahmed@example.com</p>
+                    </div>
+                  </div>
+                </div>
+                {[
+                  { label: 'اللغة', value: 'العربية' },
+                  { label: 'المدينة الافتراضية', value: 'الرياض' },
+                  { label: 'عملة العرض', value: 'ريال سعودي (SAR)' },
+                  { label: 'الإشعارات', value: 'مفعّلة' },
+                ].map(s => (
+                  <div key={s.label} className="flex items-center justify-between py-2.5 border-b border-slate-100 last:border-0">
+                    <span className="text-sm text-slate-700">{s.label}</span>
+                    <span className="text-sm text-indigo-600 font-medium">{s.value}</span>
+                  </div>
+                ))}
+                <button
+                  onClick={() => { setSidebarPanel(null); navigate('/'); }}
+                  className="w-full mt-2 py-2.5 rounded-xl border border-red-200 text-red-500 text-sm font-medium hover:bg-red-50 transition-colors"
+                >
+                  تسجيل الخروج
+                </button>
+              </div>
+            </>
+          )}
+
+          {sidebarPanel === 'help' && (
+            <>
+              <SheetHeader className="mb-4">
+                <SheetTitle className="flex items-center gap-2">
+                  <LifeBuoy className="w-5 h-5 text-indigo-500" />
+                  المساعدة
+                </SheetTitle>
+              </SheetHeader>
+              <div className="space-y-3">
+                {[
+                  { q: 'كيف أبحث عن عقار؟', a: 'اكتب طلبك في مربع النص أسفل الشاشة، مثل: فيلا في الرياض بميزانية مليون ريال.' },
+                  { q: 'كيف أحفظ عقاراً في المفضلة؟', a: 'انقر على أيقونة القلب في بطاقة العقار لحفظه في قائمة المفضلة.' },
+                  { q: 'هل يمكنني التفاوض عبر التطبيق؟', a: 'نعم، سارة تساعدك في بدء مفاوضات مع المكاتب العقارية مباشرةً من المحادثة.' },
+                  { q: 'كيف أقدم طلب عقار مخصص؟', a: 'انقر على زر "أنشئ طلب عقار مخصص" الذي يظهر في المحادثة، أو اذهب لقسم الطلبات.' },
+                ].map((item, i) => (
+                  <details key={i} className="group rounded-xl border border-slate-100 overflow-hidden">
+                    <summary className="flex items-center justify-between px-4 py-3 cursor-pointer text-sm font-semibold text-slate-800 hover:bg-slate-50 list-none">
+                      {item.q}
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-open:rotate-90 transition-transform flex-shrink-0 mr-2" />
+                    </summary>
+                    <p className="px-4 pb-3 pt-1 text-sm text-slate-500 leading-relaxed">{item.a}</p>
+                  </details>
+                ))}
+                <div className="mt-4 p-4 rounded-xl bg-indigo-50 border border-indigo-100">
+                  <p className="text-sm font-semibold text-indigo-800 mb-1">تواصل معنا</p>
+                  <p className="text-xs text-indigo-600">support@alshat-alaqari.com</p>
+                </div>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
