@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import {
-  Send, User, MessageSquare, LogOut, ChevronRight,
+  Send, MessageSquare, LogOut, ChevronRight,
   Plus, Star, Bell, Settings, HelpCircle,
-  Building2, Scale, Wallet, Search, Trash2,
+  Building2, Scale, Wallet, Trash2,
+  Heart, BellRing, LifeBuoy, SlidersHorizontal,
 } from 'lucide-react';
 import { Input } from './ui/input';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from './ui/sheet';
 import { useNavigate } from 'react-router';
 import { mockListings, formatPrice, getCityName, type ChatMessage } from '../lib/mock-data';
 
@@ -82,6 +84,7 @@ export function ChatInterface() {
   const [isTyping, setIsTyping] = useState(false);
   // Default closed on mobile (< 1024px), open on desktop
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1024);
+  const [sidebarPanel, setSidebarPanel] = useState<'favorites' | 'notifications' | 'settings' | 'help' | null>(null);
   const isDesktop = () => window.innerWidth >= 1024;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -250,21 +253,21 @@ export function ChatInterface() {
 
         {/* Bottom nav */}
         <div className="relative z-10 border-t border-white/10 px-3 py-3 space-y-0.5 flex-shrink-0">
-          {[
-            { icon: <Star className="w-4 h-4" />, label: 'المفضلة' },
-            { icon: <Bell className="w-4 h-4" />, label: 'التنبيهات' },
-          ].map(item => (
-            <button key={item.label} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-white/40 hover:bg-white/8 hover:text-blue-300 transition-colors">
+          {([
+            { icon: <Heart className="w-4 h-4" />, label: 'المفضلة', panel: 'favorites' as const },
+            { icon: <BellRing className="w-4 h-4" />, label: 'التنبيهات', panel: 'notifications' as const },
+          ] as const).map(item => (
+            <button key={item.label} onClick={() => setSidebarPanel(item.panel)} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-white/40 hover:bg-white/8 hover:text-blue-300 transition-colors">
               {item.icon}
               <span>{item.label}</span>
             </button>
           ))}
           <div className="h-px bg-white/10 my-1" />
-          {[
-            { icon: <Settings className="w-4 h-4" />, label: 'الإعدادات' },
-            { icon: <HelpCircle className="w-4 h-4" />, label: 'مساعدة' },
-          ].map(item => (
-            <button key={item.label} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-white/40 hover:bg-white/8 hover:text-blue-300 transition-colors">
+          {([
+            { icon: <SlidersHorizontal className="w-4 h-4" />, label: 'الإعدادات', panel: 'settings' as const },
+            { icon: <LifeBuoy className="w-4 h-4" />, label: 'مساعدة', panel: 'help' as const },
+          ] as const).map(item => (
+            <button key={item.label} onClick={() => setSidebarPanel(item.panel)} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-white/40 hover:bg-white/8 hover:text-blue-300 transition-colors">
               {item.icon}
               <span>{item.label}</span>
             </button>
@@ -299,17 +302,14 @@ export function ChatInterface() {
                 <Building2 className="w-4 h-4 text-white" />
               </div>
               <div className="min-w-0">
-                <span className="font-bold text-slate-900 text-sm">الشات العقاري</span>
-                <span className="hidden sm:inline text-slate-400 text-xs ml-2">سارة — مساعدة ذكية للعقارات</span>
+                <p className="font-bold text-slate-900 text-sm leading-tight">الشات العقاري</p>
+                <p className="hidden sm:block text-slate-400 text-xs leading-tight">سارة — مساعدة ذكية للعقارات</p>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
             <button onClick={() => navigate('/demand')} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
               <MessageSquare className="w-4 h-4" />
-            </button>
-            <button onClick={() => navigate('/buyer/dashboard')} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
-              <User className="w-4 h-4" />
             </button>
             <button onClick={() => navigate('/')} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
               <LogOut className="w-4 h-4" />
