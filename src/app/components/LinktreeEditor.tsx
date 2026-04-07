@@ -4,7 +4,7 @@ import {
   ArrowLeft, Save, Eye, Plus, Trash2, GripVertical,
   Link2, Instagram, Twitter, Youtube, Facebook,
   Phone, Globe, MessageCircle, Linkedin,
-  Check, Palette, User, ChevronDown,
+  Check, Palette, User, X as XIcon,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useDrag, useDrop, DndProvider } from 'react-dnd';
@@ -233,6 +233,7 @@ export function LinktreeEditor() {
   const [selectedLinkId, setSelectedLinkId] = useState<string | null>(null);
   const [leftTab, setLeftTab] = useState<'profile' | 'links' | 'appearance'>('links');
   const [isDirty, setIsDirty] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const selectedLink = links.find(l => l.id === selectedLinkId) ?? null;
 
@@ -297,7 +298,7 @@ export function LinktreeEditor() {
               {isDirty && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium border border-amber-200">غير محفوظ</span>}
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => window.open(`/office/${office.slug}`, '_blank')}>
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setPreviewOpen(true)}>
                 <Eye className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">معاينة</span>
               </Button>
@@ -586,6 +587,41 @@ export function LinktreeEditor() {
 
         </div>
       </div>
+
+      {/* ── Preview Modal ── */}
+      {previewOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={() => setPreviewOpen(false)}
+        >
+          <div
+            className="relative flex flex-col items-center"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setPreviewOpen(false)}
+              className="absolute -top-4 -left-4 z-10 w-9 h-9 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <XIcon className="w-4 h-4" />
+            </button>
+
+            {/* Phone frame */}
+            <div className="bg-gray-900 rounded-[3rem] p-3 shadow-2xl ring-4 ring-gray-700">
+              {/* Notch */}
+              <div className="flex justify-center mb-1.5">
+                <div className="w-24 h-5 bg-gray-800 rounded-full" />
+              </div>
+              {/* Screen */}
+              <div className="w-[360px] rounded-[2.25rem] overflow-hidden" style={{ height: '680px' }}>
+                <Preview profile={profile} links={links} appearance={appearance} />
+              </div>
+            </div>
+
+            <p className="text-white/50 text-xs mt-4">انقر خارج الإطار للإغلاق</p>
+          </div>
+        </div>
+      )}
     </DndProvider>
   );
 }
