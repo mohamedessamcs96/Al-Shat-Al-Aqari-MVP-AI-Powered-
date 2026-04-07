@@ -6,7 +6,7 @@ import {
   Mail, CheckCircle2, Bell, LogOut, ChevronRight, Home, Megaphone,
   QrCode, Download, Copy, Check, ExternalLink,
   Search, Filter, Clock, Play, Pause, Target, X,
-  ArrowUpRight, Activity, Zap,
+  ArrowUpRight, Activity, Zap, Link2,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { PageAnalyticsDashboard } from './PageAnalyticsDashboard';
@@ -263,6 +263,10 @@ export function OfficeDashboard() {
 
               {/* Action buttons */}
               <div className="flex gap-2 sm:pb-2 flex-shrink-0">
+                <Button size="sm" variant="outline" className="gap-1.5" onClick={() => navigate('/office/linktree')}>
+                  <Link2 className="w-3.5 h-3.5" />
+                  صفحة الروابط
+                </Button>
                 <Button size="sm" variant="outline" className="gap-1.5" onClick={() => navigate('/office/page-builder')}>
                   <Settings className="w-3.5 h-3.5" />
                   محرر الصفحة
