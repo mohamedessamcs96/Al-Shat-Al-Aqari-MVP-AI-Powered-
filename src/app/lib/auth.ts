@@ -67,6 +67,35 @@ export function setLang(lang: string): void {
   localStorage.setItem(KEYS.LANG, lang);
 }
 
+// ── Raw auth response ─────────────────────────────────────────────────────────
+// Stores the entire login API response so we can extract the office ID
+// from any field path, regardless of the exact response shape the backend uses.
+
+export function setRawAuthResponse(data: Record<string, unknown>): void {
+  // Omit token to avoid double-storing sensitive data
+  const { token: _, ...rest } = data as { token?: unknown; [k: string]: unknown };
+  localStorage.setItem('auth_raw', JSON.stringify(rest));
+}
+
+export function getOfficeIdFromRawResponse(): string | null {
+  const raw = localStorage.getItem('auth_raw');
+  if (!raw) return null;
+  try {
+    const r = JSON.parse(raw) as Record<string, unknown>;
+    return (
+      (r.office_id as string | undefined) ||
+      (r.id as string | undefined) ||
+      ((r.office as Record<string, unknown> | undefined)?.id as string | undefined) ||
+      ((r.user as Record<string, unknown> | undefined)?.id as string | undefined) ||
+      ((r.data as Record<string, unknown> | undefined)?.office_id as string | undefined) ||
+      ((r.data as Record<string, unknown> | undefined)?.id as string | undefined) ||
+      null
+    );
+  } catch {
+    return null;
+  }
+}
+
 // ── JWT decode ───────────────────────────────────────────────────────────────
 
 /**
@@ -103,5 +132,6 @@ export function isAuthenticated(): boolean {
 export function logout(): void {
   localStorage.removeItem(KEYS.TOKEN);
   localStorage.removeItem(KEYS.ROLE);
+  localStorage.removeItem('auth_raw');
   localStorage.removeItem(KEYS.USER);
 }

@@ -10,7 +10,7 @@ import { Input } from './ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { toast } from 'sonner';
 import { auth as apiAuth } from '../lib/api-client';
-import { setToken, setRole, setUser } from '../lib/auth';
+import { setToken, setRole, setUser, setRawAuthResponse } from '../lib/auth';
 
 type Role = 'buyer' | 'office';
 
@@ -82,6 +82,7 @@ export function LoginPage() {
       const res = await apiAuth.officeLogin(officeEmail, officePassword);
       setToken(res.token);
       setRole('office');
+      setRawAuthResponse(res as Record<string, unknown>);
       const offId = res.office_id || res.id || (res.office as any)?.id || (res.user as any)?.id || '';
       if (offId) setUser({ id: offId, email: officeEmail });
       toast.success('مرحباً بك في لوحة التحكم!');
@@ -102,6 +103,7 @@ export function LoginPage() {
       const res = await apiAuth.officeRegister(registerOfficeName, registerEmail, registerPhone, registerPassword);
       setToken(res.token);
       setRole('office');
+      setRawAuthResponse(res as Record<string, unknown>);
       const offRegId = res.office_id || res.id || (res.office as any)?.id || (res.user as any)?.id || '';
       if (offRegId) setUser({ id: offRegId, name: registerOfficeName, email: registerEmail });
       toast.success('تم إنشاء الحساب بنجاح! مرحباً بك في الشات العقاري');
