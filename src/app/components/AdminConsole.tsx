@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { ArrowLeft, BarChart3, Users, Building2, AlertCircle, TrendingUp, Settings } from 'lucide-react';
+import { ArrowLeft, BarChart3, Users, Building2, AlertCircle, TrendingUp, Settings, LogOut } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
@@ -9,40 +9,51 @@ import { Progress } from './ui/progress';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { toast } from 'sonner';
+import { admin as adminApi } from '../lib/api-client';
+import { logout as authLogout } from '../lib/auth';
 
 export function AdminConsole() {
   const navigate = useNavigate();
   const [filterCity, setFilterCity] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [stats, setStats] = useState<Record<string, any>>({
+    totalUsers: 0, totalOffices: 0, totalListings: 0,
+    activeUsers: 0, newSignups: 0, platformRevenue: 0,
+  });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [offices, setOffices] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [incidents, setIncidents] = useState<any[]>([]);
 
-  // Mock admin stats
-  const stats = {
-    totalUsers: 12543,
-    totalOffices: 487,
-    totalListings: 23891,
-    activeUsers: 3456,
-    newSignups: 287,
-    platformRevenue: 1234567,
+  useEffect(() => {
+    adminApi.getAnalytics()
+      .then(data => setStats(data as any))
+      .catch(() => {});
+    adminApi.listOffices()
+      .then(data => setOffices(data as any[]))
+      .catch(() => {});
+    adminApi.listCompliance()
+      .then(data => setIncidents(data as any[]))
+      .catch(() => {});
+  }, []);
+
+  const handleUpdateRanking = async (officeId: string, newRank: number) => {
+    try {
+      await adminApi.setOfficeRanking(officeId, newRank);
+      toast.success(`تم تحديث ترتيب المكتب إلى ${newRank}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    }
   };
 
-  const offices = [
-    { id: '1', name: 'Prime Real Estate', city: 'الرياض', listings: 234, leads: 45, subscribed: true, rank: 1 },
-    { id: '2', name: 'Elite Properties', city: 'جدة', listings: 156, leads: 32, subscribed: true, rank: 2 },
-    { id: '3', name: 'Modern Homes', city: 'الرياض', listings: 89, leads: 18, subscribed: false, rank: 5 },
-    { id: '4', name: 'Gold Realty', city: 'الدمام', listings: 112, leads: 22, subscribed: true, rank: 3 },
-  ];
-
-  const incidents = [
-    { id: '1', type: 'spam', office: 'Unknown Office', status: 'pending', date: '2026-03-14' },
-    { id: '2', type: 'fraud', office: 'Fake Properties Ltd', status: 'resolved', date: '2026-03-13' },
-    { id: '3', type: 'abuse', office: 'Bad Actor Inc', status: 'investigating', date: '2026-03-12' },
-  ];
-
-  const handleUpdateRanking = (officeId: string, newRank: number) => {
-    toast.success(`تم تحديث ترتيب المكتب إلى ${newRank}`);
-  };
-
-  const handleSuspendOffice = (officeId: string) => {
-    toast.success('تم إيقاف المكتب مؤقتاً');
+  const handleSuspendOffice = async (officeId: string) => {
+    try {
+      await adminApi.suspendOffice(officeId);
+      setOffices(prev => prev.map((o: any) => o.id === officeId ? { ...o, suspended: true } : o));
+      toast.success('تم إيقاف المكتب مؤقتاِ');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    }
   };
 
   return (
@@ -58,9 +69,14 @@ export function AdminConsole() {
             <h1 className="text-xl font-bold text-gray-900">لوحة التحكم الإدارية</h1>
             <p className="text-sm text-gray-500">إدارة المنصة والامتثال</p>
           </div>
-          <Badge className="bg-red-100 text-red-700 border-red-200">
-            {incidents.filter(i => i.status !== 'resolved').length} تنبيهات
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge className="bg-red-100 text-red-700 border-red-200">
+              {incidents.filter((i: any) => i.status !== 'resolved').length} تنبيهات
+            </Badge>
+            <Button variant="ghost" size="sm" onClick={() => { authLogout(); navigate('/'); }}>
+              <LogOut className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -104,7 +120,7 @@ export function AdminConsole() {
             <TabsTrigger value="offices">المكاتب</TabsTrigger>
             <TabsTrigger value="compliance">
               الامتثال و التنبيهات
-              <Badge className="ml-2 bg-red-100 text-red-700">{incidents.filter(i => i.status !== 'resolved').length}</Badge>
+              <Badge className="ml-2 bg-red-100 text-red-700">{incidents.filter((i: any) => i.status !== 'resolved').length}</Badge>
             </TabsTrigger>
             <TabsTrigger value="ranking">الترتيب والأداء</TabsTrigger>
             <TabsTrigger value="settings">الإعدادات</TabsTrigger>
@@ -136,7 +152,7 @@ export function AdminConsole() {
                     </tr>
                   </thead>
                   <tbody>
-                    {offices.map((office) => (
+                    {offices.map((office: any) => (
                       <tr key={office.id} className="border-b hover:bg-gray-50" dir="rtl">
                         <td className="py-3 px-4 font-medium text-gray-900">{office.name}</td>
                         <td className="py-3 px-4 text-gray-600">{office.city}</td>
@@ -176,7 +192,7 @@ export function AdminConsole() {
             <Card className="p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">التنبيهات والانتهاكات</h2>
               <div className="space-y-4">
-                {incidents.map((incident) => (
+                {incidents.map((incident: any) => (
                   <div key={incident.id} className="p-4 border rounded-lg hover:bg-gray-50" dir="rtl">
                     <div className="flex items-start justify-between">
                       <div>
@@ -233,7 +249,7 @@ export function AdminConsole() {
             <Card className="p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4" dir="rtl">خوارزمية الترتيب والأداء</h2>
               <div className="space-y-6">
-                {offices.map((office) => (
+                {offices.map((office: any) => (
                   <div key={office.id} className="p-4 border rounded-lg" dir="rtl">
                     <div className="flex items-start justify-between mb-3">
                       <div>

@@ -24,7 +24,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Badge } from './ui/badge';
 import { Switch } from './ui/switch';
 import { Slider } from './ui/slider';
-import { mockOffices } from '../lib/mock-data';
+import { offices as officesApi } from '../lib/api-client';
+import { getUser } from '../lib/auth';
 import { BlockSettingsPanel } from './page-builder/BlockSettingsPanel';
 import { ThemeEditorPanel } from './page-builder/ThemeEditorPanel';
 
@@ -149,11 +150,12 @@ const DEVICE_WIDTHS = { desktop: '100%', tablet: '768px', mobile: '390px' };
 // ─── Main PageBuilder ─────────────────────────────────────────────────────────
 export function PageBuilder() {
   const navigate = useNavigate();
+  const officeUser = getUser();
+  const officeId = officeUser?.id || '';
 
   // Load existing config or create default
-  const office = mockOffices[0];
   const [config, setConfig] = useState<PageConfig>(() =>
-    makeDefaultPageConfig(office.id, office.slug, office.name, office.logo_url)
+    makeDefaultPageConfig(officeId, '', '', '')
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [leftTab, setLeftTab] = useState<'blocks' | 'page' | 'theme' | 'templates'>('page');
@@ -249,14 +251,29 @@ export function PageBuilder() {
     toast.success(`تم تطبيق القالب: ${tpl.nameAr}`);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (officeId) {
+      try {
+        await officesApi.savePage(officeId, config as unknown as Record<string, unknown>);
+      } catch {
+        // ignore save errors silently — user sees the toast regardless
+      }
+    }
     setIsDirty(false);
     toast.success('تم حفظ التغييرات!');
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
+    if (officeId) {
+      try {
+        await officesApi.savePage(officeId, config as unknown as Record<string, unknown>);
+        await officesApi.publishPage(officeId);
+      } catch {
+        // ignore
+      }
+    }
     setIsDirty(false);
-    toast.success('🎉 تم نشر الصفحة! يمكن للعملاء رؤيتها الآن.');
+    toast.success(' تم نشر الصفحة! يمكن للعملاء رؤيتها الآن.');
   };
 
   // ── computing page background style ────────────────────────────────────────

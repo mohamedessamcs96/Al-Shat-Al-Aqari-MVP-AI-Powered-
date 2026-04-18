@@ -3,12 +3,14 @@ import { useNavigate, useLocation } from 'react-router';
 import {
   Building2, User, Mail, Lock, Phone, ShieldCheck,
   ChevronLeft, MapPin, Bot, MessageSquare, UserPlus,
-  LogIn, ArrowLeft, Eye, EyeOff, AlertTriangle,
+  LogIn, ArrowLeft, Eye, EyeOff, AlertTriangle, Loader2,
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { toast } from 'sonner';
+import { auth as apiAuth } from '../lib/api-client';
+import { setToken, setRole, setUser } from '../lib/auth';
 
 type Role = 'buyer' | 'office';
 
@@ -18,6 +20,7 @@ export function LoginPage() {
   const isAdminRoute = location.pathname === '/admin/login';
 
   const [activeRole, setActiveRole] = useState<Role | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // Buyer
   const [buyerPhone, setBuyerPhone] = useState('');
@@ -32,42 +35,94 @@ export function LoginPage() {
   const [registerPassword, setRegisterPassword] = useState('');
   const [showRegisterPass, setShowRegisterPass] = useState(false);
   // Admin
+  const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [showAdminPass, setShowAdminPass] = useState(false);
 
-  const handleBuyerLogin = () => {
+  const handleBuyerLogin = async () => {
     if (!buyerPhone) { toast.error('الرجاء إدخال رقم الهاتف'); return; }
-    toast.success('تم تسجيل الدخول بنجاح!');
-    navigate('/chat');
+    setLoading(true);
+    try {
+      const res = await apiAuth.buyerLogin(buyerPhone);
+      setToken(res.token);
+      setRole('buyer');
+      if (res.buyer_id) setUser({ id: res.buyer_id, phone: buyerPhone });
+      toast.success('تم تسجيل الدخول بنجاح!');
+      navigate('/chat');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleBuyerRegister = () => {
+  const handleBuyerRegister = async () => {
     if (!buyerName || !buyerPhone) { toast.error('الرجاء ملء جميع الحقول'); return; }
-    toast.success('تم إنشاء حسابك بنجاح! مرحباً بك');
-    navigate('/chat');
+    setLoading(true);
+    try {
+      const res = await apiAuth.buyerRegister(buyerName, buyerPhone);
+      setToken(res.token);
+      setRole('buyer');
+      if (res.buyer_id) setUser({ id: res.buyer_id, name: buyerName, phone: buyerPhone });
+      toast.success('تم إنشاء حسابك بنجاح! مرحباً بك');
+      navigate('/chat');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleOfficeLogin = () => {
+  const handleOfficeLogin = async () => {
     if (!officeEmail || !officePassword) { toast.error('الرجاء ملء جميع الحقول'); return; }
-    toast.success('مرحباً بك في لوحة التحكم!');
-    navigate('/office/dashboard');
+    setLoading(true);
+    try {
+      const res = await apiAuth.officeLogin(officeEmail, officePassword);
+      setToken(res.token);
+      setRole('office');
+      if (res.office_id) setUser({ id: res.office_id, email: officeEmail });
+      toast.success('مرحباً بك في لوحة التحكم!');
+      navigate('/office/dashboard');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleOfficeRegister = () => {
+  const handleOfficeRegister = async () => {
     if (!registerOfficeName || !registerEmail || !registerPhone || !registerPassword) {
       toast.error('الرجاء ملء جميع الحقول'); return;
     }
-    toast.success('تم إنشاء الحساب بنجاح! مرحباً بك في الشات العقاري');
-    navigate('/office/dashboard');
+    setLoading(true);
+    try {
+      const res = await apiAuth.officeRegister(registerOfficeName, registerEmail, registerPhone, registerPassword);
+      setToken(res.token);
+      setRole('office');
+      if (res.office_id) setUser({ id: res.office_id, name: registerOfficeName, email: registerEmail });
+      toast.success('تم إنشاء الحساب بنجاح! مرحباً بك في الشات العقاري');
+      navigate('/office/dashboard');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleAdminLogin = () => {
-    if (!adminPassword) { toast.error('الرجاء إدخال كلمة المرور'); return; }
-    if (adminPassword === 'admin123') {
+  const handleAdminLogin = async () => {
+    if (!adminEmail || !adminPassword) { toast.error('الرجاء ملء جميع الحقول'); return; }
+    setLoading(true);
+    try {
+      const res = await apiAuth.adminLogin(adminEmail, adminPassword);
+      setToken(res.token);
+      setRole('admin');
+      setUser({ id: 'admin', email: adminEmail });
       toast.success('مرحباً بك في لوحة تحكم المنصة!');
       navigate('/admin/dashboard');
-    } else {
-      toast.error('كلمة المرور غير صحيحة');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'كلمة المرور أو البريد الإلكتروني غير صحيح');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -113,9 +168,23 @@ export function LoginPage() {
               <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
               <p className="text-xs text-red-400">هذه الصفحة مخصصة للمسؤولين فقط</p>
             </div>
+            <FieldWithIcon icon={<Mail className="w-4 h-4 text-slate-500" />} className="bg-slate-800 border-slate-700">
+              <Input
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                value={adminEmail}
+                onChange={(e) => setAdminEmail(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAdminLogin()}
+                placeholder="البريد الإلكتروني"
+                className="pr-10 text-right rounded-xl bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-red-500"
+                dir="rtl"
+              />
+            </FieldWithIcon>
             <FieldWithIcon icon={<Lock className="w-4 h-4 text-slate-500" />} className="bg-slate-800 border-slate-700">
               <Input
                 type={showAdminPass ? 'text' : 'password'}
+                autoComplete="current-password"
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAdminLogin()}
@@ -131,12 +200,12 @@ export function LoginPage() {
                 {showAdminPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </FieldWithIcon>
-            <p className="text-xs text-slate-500 text-right -mt-2">للاختبار: admin123</p>
             <Button
               onClick={handleAdminLogin}
-              className="w-full bg-red-600 hover:bg-red-700 rounded-xl h-11 font-semibold shadow-lg shadow-red-900/30"
+              disabled={loading}
+              className="w-full bg-red-600 hover:bg-red-700 rounded-xl h-11 font-semibold shadow-lg shadow-red-900/30 disabled:opacity-60"
             >
-              <ShieldCheck className="w-4 h-4 ml-2" />
+              {loading ? <Loader2 className="w-4 h-4 ml-2 animate-spin" /> : <ShieldCheck className="w-4 h-4 ml-2" />}
               دخول الإدارة
             </Button>
             <button
@@ -329,9 +398,10 @@ export function LoginPage() {
                   </FieldWithIcon>
                   <Button
                     onClick={handleBuyerLogin}
-                    className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl h-12 font-semibold shadow-md shadow-blue-500/20 gap-2 text-base"
+                    disabled={loading}
+                    className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl h-12 font-semibold shadow-md shadow-blue-500/20 gap-2 text-base disabled:opacity-60"
                   >
-                    <LogIn className="w-4 h-4" />
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
                     دخول سريع
                   </Button>
                   <Divider />
@@ -370,9 +440,10 @@ export function LoginPage() {
                   </FieldWithIcon>
                   <Button
                     onClick={handleBuyerRegister}
-                    className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl h-12 font-semibold shadow-md shadow-blue-500/20 gap-2 text-base"
+                    disabled={loading}
+                    className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl h-12 font-semibold shadow-md shadow-blue-500/20 gap-2 text-base disabled:opacity-60"
                   >
-                    <UserPlus className="w-4 h-4" />
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
                     إنشاء حساب
                   </Button>
                   <p className="text-xs text-center text-slate-400">بالتسجيل، أنت توافق على شروط الخدمة</p>
@@ -435,9 +506,10 @@ export function LoginPage() {
                   </FieldWithIcon>
                   <Button
                     onClick={handleOfficeLogin}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 rounded-xl h-12 font-semibold shadow-md shadow-indigo-500/20 gap-2 text-base"
+                    disabled={loading}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 rounded-xl h-12 font-semibold shadow-md shadow-indigo-500/20 gap-2 text-base disabled:opacity-60"
                   >
-                    <LogIn className="w-4 h-4" />
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
                     دخول المكتب
                   </Button>
                   <Button variant="link" className="w-full text-sm text-slate-400 h-fit py-1">نسيت كلمة المرور؟</Button>
@@ -496,9 +568,10 @@ export function LoginPage() {
                   </FieldWithIcon>
                   <Button
                     onClick={handleOfficeRegister}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 rounded-xl h-12 font-semibold shadow-md shadow-indigo-500/20 gap-2 text-base mt-1"
+                    disabled={loading}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 rounded-xl h-12 font-semibold shadow-md shadow-indigo-500/20 gap-2 text-base mt-1 disabled:opacity-60"
                   >
-                    <UserPlus className="w-4 h-4" />
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
                     إنشاء حساب مكتب
                   </Button>
                   <p className="text-xs text-center text-slate-400 pt-1">بالتسجيل، أنت توافق على شروط الخدمة</p>

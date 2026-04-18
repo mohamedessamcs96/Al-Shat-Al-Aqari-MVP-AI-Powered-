@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { ArrowLeft, Send, TrendingDown, CheckCircle, LogOut } from 'lucide-react';
 import { Button } from './ui/button';
@@ -7,7 +7,9 @@ import { Badge } from './ui/badge';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
-import { mockNegotiations, mockListings, formatPrice } from '../lib/mock-data';
+import { formatPrice } from '../lib/formatters';
+import { negotiations as negotiationsApi } from '../lib/api-client';
+import { logout as authLogout } from '../lib/auth';
 import { toast } from 'sonner';
 
 export function NegotiationView() {
@@ -15,11 +17,19 @@ export function NegotiationView() {
   const navigate = useNavigate();
   const [newOffer, setNewOffer] = useState('');
   const [offerMessage, setOfferMessage] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [negotiation, setNegotiation] = useState<any | null>(null);
 
-  const negotiation = mockNegotiations.find(n => n.id === id);
-  const listing = negotiation ? mockListings.find(l => l.id === negotiation.listing_id) : null;
+  useEffect(() => {
+    if (!id) return;
+    negotiationsApi.get(id)
+      .then(data => setNegotiation(data))
+      .catch(() => {});
+  }, [id]);
 
-  if (!negotiation || !listing) {
+  const listing = negotiation?.listing ?? {};
+
+  if (!negotiation) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -32,7 +42,7 @@ export function NegotiationView() {
     );
   }
 
-  const handleSubmitOffer = () => {
+  const handleSubmitOffer = async () => {
     if (!newOffer) {
       toast.error('الرجاء إدخال قيمة العرض');
       return;
@@ -42,13 +52,22 @@ export function NegotiationView() {
       toast.error('العرض يجب أن يكون أقل من السعر المطلوب');
       return;
     }
-    toast.success('تم إرسال عرضك الجديد بنجاح!');
-    setNewOffer('');
-    setOfferMessage('');
+    try {
+      await negotiationsApi.submitOffer(id!, offerValue, offerMessage);
+      toast.success('تم إرسال عرضك الجديد بنجاح!');
+      setNewOffer('');
+      setOfferMessage('');
+      // Refresh negotiation data
+      negotiationsApi.get(id!).then(data => setNegotiation(data)).catch(() => {});
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    }
   };
 
-  const priceDifference = negotiation.listing_price - negotiation.current_offer;
-  const differencePercentage = ((priceDifference / negotiation.listing_price) * 100).toFixed(1);
+  const priceDifference = (negotiation?.listing_price ?? 0) - (negotiation?.current_offer ?? 0);
+  const differencePercentage = negotiation?.listing_price
+    ? ((priceDifference / negotiation.listing_price) * 100).toFixed(1)
+    : '0';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -60,7 +79,7 @@ export function NegotiationView() {
             رجوع
           </Button>
           <h1 className="text-xl font-bold text-gray-900" dir="rtl">التفاوض على العقار</h1>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+          <Button variant="ghost" size="sm" onClick={() => { authLogout(); navigate('/'); }}>
             <LogOut className="w-4 h-4 mr-2" />
             خروج
           </Button>
@@ -124,7 +143,7 @@ export function NegotiationView() {
             <Card className="p-6">
               <h3 className="font-semibold text-gray-900 mb-4" dir="rtl">سجل التفاوض</h3>
               <div className="space-y-4">
-                {negotiation.history.map((entry, idx) => (
+                {(negotiation?.history ?? []).map((entry: any, idx: number) => (
                   <div
                     key={idx}
                     className={`p-4 rounded-lg ${

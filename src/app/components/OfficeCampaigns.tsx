@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { ArrowLeft, Plus, Play, Pause, BarChart3, Target, Users } from 'lucide-react';
 import { Button } from './ui/button';
@@ -10,31 +10,63 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Textarea } from './ui/textarea';
 import { Progress } from './ui/progress';
-import { mockCampaigns, mockListings } from '../lib/mock-data';
+import { offices as officesApi } from '../lib/api-client';
+import { getUser } from '../lib/auth';
 import { toast } from 'sonner';
 
 export function OfficeCampaigns() {
   const navigate = useNavigate();
+  const officeId = getUser()?.id ?? '';
   const [campaignName, setCampaignName] = useState('');
   const [selectedListing, setSelectedListing] = useState('');
   const [audienceFilter, setAudienceFilter] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [campaigns, setCampaigns] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [officeListings, setOfficeListings] = useState<any[]>([]);
 
-  const handleCreateCampaign = () => {
+  useEffect(() => {
+    if (!officeId) return;
+    officesApi.listCampaigns(officeId)
+      .then(data => setCampaigns(data as any[]))
+      .catch(() => {});
+    officesApi.listListings(officeId)
+      .then(data => setOfficeListings(data as any[]))
+      .catch(() => {});
+  }, [officeId]);
+
+  const handleCreateCampaign = async () => {
     if (!campaignName || !selectedListing) {
       toast.error('الرجاء ملء جميع الحقول المطلوبة');
       return;
     }
-    toast.success('تم إنشاء الحملة بنجاح!');
-    setCampaignName('');
-    setSelectedListing('');
-    setAudienceFilter('');
-    setIsDialogOpen(false);
+    try {
+      const created = await officesApi.createCampaign(officeId, {
+        name: campaignName,
+        listing_id: selectedListing,
+        audience_filter: audienceFilter,
+      });
+      setCampaigns(prev => [...prev, created]);
+      toast.success('تم إنشاء الحملة بنجاح!');
+      setCampaignName('');
+      setSelectedListing('');
+      setAudienceFilter('');
+      setIsDialogOpen(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    }
   };
 
-  const handleToggleCampaign = (campaignId: string, currentStatus: string) => {
+  const handleToggleCampaign = async (campaignId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'paused' : 'active';
-    toast.success(`تم ${newStatus === 'active' ? 'تفعيل' : 'إيقاف'} الحملة`);
+    try {
+      const updated = await officesApi.updateCampaign(officeId, campaignId, { status: newStatus });
+      setCampaigns(prev => prev.map((c: any) => c.id === campaignId ? updated : c));
+      toast.success(`تم ${newStatus === 'active' ? 'تفعيل' : 'إيقاف'} الحملة`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    }
   };
 
   return (
@@ -76,7 +108,7 @@ export function OfficeCampaigns() {
                       <SelectValue placeholder="اختر عقار للترويج له" />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockListings.slice(0, 5).map((listing) => (
+                      {officeListings.slice(0, 5).map((listing: any) => (
                         <SelectItem key={listing.id} value={listing.id}>
                           {listing.property_type} - {listing.address}
                         </SelectItem>
@@ -116,7 +148,7 @@ export function OfficeCampaigns() {
             <div className="flex items-center justify-between" dir="rtl">
               <div>
                 <p className="text-sm text-gray-600">إجمالي الحملات</p>
-                <p className="text-3xl font-bold text-gray-900">{mockCampaigns.length}</p>
+                <p className="text-3xl font-bold text-gray-900">{campaigns.length}</p>
               </div>
               <Target className="w-10 h-10 text-blue-500" />
             </div>
@@ -127,7 +159,7 @@ export function OfficeCampaigns() {
               <div>
                 <p className="text-sm text-gray-600">الحملات النشطة</p>
                 <p className="text-3xl font-bold text-green-600">
-                  {mockCampaigns.filter(c => c.status === 'active').length}
+                  {campaigns.filter((c: any) => c.status === 'active').length}
                 </p>
               </div>
               <Play className="w-10 h-10 text-green-500" />
@@ -139,7 +171,7 @@ export function OfficeCampaigns() {
               <div>
                 <p className="text-sm text-gray-600">إجمالي الوصول</p>
                 <p className="text-3xl font-bold text-gray-900">
-                  {mockCampaigns.reduce((sum, c) => sum + c.sent_count, 0)}
+                  {campaigns.reduce((sum: number, c: any) => sum + (c.sent_count ?? 0), 0)}
                 </p>
               </div>
               <Users className="w-10 h-10 text-purple-500" />
@@ -151,7 +183,7 @@ export function OfficeCampaigns() {
               <div>
                 <p className="text-sm text-gray-600">إجمالي العملاء</p>
                 <p className="text-3xl font-bold text-orange-600">
-                  {mockCampaigns.reduce((sum, c) => sum + c.lead_count, 0)}
+                  {campaigns.reduce((sum: number, c: any) => sum + (c.lead_count ?? 0), 0)}
                 </p>
               </div>
               <BarChart3 className="w-10 h-10 text-orange-500" />
@@ -161,8 +193,8 @@ export function OfficeCampaigns() {
 
         {/* Campaigns List */}
         <div className="space-y-4">
-          {mockCampaigns.map((campaign) => {
-            const listing = mockListings.find(l => l.id === campaign.listing_id);
+          {campaigns.map((campaign: any) => {
+            const listing = officeListings.find((l: any) => l.id === campaign.listing_id);
             const clickRate = campaign.sent_count > 0 ? (campaign.click_count / campaign.sent_count) * 100 : 0;
             const conversionRate = campaign.click_count > 0 ? (campaign.lead_count / campaign.click_count) * 100 : 0;
 
@@ -281,7 +313,7 @@ export function OfficeCampaigns() {
             );
           })}
 
-          {mockCampaigns.length === 0 && (
+          {campaigns.length === 0 && (
             <Card className="p-12 text-center">
               <Target className="w-12 h-12 text-gray-400 mx-auto mb-3" />
               <h3 className="font-semibold text-gray-900 mb-2" dir="rtl">لا توجد حملات بعد</h3>

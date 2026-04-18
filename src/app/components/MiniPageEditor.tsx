@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { ArrowLeft, Save, Eye, Settings } from 'lucide-react';
 import { Button } from './ui/button';
@@ -8,30 +8,60 @@ import { Label } from './ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Textarea } from './ui/textarea';
 import { toast } from 'sonner';
+import { offices as officesApi } from '../lib/api-client';
+import { getUser, logout as authLogout } from '../lib/auth';
 
 export function MiniPageEditor() {
   const navigate = useNavigate();
-  const [officeName, setOfficeName] = useState('Prime Real Estate');
-  const [officeBio, setOfficeBio] = useState('مكتب عقاري متخصص في بيع وشراء العقارات السكنية والتجارية');
-  const [phone, setPhone] = useState('0550123456');
-  const [email, setEmail] = useState('info@prime.com');
-  const [whatsapp, setWhatsapp] = useState('0550123456');
-  const [address, setAddress] = useState('الرياض، حي النرجس');
-  const [websiteUrl, setWebsiteUrl] = useState('www.prime-real-estate.com');
+  const officeId = getUser()?.id || '';
+  const [officeName, setOfficeName] = useState('');
+  const [officeBio, setOfficeBio] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
+  const [address, setAddress] = useState('');
+  const [websiteUrl, setWebsiteUrl] = useState('');
   const [savedChanges, setSavedChanges] = useState(true);
 
-  const handleSave = () => {
-    toast.success('تم حفظ التغييرات بنجاح!');
-    setSavedChanges(true);
+  useEffect(() => {
+    if (!officeId) return;
+    officesApi.getById(officeId)
+      .then((data: any) => {
+        setOfficeName(data.name ?? '');
+        setOfficeBio(data.bio ?? '');
+        setPhone(data.phone ?? '');
+        setEmail(data.email ?? '');
+        setWhatsapp(data.whatsapp ?? '');
+        setAddress(data.address ?? '');
+        setWebsiteUrl(data.website ?? '');
+      })
+      .catch(() => {});
+  }, [officeId]);
+
+  const handleSave = async () => {
+    if (!officeId) { toast.error('الرجاء تسجيل الدخول'); return; }
+    try {
+      await officesApi.update(officeId, { name: officeName, bio: officeBio, phone, email, whatsapp, address, website: websiteUrl });
+      toast.success('تم حفظ التغييرات بنجاح!');
+      setSavedChanges(true);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    }
   };
 
   const handlePreview = () => {
-    toast.success('تم فتح معاينة الصفحة في علامة تبويب جديدة');
-    window.open('/office/prime-real-estate', '_blank');
+    const slug = officeId;
+    window.open(`/office/${slug}`, '_blank');
   };
 
-  const handlePublish = () => {
-    toast.success('تم نشر الصفحة! سيرى العملاء التغييرات الآن');
+  const handlePublish = async () => {
+    if (!officeId) return;
+    try {
+      await officesApi.publishPage(officeId);
+      toast.success('تم نشر الصفحة! سيرى العملاء التغييرات الآن');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    }
   };
 
   return (

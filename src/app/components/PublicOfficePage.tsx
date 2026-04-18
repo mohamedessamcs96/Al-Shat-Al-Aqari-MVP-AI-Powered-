@@ -8,8 +8,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Badge } from './ui/badge';
-import { mockOffices } from '../lib/mock-data';
-import { mockPageConfigs } from '../lib/page-builder-defaults';
+import { offices as officesApi, pages as pagesApi } from '../lib/api-client';
 import { BlockRenderer } from './blocks/BlockRenderer';
 import type { PageConfig } from '../lib/page-builder-types';
 
@@ -119,19 +118,27 @@ export function PublicOfficePage() {
   const navigate = useNavigate();
   const [qrOpen, setQrOpen] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [office, setOffice] = useState<any | null>(null);
+  const [pageConfig, setPageConfig] = useState<PageConfig | null>(null);
 
-  const office = mockOffices.find((o) => o.slug === slug);
-
-  // Load page config: prefer the stored one, else build a default
-  const pageConfig: PageConfig | null = office
-    ? (mockPageConfigs[office.id] ?? null)
-    : null;
+  useEffect(() => {
+    if (!slug) return;
+    // Load office by slug
+    officesApi.getBySlug(slug)
+      .then((data: any) => setOffice(data))
+      .catch(() => setOffice(null));
+    // Load public page config
+    pagesApi.getPublicPage(slug)
+      .then((data: any) => setPageConfig(data as PageConfig))
+      .catch(() => setPageConfig(null));
+  }, [slug]);
 
   const pageUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/office/${slug}`
     : `/office/${slug}`;
 
-  // Track page view (mock)
+  // Track page view
   useEffect(() => {
     if (office) {
       console.log('[analytics] page_view', { officId: office.id, slug });

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { ArrowLeft, Plus, Edit2, Trash2, Eye, Search, Filter } from 'lucide-react';
 import { Button } from './ui/button';
@@ -10,7 +10,9 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Textarea } from './ui/textarea';
 import { Progress } from './ui/progress';
-import { mockListings, formatPrice, getCityName } from '../lib/mock-data';
+import { formatPrice, getCityName } from '../lib/formatters';
+import { offices as officesApi } from '../lib/api-client';
+import { getUser } from '../lib/auth';
 import { toast } from 'sonner';
 
 export function OfficeListings() {
@@ -27,29 +29,48 @@ export function OfficeListings() {
     city_id: '1',
   });
 
-  // Mock office data
-  const officeId = 'office-1';
-  const officeListings = mockListings.filter(l => l.office_id === officeId);
+  const officeId = getUser()?.id ?? '';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [officeListings, setOfficeListings] = useState<any[]>([]);
 
-  const handleAddListing = () => {
+  useEffect(() => {
+    if (!officeId) return;
+    officesApi.listListings(officeId)
+      .then(data => setOfficeListings(data as any[]))
+      .catch(() => {});
+  }, [officeId]);
+
+  const handleAddListing = async () => {
     if (!newListing.property_type || !newListing.address || !newListing.price) {
       toast.error('الرجاء ملء جميع الحقول المطلوبة');
       return;
     }
-    toast.success('تم إضافة العقار بنجاح!');
-    setIsDialogOpen(false);
-    setNewListing({
-      property_type: '',
-      address: '',
-      price: '',
-      bedrooms: '',
-      area: '',
-      city_id: '1',
-    });
+    try {
+      const created = await officesApi.createListing(officeId, {
+        property_type: newListing.property_type,
+        address: newListing.address,
+        price: Number(newListing.price),
+        bedrooms: Number(newListing.bedrooms),
+        area: Number(newListing.area),
+        city_id: newListing.city_id,
+      });
+      setOfficeListings(prev => [...prev, created]);
+      toast.success('تم إضافة العقار بنجاح!');
+      setIsDialogOpen(false);
+      setNewListing({ property_type: '', address: '', price: '', bedrooms: '', area: '', city_id: '1' });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    }
   };
 
-  const handleDeleteListing = (id: string) => {
-    toast.success('تم حذف العقار بنجاح!');
+  const handleDeleteListing = async (id: string) => {
+    try {
+      await officesApi.deleteListing(officeId, id);
+      setOfficeListings(prev => prev.filter((l: any) => l.id !== id));
+      toast.success('تم حذف العقار بنجاح!');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    }
   };
 
   const filteredListings = officeListings.filter(listing => {

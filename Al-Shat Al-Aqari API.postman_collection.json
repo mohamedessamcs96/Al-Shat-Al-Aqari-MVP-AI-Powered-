@@ -1,0 +1,2688 @@
+{
+  "info": {
+    "_postman_id": "17de74a1-b2c2-4832-afd9-a875257c6747",
+    "name": "Al-Shat Al-Aqari API",
+    "description": "Full REST API collection for Al-Shat Al-Aqari. Base URL: {{base_url}}/api/v1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "25865802",
+    "_collection_link": "https://go.postman.co/collection/25865802-17de74a1-b2c2-4832-afd9-a875257c6747?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "1. Auth",
+      "item": [
+        {
+          "name": "Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+966501234567\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/otp/send",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "otp",
+                "send"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+966501234567\",\n  \"code\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/otp/verify",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "otp",
+                "verify"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buyer — Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mohammed Al-Farsi\",\n  \"phone\": \"+966501234567\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/buyer/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "buyer",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buyer — Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if(r.token) pm.collectionVariables.set('buyer_token', r.token);",
+                  "if(r.buyer_id) pm.collectionVariables.set('buyer_id', r.buyer_id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+966501234567\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/buyer/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "buyer",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Office — Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if(r.token) pm.collectionVariables.set('office_token', r.token);",
+                  "if(r.office_id) pm.collectionVariables.set('office_id', r.office_id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Prime Real Estate\",\n  \"email\": \"contact@prime.sa\",\n  \"phone\": \"+966501234567\",\n  \"password\": \"Str0ngPass!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/office/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "office",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Office — Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if(r.token) pm.collectionVariables.set('office_token', r.token);",
+                  "if(r.office_id) pm.collectionVariables.set('office_id', r.office_id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"contact@prime.sa\",\n  \"password\": \"Str0ngPass!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/office/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "office",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Admin — Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if(r.token) pm.collectionVariables.set('admin_token', r.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@aqargpt.sa\",\n  \"password\": \"AdminPass!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/admin/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "admin",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Admin — register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if(r.token) pm.collectionVariables.set('admin_token', r.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@aqargpt.sa\",\n  \"password\": \"AdminPass!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/admin/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "admin",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Buyers",
+      "item": [
+        {
+          "name": "Update Buyer Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Prime Real Estate\",\n  \"bio\": \"We help you find your dream home.\",\n  \"phone\": \"+966501234567\",\n  \"whatsapp\": \"+966501234567\",\n  \"address\": \"King Fahd Road, Riyadh\",\n  \"website\": \"https://prime.sa\",\n  \"logo_url\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Buyer Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/buyers/{{buyer_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "buyers",
+                "{{buyer_id}}",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Buyer Name",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkMzE3YWI2My0zNmFjLTQwNzMtYjc0ZC1lYzQ1YWJhMTYxYzEiLCJyb2xlIjoib2ZmaWNlIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc3NjE3NDMwMiwiZXhwIjoxNzc2MTc1MjAyLCJqdGkiOiIyZjA4NDhlMy03NDE1LTRiNTAtYmViMi05OTFjZWM2OGVhZDMifQ.VWK_YbZRL-DDshq9ey_4MnLi1PmozzU0ZZoQiNvlp80",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyer_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/buyers/{{buyer_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "buyers",
+                "{{buyer_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Buyer Account",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/buyers/{{buyer_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "buyers",
+                "{{buyer_id}}",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Listings",
+      "item": [
+        {
+          "name": "List Listings (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/listings/?property_type=Villa&price_min=500000&price_max=2000000&bedrooms_min=3&status=active",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "listings",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "city_id",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "property_type",
+                  "value": "Villa"
+                },
+                {
+                  "key": "price_min",
+                  "value": "500000"
+                },
+                {
+                  "key": "price_max",
+                  "value": "2000000"
+                },
+                {
+                  "key": "bedrooms_min",
+                  "value": "3"
+                },
+                {
+                  "key": "status",
+                  "value": "active"
+                },
+                {
+                  "key": "office_id",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Listing",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/listings/{{listing_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "listings",
+                "{{listing_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Similar Listings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/listings/{{listing_id}}/similar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "listings",
+                "{{listing_id}}",
+                "similar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Office — List Own Listings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/listings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "listings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Office — Create Listing",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if(r.id) pm.collectionVariables.set('listing_id', r.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"property_type\": \"Villa\",\n  \"address\": \"Al Yasmin, North Riyadh\",\n  \"price\": 1250000,\n  \"area\": 350,\n  \"bedrooms\": 4,\n  \"bathrooms\": 3,\n  \"city\": null,\n  \"description\": \"Spacious villa in quiet neighbourhood.\",\n  \"features\": [\"Pool\", \"Garden\"],\n  \"images\": []\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/listings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "listings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Office — Update Listing",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 1200000,\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/listings/{{listing_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "listings",
+                "{{listing_id}}",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Office — Delete Listing",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/listings/{{listing_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "listings",
+                "{{listing_id}}",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Offices",
+      "item": [
+        {
+          "name": "List All Offices (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Office by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Office by Slug (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/slug/{{office_slug}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "slug",
+                "{{office_slug}}",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Office Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Prime Real Estate\",\n  \"bio\": \"We help you find your dream home.\",\n  \"phone\": \"+966501234567\",\n  \"whatsapp\": \"+966501234567\",\n  \"address\": \"King Fahd Road, Riyadh\",\n  \"website\": \"https://prime.sa\",\n  \"logo_url\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Suspend Office",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"suspended\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/suspend/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "suspend",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Office Ranking",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ranking_score\": 95\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/ranking/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "ranking",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Campaigns",
+      "item": [
+        {
+          "name": "List Campaigns",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/campaigns/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "campaigns",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Campaign Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/campaigns/{{campaign_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "campaigns",
+                "{{campaign_id}}",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Campaign",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if(r.id) pm.collectionVariables.set('campaign_id', r.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Spring Promo\",\n  \"listing\": \"{{listing_id}}\",\n  \"audience_filter\": \"serious|urgent\",\n  \"scheduled_at\": \"2026-04-20T09:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/campaigns",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "campaigns"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Campaign (pause/launch)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/campaigns/{{campaign_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "campaigns",
+                "{{campaign_id}}",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Campaign",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/campaigns/{{campaign_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "campaigns",
+                "{{campaign_id}}",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Leads / Demands",
+      "item": [
+        {
+          "name": "Create Demand (Buyer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if(r.id) pm.collectionVariables.set('demand_id', r.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyer_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"buyer_name\": \"Mohammed Al-Farsi\",\n  \"city\": null,\n  \"budget_min\": 500000,\n  \"budget_max\": 900000,\n  \"property_type\": \"Apartment\",\n  \"bedrooms_min\": 3,\n  \"intent_level\": \"serious\",\n  \"notes\": \"Prefer North Riyadh\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/demands/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "demands",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Office — List Leads",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/leads/?status=pending&intent_level=serious",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "leads",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                },
+                {
+                  "key": "intent_level",
+                  "value": "serious"
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Office — Get Lead Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/leads/{{demand_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "leads",
+                "{{demand_id}}",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Office — Respond to Lead",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/leads/{{demand_id}}/respond/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "leads",
+                "{{demand_id}}",
+                "respond",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7. Negotiations",
+      "item": [
+        {
+          "name": "Buyer — List Own Negotiations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/buyers/{{buyer_id}}/negotiations/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "buyers",
+                "{{buyer_id}}",
+                "negotiations",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Office — List Own Negotiations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/negotiations/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "negotiations",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Negotiation Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/negotiations/{{negotiation_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "negotiations",
+                "{{negotiation_id}}",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Start Negotiation (Buyer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if(r.id) pm.collectionVariables.set('negotiation_id', r.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyer_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"initial_offer\": 1100000,\n  \"message\": \"I'd like to negotiate.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/listings/{{listing_id}}/negotiations/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "listings",
+                "{{listing_id}}",
+                "negotiations",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Counter-Offer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyer_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"offer\": 1150000,\n  \"message\": \"Counter-offer from buyer.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/negotiations/{{negotiation_id}}/offers/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "negotiations",
+                "{{negotiation_id}}",
+                "offers",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Accept Negotiation",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/negotiations/{{negotiation_id}}/accept/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "negotiations",
+                "{{negotiation_id}}",
+                "accept",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reject Negotiation",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/negotiations/{{negotiation_id}}/reject/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "negotiations",
+                "{{negotiation_id}}",
+                "reject",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "8. Visit Requests",
+      "item": [
+        {
+          "name": "Buyer — List Own Visits",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/buyers/{{buyer_id}}/visits/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "buyers",
+                "{{buyer_id}}",
+                "visits",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Office — List Own Visits",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/visits/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "visits",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Schedule Visit (Buyer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if(r.id) pm.collectionVariables.set('visit_id', r.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyer_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduled_at\": \"2026-04-25T14:00:00Z\",\n  \"notes\": \"Please call before arrival.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/listings/{{listing_id}}/visits/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "listings",
+                "{{listing_id}}",
+                "visits",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Visit (Buyer)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/visits/{{visit_id}}/cancel/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "visits",
+                "{{visit_id}}",
+                "cancel",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Confirm Visit (Office)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/visits/{{visit_id}}/confirm/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "visits",
+                "{{visit_id}}",
+                "confirm",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "9. Subscriptions",
+      "item": [
+        {
+          "name": "List Plans (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/subscription-plans/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "subscription-plans",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Plan Detail (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/subscription-plans/{{plan_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "subscription-plans",
+                "{{plan_id}}",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Office Subscription",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/subscription/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "subscription",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change/Upgrade Plan",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plan_id\": \"{{plan_id}}\",\n  \"billing_cycle\": \"annual\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/subscription/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "subscription",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Subscription",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/subscription/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "subscription",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10. Page Builder",
+      "item": [
+        {
+          "name": "Get Office Page Config",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkMzE3YWI2My0zNmFjLTQwNzMtYjc0ZC1lYzQ1YWJhMTYxYzEiLCJyb2xlIjoib2ZmaWNlIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc3NjI2Njg0NywiZXhwIjoxNzc2MjY3NzQ3LCJqdGkiOiJkY2FmNTVkNC1lYjgzLTQ4YzMtYTM0MS03MjVkM2I5MDE5ODEifQ.bFTmoISZPPgujctsK_ZsKzWLLtXDx8upEJgLjEoDrhM",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/page",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "page"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Save Page Config",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"theme\": {\n    \"primaryColor\": \"#1A56DB\",\n    \"fontFamily\": \"Cairo\",\n    \"buttonStyle\": \"rounded\"\n  },\n  \"background\": {\n    \"type\": \"gradient\",\n    \"value\": \"linear-gradient(135deg, #1A56DB, #0E9F6E)\"\n  },\n  \"seo\": {\n    \"title\": \"Prime Real Estate\",\n    \"description\": \"Find your dream property\"\n  },\n  \"blocks\": [\n    {\n      \"type\": \"hero\",\n      \"order\": 0,\n      \"visible\": true,\n      \"data\": { \"heading\": \"Welcome\", \"subheading\": \"Your trusted real estate partner\" }\n    },\n    {\n      \"type\": \"listings\",\n      \"order\": 1,\n      \"visible\": true,\n      \"data\": { \"title\": \"Featured Properties\" }\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/page/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "page",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Publish Page",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/page/publish/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "page",
+                "publish",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Public Page (by Slug)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/pages/{{page_slug}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pages",
+                "{{page_slug}}",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Linktree Config",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/linktree/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "linktree",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Save Linktree Config",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"profile\": {\n    \"name\": \"Prime RE\",\n    \"bio\": \"Your trusted real estate partner.\",\n    \"avatar\": \"\"\n  },\n  \"appearance\": {\n    \"background\": \"brand\",\n    \"buttonStyle\": \"rounded\",\n    \"font\": \"Cairo\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/linktree/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "linktree",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "11. Chat / AI",
+      "item": [
+        {
+          "name": "List Conversations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/chat/conversations/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "chat",
+                "conversations",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Start New Conversation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if(r.id) pm.collectionVariables.set('conversation_id', r.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkMGRjN2VjZi1kNWRkLTQ1MGEtYmQxYi1jYjRkMWRmM2JlOWIiLCJyb2xlIjoiYnV5ZXIiLCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzc2MjQ2ODEyLCJleHAiOjE3NzYyNDc3MTIsImp0aSI6IjMyNTE0ZTBkLTA3YzAtNGE2Ni1iNjg5LTM3OTE4YTgyNDNlMyJ9.4mudMHB6SOyhKTXuHx5lL4mSPSzZDYShKmMvW0yWPVA",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/chat/conversations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "chat",
+                "conversations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Conversation Messages",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkMGRjN2VjZi1kNWRkLTQ1MGEtYmQxYi1jYjRkMWRmM2JlOWIiLCJyb2xlIjoiYnV5ZXIiLCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzc2MjQ2ODEyLCJleHAiOjE3NzYyNDc3MTIsImp0aSI6IjMyNTE0ZTBkLTA3YzAtNGE2Ni1iNjg5LTM3OTE4YTgyNDNlMyJ9.4mudMHB6SOyhKTXuHx5lL4mSPSzZDYShKmMvW0yWPVA",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/chat/conversations/{{conversation_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "chat",
+                "conversations",
+                "{{conversation_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Conversation",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/chat/conversations/{{conversation_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "chat",
+                "conversations",
+                "{{conversation_id}}",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Message (get AI response)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyer_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"I'm looking for a 3-bedroom villa in Riyadh under 1.5M SAR\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/chat/conversations/{{conversation_id}}/messages/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "chat",
+                "conversations",
+                "{{conversation_id}}",
+                "messages",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "12. Analytics",
+      "item": [
+        {
+          "name": "Office KPI Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/analytics/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "analytics",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Office Per-Listing Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/analytics/listings/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "analytics",
+                "listings",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Office Page Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{office_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offices/{{office_id}}/analytics/page/?range=30d",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offices",
+                "{{office_id}}",
+                "analytics",
+                "page",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "range",
+                  "value": "30d"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Admin — Platform KPIs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/analytics/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "analytics",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Admin — Per-Office Metrics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/analytics/offices/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "analytics",
+                "offices",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "13. Admin / Compliance",
+      "item": [
+        {
+          "name": "List All Offices",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/offices",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "offices"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Suspend Office",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/offices/{{office_id}}/suspend/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "offices",
+                "{{office_id}}",
+                "suspend",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Set Office Ranking",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ranking_score\": 90\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/offices/{{office_id}}/ranking/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "offices",
+                "{{office_id}}",
+                "ranking",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Compliance Incidents",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/compliance/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "compliance",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Compliance Incident",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/compliance/{{compliance_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "compliance",
+                "{{compliance_id}}",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Platform Settings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/settings/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "settings",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Platform Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"commission_rate\": 2.5,\n  \"min_listing_price\": 100000,\n  \"max_free_listings_per_office\": 5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/settings/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "settings",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List All Demands",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/demands/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "demands",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Distribute Demand to Offices",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"office_ids\": [\"{{office_id}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/demands/{{demand_id}}/distribute/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "demands",
+                "{{demand_id}}",
+                "distribute",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View Demand Distributions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/demands/{{demand_id}}/distributions/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "demands",
+                "{{demand_id}}",
+                "distributions",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List All Buyers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/buyers/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "buyers",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List All Subscriptions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/subscriptions/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "subscriptions",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "14. Cities",
+      "item": [
+        {
+          "name": "List All Cities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/cities/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "cities",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "buyer_token",
+      "value": ""
+    },
+    {
+      "key": "office_token",
+      "value": ""
+    },
+    {
+      "key": "admin_token",
+      "value": ""
+    },
+    {
+      "key": "buyer_id",
+      "value": ""
+    },
+    {
+      "key": "office_id",
+      "value": ""
+    },
+    {
+      "key": "listing_id",
+      "value": ""
+    },
+    {
+      "key": "negotiation_id",
+      "value": ""
+    },
+    {
+      "key": "visit_id",
+      "value": ""
+    },
+    {
+      "key": "demand_id",
+      "value": ""
+    },
+    {
+      "key": "campaign_id",
+      "value": ""
+    },
+    {
+      "key": "conversation_id",
+      "value": ""
+    },
+    {
+      "key": "plan_id",
+      "value": ""
+    },
+    {
+      "key": "office_slug",
+      "value": "my-office"
+    },
+    {
+      "key": "page_slug",
+      "value": "my-office"
+    }
+  ]
+}

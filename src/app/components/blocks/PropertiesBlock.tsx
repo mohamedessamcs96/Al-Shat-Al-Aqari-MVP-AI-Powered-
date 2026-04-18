@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin, Bed, Bath, Maximize2, Star, Filter, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import type { PropertiesBlockData, Theme } from '../../lib/page-builder-types';
-import type { Listing } from '../../lib/mock-data';
-import { mockListings, formatPrice, getCityName } from '../../lib/mock-data';
+import { formatPrice, getCityName } from '../../lib/formatters';
+import { offices as officesApi, listings as listingsApi } from '../../lib/api-client';
 import { Badge } from '../ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
@@ -27,11 +27,22 @@ export function PropertiesBlock({ data, theme, officeId, isEditing }: Props) {
   const navigate = useNavigate();
   const [filterType, setFilterType] = useState<string>('all');
   const [filterBedrooms, setFilterBedrooms] = useState<string>('all');
+  const [allListings, setAllListings] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (officeId) {
+      officesApi.listListings(officeId).then((res: any) => {
+        setAllListings(Array.isArray(res) ? res : (res?.results ?? []));
+      }).catch(() => setAllListings([]));
+    } else {
+      listingsApi.list().then((res: any) => {
+        setAllListings(Array.isArray(res) ? res : (res?.results ?? []));
+      }).catch(() => setAllListings([]));
+    }
+  }, [officeId]);
 
   // Filter listings
-  let listings: Listing[] = officeId
-    ? mockListings.filter((l) => l.office_id === officeId)
-    : mockListings;
+  let listings: any[] = allListings;
 
   if (data.filter.status && data.filter.status !== 'all') {
     listings = listings.filter((l) => l.status === data.filter.status);
@@ -48,7 +59,7 @@ export function PropertiesBlock({ data, theme, officeId, isEditing }: Props) {
 
   listings = listings.slice(0, data.maxItems);
 
-  const uniqueTypes = [...new Set(mockListings.map((l) => l.property_type))];
+  const uniqueTypes = [...new Set(allListings.map((l: any) => l.property_type as string))];
 
   const colsMap: Record<number, string> = {
     1: 'grid-cols-1',
@@ -141,7 +152,7 @@ export function PropertiesBlock({ data, theme, officeId, isEditing }: Props) {
 }
 
 interface CardProps {
-  listing: Listing;
+  listing: any;
   cardStyle: string;
   theme: Theme;
   showPrice: boolean;

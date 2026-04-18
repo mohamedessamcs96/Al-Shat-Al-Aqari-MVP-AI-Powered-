@@ -10,6 +10,8 @@ import { OfficeCampaigns } from "./components/OfficeCampaigns";
 import { OfficeListings } from "./components/OfficeListings";
 import { OfficeSubscription } from "./components/OfficeSubscription";
 import { MiniPageEditor } from "./components/MiniPageEditor";import { LinktreeEditor } from './components/LinktreeEditor';import { AdminConsole } from "./components/AdminConsole";
+import { OfficeVisits } from "./components/OfficeVisits";
+import { OfficeNegotiations } from "./components/OfficeNegotiations";
 import { BuyerDashboard } from "./components/BuyerDashboard";
 import { NegotiationView } from "./components/NegotiationView";
 import { LoginPage } from "./components/LoginPage";
@@ -63,6 +65,14 @@ export const router = createBrowserRouter([
   {
     path: "/office/subscription",
     Component: OfficeSubscription,
+  },
+  {
+    path: "/office/visits",
+    Component: OfficeVisits,
+  },
+  {
+    path: "/office/negotiations",
+    Component: OfficeNegotiations,
   },
   {
     path: "/office/mini-page-editor",

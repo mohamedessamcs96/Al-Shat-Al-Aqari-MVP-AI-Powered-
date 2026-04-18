@@ -1,18 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { Home, MessageSquare, Calendar, DollarSign, Heart, ArrowLeft, Clock, CheckCircle, XCircle, LogOut } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { mockVisitRequests, mockNegotiations, mockListings, formatPrice, getCityName } from '../lib/mock-data';
+import { formatPrice } from '../lib/formatters';
+import { buyers as buyersApi } from '../lib/api-client';
+import { getUser, logout as authLogout } from '../lib/auth';
 
 export function BuyerDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('visits');
+  const buyerId = getUser()?.id ?? '';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [visits, setVisits] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [negotiations, setNegotiations] = useState<any[]>([]);
 
-  // Mock saved/favorite listings
-  const savedListings = mockListings.slice(0, 3);
+  useEffect(() => {
+    if (!buyerId) return;
+    buyersApi.listVisits(buyerId)
+      .then(data => setVisits(data as any[]))
+      .catch(() => {});
+    buyersApi.listNegotiations(buyerId)
+      .then(data => setNegotiations(data as any[]))
+      .catch(() => {});
+  }, [buyerId]);
+
+  // Saved listings are managed locally (favourites not yet backed by API)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [savedListings] = useState<any[]>([]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -24,7 +42,7 @@ export function BuyerDashboard() {
             رجوع
           </Button>
           <h1 className="text-xl font-bold text-gray-900" dir="rtl">لوحة التحكم</h1>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+          <Button variant="ghost" size="sm" onClick={() => { authLogout(); navigate('/'); }}>
             <LogOut className="w-4 h-4 mr-2" />
             خروج
           </Button>
@@ -48,7 +66,7 @@ export function BuyerDashboard() {
             <div className="flex items-center justify-between" dir="rtl">
               <div>
                 <p className="text-sm text-gray-600">الزيارات المجدولة</p>
-                <p className="text-2xl font-bold text-gray-900">{mockVisitRequests.length}</p>
+                <p className="text-2xl font-bold text-gray-900">{visits.length}</p>
               </div>
               <Calendar className="w-8 h-8 text-blue-500" />
             </div>
@@ -58,7 +76,7 @@ export function BuyerDashboard() {
             <div className="flex items-center justify-between" dir="rtl">
               <div>
                 <p className="text-sm text-gray-600">العروض النشطة</p>
-                <p className="text-2xl font-bold text-gray-900">{mockNegotiations.length}</p>
+                <p className="text-2xl font-bold text-gray-900">{negotiations.length}</p>
               </div>
               <DollarSign className="w-8 h-8 text-green-500" />
             </div>
@@ -175,9 +193,9 @@ export function BuyerDashboard() {
           {/* Visits Tab */}
           <TabsContent value="visits" className="mt-6">
             <div className="space-y-4">
-              {mockVisitRequests.map((visit) => {
-                const listing = mockListings.find(l => l.id === visit.listing_id);
-                if (!listing) return null;
+              {visits.map((visit: any) => {
+                const listing = visit.listing ?? {};
+                if (!visit.id) return null;
 
                 return (
                   <Card key={visit.id} className="p-6">
@@ -236,7 +254,7 @@ export function BuyerDashboard() {
                 );
               })}
 
-              {mockVisitRequests.length === 0 && (
+              {visits.length === 0 && (
                 <Card className="p-12 text-center">
                   <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                   <h3 className="font-semibold text-gray-900 mb-2" dir="rtl">لا توجد زيارات مجدولة</h3>
@@ -253,11 +271,13 @@ export function BuyerDashboard() {
           {/* Negotiations Tab */}
           <TabsContent value="negotiations" className="mt-6">
             <div className="space-y-4">
-              {mockNegotiations.map((negotiation) => {
-                const listing = mockListings.find(l => l.id === negotiation.listing_id);
-                if (!listing) return null;
+              {negotiations.map((negotiation: any) => {
+                const listing = negotiation.listing ?? {};
+                if (!negotiation.id) return null;
 
-                const latestOffer = negotiation.history[negotiation.history.length - 1];
+                const latestOffer = Array.isArray(negotiation.history) && negotiation.history.length > 0
+                  ? negotiation.history[negotiation.history.length - 1]
+                  : null;
 
                 return (
                   <Card key={negotiation.id} className="p-6">
@@ -296,9 +316,13 @@ export function BuyerDashboard() {
                         </div>
 
                         <div className="mt-3 text-sm text-gray-600">
-                          <p>آخر عرض من: {latestOffer.party === 'buyer' ? 'أنت' : 'البائع'}</p>
-                          {latestOffer.message && (
-                            <p className="mt-1 bg-blue-50 p-2 rounded">{latestOffer.message}</p>
+                          {latestOffer && (
+                            <>
+                              <p>آخر عرض من: {latestOffer.party === 'buyer' ? 'أنت' : 'البائع'}</p>
+                              {latestOffer.message && (
+                                <p className="mt-1 bg-blue-50 p-2 rounded">{latestOffer.message}</p>
+                              )}
+                            </>
                           )}
                         </div>
 
@@ -319,7 +343,7 @@ export function BuyerDashboard() {
                 );
               })}
 
-              {mockNegotiations.length === 0 && (
+              {negotiations.length === 0 && (
                 <Card className="p-12 text-center">
                   <DollarSign className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                   <h3 className="font-semibold text-gray-900 mb-2" dir="rtl">لا توجد عروض نشطة</h3>

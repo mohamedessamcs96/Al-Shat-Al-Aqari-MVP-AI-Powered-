@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import {
   Building2, TrendingUp, Users, Eye, MessageSquare, ArrowRight,
@@ -21,7 +21,9 @@ import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { mockListings, mockDemandRequests, mockCampaigns, mockOffices, formatPrice, getCityName } from '../lib/mock-data';
+import { formatPrice, getCityName } from '../lib/formatters';
+import { offices as officesApi } from '../lib/api-client';
+import { getUser, logout as authLogout } from '../lib/auth';
 import { toast } from 'sonner';
 
 function DashSparkline({ data, color }: { data: number[]; color: string }) {
@@ -69,9 +71,54 @@ export function OfficeDashboard() {
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [currentPlan, setCurrentPlan] = useState('professional');
 
-  const officeId = 'office-1';
-  const office = mockOffices.find(o => o.id === officeId)!;
-  const officeListings = mockListings.filter(l => l.office_id === officeId);
+  const officeId = getUser()?.id || 'office-1';
+  const [apiOffice, setApiOffice] = useState<Record<string, unknown> | null>(null);
+  const [apiListings, setApiListings] = useState<any[] | null>(null);
+  const [apiLeads, setApiLeads] = useState<any[] | null>(null);
+  const [apiCampaigns, setApiCampaigns] = useState<any[] | null>(null);
+
+  // Fetch office data from API, fall back to mock data on error
+  useEffect(() => {
+    officesApi.getById(officeId)
+      .then((d) => setApiOffice(d))
+      .catch(() => {});
+    officesApi.listListings(officeId)
+      .then((d) => setApiListings(d))
+      .catch(() => {});
+    officesApi.listLeads(officeId)
+      .then((d) => setApiLeads(d))
+      .catch(() => {});
+    officesApi.listCampaigns(officeId)
+      .then((d) => setApiCampaigns(d))
+      .catch(() => {});
+  }, [officeId]);
+
+  // Derive display data from API
+  const office = apiOffice
+    ? {
+        id: officeId,
+        name: String((apiOffice as Record<string,unknown>).name ?? 'المكتب'),
+        slug: String((apiOffice as Record<string,unknown>).slug ?? ''),
+        city_id: String((apiOffice as Record<string,unknown>).city_id ?? ''),
+        verified: Boolean((apiOffice as Record<string,unknown>).verified ?? true),
+        phone: String((apiOffice as Record<string,unknown>).phone ?? ''),
+        email: String((apiOffice as Record<string,unknown>).email ?? ''),
+        logo_url: String((apiOffice as Record<string,unknown>).logo_url ?? ''),
+        rating: Number((apiOffice as Record<string,unknown>).rating ?? 0),
+      }
+    : { id: officeId, name: 'المكتب', slug: '', city_id: '', verified: false, phone: '', email: '', logo_url: '', rating: 0 };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const officeListings: any[] = apiListings ?? [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const leadsData: any[] = apiLeads ?? [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const campaignsData: any[] = apiCampaigns ?? [];
+
+  // Helper accessors for typed display
+  const pendingLeadsCount = leadsData.filter(l => l.validation_status === 'pending').length;
+  const urgentLeadsCount = leadsData.filter(l => l.intent_level === 'urgent').length;
+  const activeCampaignsCount = campaignsData.filter(c => c.status === 'active').length;
   const totalViews = 1234;
   const totalLeads = 45;
   const conversionRate = 8.5;
@@ -86,21 +133,44 @@ export function OfficeDashboard() {
     setTimeout(() => setQrCopied(false), 2000);
   };
 
-  const handleRespond = () => {
+  const handleRespond = async () => {
     if (!responseMessage.trim()) { toast.error('الرجاء كتابة رسالة'); return; }
-    toast.success('تم إرسال الرد بنجاح!');
+    try {
+      await officesApi.respondToLead(officeId, selectedLead!);
+      toast.success('تم إرسال الرد بنجاح!');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    }
     setResponseMessage('');
     setSelectedLead(null);
   };
 
-  const handleToggleCampaign = (campaignId: string, currentStatus: string) => {
+  const handleToggleCampaign = async (campaignId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'paused' : 'active';
-    toast.success(`تم ${newStatus === 'active' ? 'تفعيل' : 'إيقاف'} الحملة`);
+    try {
+      const updated = await officesApi.updateCampaign(officeId, campaignId, { status: newStatus });
+      setApiCampaigns(prev => (prev ?? []).map(c =>
+        (c as Record<string, unknown>).id === campaignId ? updated : c
+      ));
+      toast.success(`تم ${newStatus === 'active' ? 'تفعيل' : 'إيقاف'} الحملة`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    }
   };
 
-  const handleCreateCampaign = () => {
+  const handleCreateCampaign = async () => {
     if (!campaignName || !selectedListing) { toast.error('الرجاء ملء جميع الحقول المطلوبة'); return; }
-    toast.success('تم إنشاء الحملة بنجاح!');
+    try {
+      const newCampaign = await officesApi.createCampaign(officeId, {
+        name: campaignName,
+        listing: selectedListing,
+        audience_filter: audienceFilter,
+      });
+      setApiCampaigns(prev => [newCampaign, ...(prev ?? [])]);
+      toast.success('تم إنشاء الحملة بنجاح!');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    }
     setCampaignName(''); setSelectedListing(''); setAudienceFilter('');
     setIsCampaignDialogOpen(false);
   };
@@ -146,10 +216,11 @@ export function OfficeDashboard() {
     },
   ];
 
-  const filteredLeads = mockDemandRequests.filter(l =>
-    l.buyer_name.toLowerCase().includes(leadsSearch.toLowerCase()) ||
-    l.property_type.toLowerCase().includes(leadsSearch.toLowerCase())
-  );
+  const filteredLeads = leadsData.filter(l => {
+    const name = String(l.buyer_name ?? '').toLowerCase();
+    const type = String(l.property_type ?? '').toLowerCase();
+    return name.includes(leadsSearch.toLowerCase()) || type.includes(leadsSearch.toLowerCase());
+  });
 
   const handleQrDownload = () => {
     const svg = qrRef.current;
@@ -197,7 +268,7 @@ export function OfficeDashboard() {
               <Bell className="w-4 h-4 text-gray-600" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
             </button>
-            <Button size="sm" variant="ghost" className="text-gray-600 gap-1" onClick={() => navigate('/')}>
+            <Button size="sm" variant="ghost" className="text-gray-600 gap-1" onClick={() => { authLogout(); navigate('/'); }}>
               <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline">خروج</span>
             </Button>
@@ -287,8 +358,8 @@ export function OfficeDashboard() {
             {[
               { label: 'لوحة التحكم', icon: <Home className="w-4 h-4" />, tab: 'overview', badge: 0 },
               { label: 'عقاراتي', icon: <Building2 className="w-4 h-4" />, tab: 'listings', badge: officeListings.length },
-              { label: 'العملاء', icon: <Users className="w-4 h-4" />, tab: 'leads', badge: mockDemandRequests.filter(l => l.validation_status === 'pending').length },
-              { label: 'الحملات', icon: <Megaphone className="w-4 h-4" />, tab: 'campaigns', badge: mockCampaigns.filter(c => c.status === 'active').length },
+              { label: 'العملاء', icon: <Users className="w-4 h-4" />, tab: 'leads', badge: pendingLeadsCount },
+              { label: 'الحملات', icon: <Megaphone className="w-4 h-4" />, tab: 'campaigns', badge: activeCampaignsCount },
               { label: 'الأداء', icon: <BarChart3 className="w-4 h-4" />, tab: 'performance', badge: 0 },
               { label: 'الاشتراك', icon: <CreditCard className="w-4 h-4" />, tab: 'subscription', badge: 0 },
             ].map((item) => (
@@ -360,9 +431,9 @@ export function OfficeDashboard() {
                 <h2 className="text-lg font-extrabold">مرحباً، {office.name}!</h2>
                 <p className="text-blue-100 text-sm mt-0.5">
                   لديك{' '}
-                  <span className="font-bold text-white">{mockDemandRequests.filter(l => l.validation_status === 'pending').length} عملاء جدد</span>
+                  <span className="font-bold text-white">{pendingLeadsCount} عملاء جدد</span>
                   {' '}و{' '}
-                  <span className="font-bold text-white">{mockCampaigns.filter(c => c.status === 'active').length} حملات نشطة</span>
+                  <span className="font-bold text-white">{activeCampaignsCount} حملات نشطة</span>
                   {' '}الآن.
                 </p>
               </div>
@@ -390,7 +461,7 @@ export function OfficeDashboard() {
                   </button>
                 </div>
                 <div className="space-y-2.5">
-                  {mockDemandRequests.slice(0, 3).map((demand) => (
+                  {leadsData.slice(0, 3).map((demand) => (
                     <div
                       key={demand.id}
                       className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer"
@@ -437,7 +508,7 @@ export function OfficeDashboard() {
                   </button>
                 </div>
                 <div className="space-y-3">
-                  {mockCampaigns.filter(c => c.status === 'active').map((campaign) => (
+                  {campaignsData.filter((c) => c.status === 'active').map((campaign) => (
                     <div key={campaign.id} className="p-3 bg-gray-50 rounded-xl">
                       <div className="flex items-center justify-between mb-3">
                         <div>
@@ -799,9 +870,9 @@ export function OfficeDashboard() {
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
-                { label: 'إجمالي العملاء', value: mockDemandRequests.length, color: 'text-gray-900' },
-                { label: 'عملاء جدد', value: mockDemandRequests.filter(l => l.validation_status === 'pending').length, color: 'text-green-600' },
-                { label: 'عملاء عاجلون', value: mockDemandRequests.filter(l => l.intent_level === 'urgent').length, color: 'text-red-600' },
+                { label: 'إجمالي العملاء', value: leadsData.length, color: 'text-gray-900' },
+                { label: 'عملاء جدد', value: pendingLeadsCount, color: 'text-green-600' },
+                { label: 'عملاء عاجلون', value: urgentLeadsCount, color: 'text-red-600' },
                 { label: 'معدل الاستجابة', value: '85%', color: 'text-blue-600' },
               ].map(s => (
                 <Card key={s.label} className="p-4 border-0 shadow-sm">
@@ -834,9 +905,9 @@ export function OfficeDashboard() {
             {/* Sub-tabs */}
             <div className="flex gap-2 flex-wrap">
               {[
-                { label: `الكل (${mockDemandRequests.length})`, value: 'all' },
-                { label: `جديد (${mockDemandRequests.filter(l => l.validation_status === 'pending').length})`, value: 'new' },
-                { label: `عاجل (${mockDemandRequests.filter(l => l.intent_level === 'urgent').length})`, value: 'urgent' },
+                { label: `الكل (${leadsData.length})`, value: 'all' },
+                { label: `جديد (${pendingLeadsCount})`, value: 'new' },
+                { label: `عاجل (${urgentLeadsCount})`, value: 'urgent' },
                 { label: 'تم الرد', value: 'responded' },
               ].map(tab => (
                 <button
@@ -948,8 +1019,8 @@ export function OfficeDashboard() {
                       <Select value={selectedListing} onValueChange={setSelectedListing}>
                         <SelectTrigger className="mt-1"><SelectValue placeholder="اختر عقار للترويج له" /></SelectTrigger>
                         <SelectContent>
-                          {mockListings.slice(0, 5).map(l => (
-                            <SelectItem key={l.id} value={l.id}>{l.property_type} - {l.address}</SelectItem>
+                          {officeListings.slice(0, 5).map((l) => (
+                            <SelectItem key={String(l.id)} value={String(l.id)}>{String(l.property_type)} - {String(l.address)}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -970,10 +1041,10 @@ export function OfficeDashboard() {
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
-                { label: 'إجمالي الحملات', value: mockCampaigns.length, color: 'text-gray-900', Icon: Target },
-                { label: 'الحملات النشطة', value: mockCampaigns.filter(c => c.status === 'active').length, color: 'text-green-600', Icon: Play },
-                { label: 'إجمالي الوصول', value: mockCampaigns.reduce((s, c) => s + c.sent_count, 0), color: 'text-gray-900', Icon: Users },
-                { label: 'إجمالي العملاء', value: mockCampaigns.reduce((s, c) => s + c.lead_count, 0), color: 'text-orange-600', Icon: BarChart3 },
+                { label: 'إجمالي الحملات', value: campaignsData.length, color: 'text-gray-900', Icon: Target },
+                { label: 'الحملات النشطة', value: activeCampaignsCount, color: 'text-green-600', Icon: Play },
+                { label: 'إجمالي الوصول', value: campaignsData.reduce((s: number, c: Record<string, unknown>) => s + Number(c.sent_count ?? 0), 0), color: 'text-gray-900', Icon: Users },
+                { label: 'إجمالي العملاء', value: campaignsData.reduce((s: number, c: Record<string, unknown>) => s + Number(c.lead_count ?? 0), 0), color: 'text-orange-600', Icon: BarChart3 },
               ].map(s => (
                 <Card key={s.label} className="p-4 border-0 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
@@ -987,10 +1058,14 @@ export function OfficeDashboard() {
 
             {/* Campaigns list */}
             <div className="space-y-3">
-              {mockCampaigns.map((campaign) => {
-                const listing = mockListings.find(l => l.id === campaign.listing_id);
-                const clickRate = campaign.sent_count > 0 ? (campaign.click_count / campaign.sent_count) * 100 : 0;
-                const conversionRate = campaign.click_count > 0 ? (campaign.lead_count / campaign.click_count) * 100 : 0;
+              {campaignsData.map((campaign) => {
+                const campaignListingId = String(campaign.listing_id ?? '');
+                const listing = officeListings.find(l => l.id === campaignListingId);
+                const sentCount = Number(campaign.sent_count ?? 0);
+                const clickCount = Number(campaign.click_count ?? 0);
+                const leadCount = Number(campaign.lead_count ?? 0);
+                const clickRate = sentCount > 0 ? (clickCount / sentCount) * 100 : 0;
+                const conversionRate = clickCount > 0 ? (leadCount / clickCount) * 100 : 0;
                 return (
                   <Card key={campaign.id} className="p-5 border-0 shadow-sm">
                     <div className="flex items-start justify-between mb-4" dir="rtl">

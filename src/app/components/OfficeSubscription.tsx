@@ -1,16 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { ArrowLeft, Check, X, CreditCard, AlertCircle, Calendar, LogOut } from 'lucide-react';
+import { ArrowLeft, Check, X, CreditCard, AlertCircle, Calendar, LogOut, Loader2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { toast } from 'sonner';
+import { offices as officesApi } from '../lib/api-client';
+import { getUser, logout as authLogout } from '../lib/auth';
 
 export function OfficeSubscription() {
   const navigate = useNavigate();
+  const officeId = getUser()?.id || '';
   const [currentPlan, setCurrentPlan] = useState('professional');
   const [billingCycle, setBillingCycle] = useState('monthly');
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
+  const [renewalDate, setRenewalDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!officeId) return;
+    officesApi.getSubscription(officeId)
+      .then((data: any) => {
+        if (data.plan_id) setCurrentPlan(data.plan_id);
+        if (data.billing_cycle) setBillingCycle(data.billing_cycle);
+        if (data.renewal_date ?? data.expires_at) setRenewalDate(data.renewal_date ?? data.expires_at);
+      })
+      .catch(() => {});
+  }, [officeId]);
 
   const plans = [
     {
@@ -61,13 +77,31 @@ export function OfficeSubscription() {
     },
   ];
 
-  const handleUpgrade = (planId: string) => {
-    setCurrentPlan(planId);
-    toast.success(`تم الترقية إلى خطة ${plans.find(p => p.id === planId)?.name}!`);
+  const handleUpgrade = async (planId: string) => {
+    if (!officeId) return;
+    setSubscriptionLoading(true);
+    try {
+      await officesApi.updateSubscription(officeId, planId, billingCycle);
+      setCurrentPlan(planId);
+      toast.success(`تم الترقية إلى خطة ${plans.find(p => p.id === planId)?.name}!`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    } finally {
+      setSubscriptionLoading(false);
+    }
   };
 
-  const handleCancelSubscription = () => {
-    toast.success('تم إلغاء الاشتراك. سيتم إنهاء الخدمة في نهاية الدورة الحالية.');
+  const handleCancelSubscription = async () => {
+    if (!officeId) return;
+    setSubscriptionLoading(true);
+    try {
+      await officesApi.cancelSubscription(officeId);
+      toast.success('تم إلغاء الاشتراك. سيتم إنهاء الخدمة في نهاية الدورة الحالية.');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    } finally {
+      setSubscriptionLoading(false);
+    }
   };
 
   return (
@@ -80,7 +114,7 @@ export function OfficeSubscription() {
             رجوع
           </Button>
           <h1 className="text-xl font-bold text-gray-900" dir="rtl">إدارة الاشتراك</h1>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+          <Button variant="ghost" size="sm" onClick={() => { authLogout(); navigate('/'); }}>
             <LogOut className="w-4 h-4 mr-2" />
             خروج
           </Button>
@@ -109,7 +143,9 @@ export function OfficeSubscription() {
                 </div>
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-sm text-gray-600">تاريخ التجديد</p>
-                  <p className="text-lg font-bold text-gray-900">15 ابريل 2026</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    {renewalDate ? new Date(renewalDate).toLocaleDateString('ar-SA') : '—'}
+                  </p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-sm text-gray-600">الحالة</p>
@@ -121,8 +157,8 @@ export function OfficeSubscription() {
                   <CreditCard className="w-4 h-4 ml-2" />
                   تحديث بيانات الدفع
                 </Button>
-                <Button variant="outline" onClick={handleCancelSubscription} className="text-red-600 hover:bg-red-50">
-                  إلغاء الاشتراك
+                <Button variant="outline" onClick={handleCancelSubscription} disabled={subscriptionLoading} className="text-red-600 hover:bg-red-50">
+                  {subscriptionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'إلغاء الاشتراك'}
                 </Button>
               </div>
             </div>

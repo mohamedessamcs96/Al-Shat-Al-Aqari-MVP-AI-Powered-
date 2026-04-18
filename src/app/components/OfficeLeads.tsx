@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { ArrowLeft, Phone, Mail, MessageSquare, Filter, Search, Clock, LogOut } from 'lucide-react';
 import { Button } from './ui/button';
@@ -9,28 +9,45 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
-import { mockDemandRequests, getCityName, formatPrice } from '../lib/mock-data';
+import { offices as officesApi } from '../lib/api-client';
+import { getUser, logout as authLogout } from '../lib/auth';
+import { formatPrice, getCityName } from '../lib/formatters';
 import { toast } from 'sonner';
 
 export function OfficeLeads() {
   const navigate = useNavigate();
+  const officeId = getUser()?.id || '';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [leads, setLeads] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [responseMessage, setResponseMessage] = useState('');
   const [selectedLead, setSelectedLead] = useState<string | null>(null);
 
-  const handleRespond = () => {
+  useEffect(() => {
+    if (!officeId) return;
+    officesApi.listLeads(officeId)
+      .then((data) => setLeads(data as any[]))
+      .catch(() => {});
+  }, [officeId]);
+
+  const handleRespond = async () => {
     if (!responseMessage.trim()) {
       toast.error('الرجاء كتابة رسالة');
       return;
     }
-    toast.success('تم إرسال الرد بنجاح!');
+    try {
+      await officesApi.respondToLead(officeId, selectedLead!);
+      toast.success('تم إرسال الرد بنجاح!');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    }
     setResponseMessage('');
     setSelectedLead(null);
   };
 
-  const filteredLeads = mockDemandRequests.filter(lead =>
-    lead.buyer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    lead.property_type.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredLeads = leads.filter(lead =>
+    String(lead.buyer_name ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    String(lead.property_type ?? '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -43,7 +60,7 @@ export function OfficeLeads() {
             رجوع
           </Button>
           <h1 className="text-xl font-bold text-gray-900" dir="rtl">إدارة العملاء المحتملين</h1>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+          <Button variant="ghost" size="sm" onClick={() => { authLogout(); navigate('/'); }}>
             <LogOut className="w-4 h-4 mr-2" />
             خروج
           </Button>
@@ -55,18 +72,18 @@ export function OfficeLeads() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <Card className="p-4">
             <p className="text-sm text-gray-600" dir="rtl">إجمالي العملاء</p>
-            <p className="text-2xl font-bold text-gray-900">{mockDemandRequests.length}</p>
+            <p className="text-2xl font-bold text-gray-900">{leads.length}</p>
           </Card>
           <Card className="p-4">
             <p className="text-sm text-gray-600" dir="rtl">عملاء جدد</p>
             <p className="text-2xl font-bold text-green-600">
-              {mockDemandRequests.filter(l => l.validation_status === 'pending').length}
+              {leads.filter(l => l.validation_status === 'pending').length}
             </p>
           </Card>
           <Card className="p-4">
             <p className="text-sm text-gray-600" dir="rtl">عملاء عاجلون</p>
             <p className="text-2xl font-bold text-red-600">
-              {mockDemandRequests.filter(l => l.intent_level === 'urgent').length}
+              {leads.filter(l => l.intent_level === 'urgent').length}
             </p>
           </Card>
           <Card className="p-4">
@@ -98,12 +115,12 @@ export function OfficeLeads() {
         {/* Leads Tabs */}
         <Tabs defaultValue="all">
           <TabsList className="w-full grid grid-cols-4">
-            <TabsTrigger value="all">الكل ({mockDemandRequests.length})</TabsTrigger>
+            <TabsTrigger value="all">الكل ({leads.length})</TabsTrigger>
             <TabsTrigger value="new">
-              جديد ({mockDemandRequests.filter(l => l.validation_status === 'pending').length})
+              جديد ({leads.filter(l => l.validation_status === 'pending').length})
             </TabsTrigger>
             <TabsTrigger value="urgent">
-              عاجل ({mockDemandRequests.filter(l => l.intent_level === 'urgent').length})
+              عاجل ({leads.filter(l => l.intent_level === 'urgent').length})
             </TabsTrigger>
             <TabsTrigger value="responded">تم الرد</TabsTrigger>
           </TabsList>

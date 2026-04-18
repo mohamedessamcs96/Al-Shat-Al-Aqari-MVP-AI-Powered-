@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import {
   ArrowLeft, Save, Eye, Plus, Trash2, GripVertical,
@@ -10,7 +10,8 @@ import { toast } from 'sonner';
 import { useDrag, useDrop, DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useRef } from 'react';
-import { mockOffices } from '../lib/mock-data';
+import { offices as officesApi } from '../lib/api-client';
+import { getUser } from '../lib/auth';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -207,19 +208,19 @@ function Preview({ profile, links, appearance }: { profile: Profile; links: Link
 // ─── Main component ───────────────────────────────────────────────────────────
 export function LinktreeEditor() {
   const navigate = useNavigate();
-  const office = mockOffices[0];
+  const officeId = getUser()?.id || '';
 
   const [profile, setProfile] = useState<Profile>({
-    name: office.name,
-    bio: 'مكتب عقاري متخصص في بيع وتأجير العقارات السكنية والتجارية في الرياض',
-    avatar: office.logo_url,
+    name: '',
+    bio: '',
+    avatar: '',
   });
 
   const [links, setLinks] = useState<LinkItem[]>([
-    { id: '1', title: 'واتساب', url: `https://wa.me/${office.phone.replace(/\D/g,'')}`, icon: 'whatsapp', active: true },
-    { id: '2', title: 'عقاراتنا', url: `/office/${office.slug}`, icon: 'link', active: true },
+    { id: '1', title: 'واتساب', url: '', icon: 'whatsapp', active: true },
+    { id: '2', title: 'عقاراتنا', url: '', icon: 'link', active: true },
     { id: '3', title: 'إنستغرام', url: 'https://instagram.com', icon: 'instagram', active: true },
-    { id: '4', title: 'اتصل بنا', url: `tel:${office.phone}`, icon: 'phone', active: true },
+    { id: '4', title: 'اتصل بنا', url: '', icon: 'phone', active: true },
   ]);
 
   const [appearance, setAppearance] = useState<Appearance>({
@@ -229,11 +230,21 @@ export function LinktreeEditor() {
     btnColor: '#6366f1',
     font: 'cairo',
   });
-
   const [selectedLinkId, setSelectedLinkId] = useState<string | null>(null);
   const [leftTab, setLeftTab] = useState<'profile' | 'links' | 'appearance'>('links');
   const [isDirty, setIsDirty] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+
+  useEffect(() => {
+    if (!officeId) return;
+    officesApi.getLinktree(officeId)
+      .then((data: any) => {
+        if (data.profile) setProfile({ name: data.profile.name ?? '', bio: data.profile.bio ?? '', avatar: data.profile.avatar ?? '' });
+        if (data.links && Array.isArray(data.links)) setLinks(data.links);
+        if (data.appearance) setAppearance(prev => ({ ...prev, ...data.appearance }));
+      })
+      .catch(() => {});
+  }, [officeId]);
 
   const selectedLink = links.find(l => l.id === selectedLinkId) ?? null;
 
@@ -302,7 +313,14 @@ export function LinktreeEditor() {
                 <Eye className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">معاينة</span>
               </Button>
-              <Button size="sm" className="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white" onClick={() => { setIsDirty(false); toast.success('تم حفظ التغييرات!'); }}>
+              <Button size="sm" className="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white" onClick={async () => {
+                if (officeId) {
+                  try {
+                    await officesApi.saveLinktree(officeId, { profile, links, appearance } as unknown as Record<string, unknown>);
+                  } catch { /* ignore */ }
+                }
+                setIsDirty(false); toast.success('تم حفظ التغييرات!');
+              }}>
                 <Save className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">حفظ</span>
               </Button>

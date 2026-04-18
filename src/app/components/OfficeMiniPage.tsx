@@ -1,11 +1,12 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { Phone, Mail, MapPin, Star, Building2, MessageSquare, QrCode, Download, Copy, Check, Shield } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { mockOffices, mockListings, formatPrice, getCityName } from '../lib/mock-data';
+import { formatPrice } from '../lib/formatters';
+import { offices as officesApi } from '../lib/api-client';
 
 export function OfficeMiniPage() {
   const { slug } = useParams();
@@ -13,8 +14,26 @@ export function OfficeMiniPage() {
   const [qrOpen, setQrOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const qrRef = useRef<SVGSVGElement>(null);
+  const [office, setOffice] = useState<any>(null);
+  const [officeListings, setOfficeListings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const office = mockOffices.find(o => o.slug === slug);
+  useEffect(() => {
+    if (!slug) return;
+    officesApi.getBySlug(slug)
+      .then((res: any) => {
+        setOffice(res);
+        const id = res?.id;
+        if (id) {
+          return officesApi.listListings(id).then((lr: any) => {
+            setOfficeListings(Array.isArray(lr) ? lr : (lr?.results ?? []));
+          });
+        }
+      })
+      .catch(() => setOffice(null))
+      .finally(() => setLoading(false));
+  }, [slug]);
+
   const pageUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/office/${slug}`
     : `/office/${slug}`;
@@ -47,8 +66,13 @@ export function OfficeMiniPage() {
     };
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
   };
-  const officeListings = office ? mockListings.filter(l => l.office_id === office.id) : [];
-
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-500">جاري التحميل...</p>
+      </div>
+    );
+  }
   if (!office) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

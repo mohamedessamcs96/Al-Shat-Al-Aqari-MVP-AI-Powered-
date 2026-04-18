@@ -8,7 +8,10 @@ import {
 import { Input } from './ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from './ui/sheet';
 import { useNavigate } from 'react-router';
-import { mockListings, formatPrice, getCityName, type ChatMessage } from '../lib/mock-data';
+import { type ChatMessage } from '../lib/mock-data';
+import { formatPrice, getCityName } from '../lib/formatters';
+import { chat as chatApi } from '../lib/api-client';
+import { getUser, logout as authLogout } from '../lib/auth';
 
 type Conversation = {
   id: string;
@@ -24,13 +27,6 @@ const makeSaraGreeting = (id: string): ChatMessage => ({
   timestamp: new Date().toISOString(),
   suggestions: ['أبحث عن فيلا في الرياض', 'شقة بسعر 800 ألف', 'عقار بجوار البحر في جدة', 'أريد رؤية أفضل العروض'],
 });
-
-const SEED_CONVERSATIONS: Conversation[] = [
-  { id: 'h1', title: 'شراء شقة في الرياض', createdAt: Date.now() - 86400000, messages: [makeSaraGreeting('h1g')] },
-  { id: 'h2', title: 'إستثمار في جدة', createdAt: Date.now() - 172800000, messages: [makeSaraGreeting('h2g')] },
-  { id: 'h3', title: 'مقارنة الفيلا', createdAt: Date.now() - 259200000, messages: [makeSaraGreeting('h3g')] },
-  { id: 'h4', title: 'تقييم المكاسة', createdAt: Date.now() - 345600000, messages: [makeSaraGreeting('h4g')] },
-];
 
 const QUICK_PROMPTS = [
   { label: 'عقارات الشركات', icon: <Building2 className="w-3.5 h-3.5" /> },
@@ -75,11 +71,8 @@ function ConvList({ convs, activeId, onSelect, onDelete }: {
 
 export function ChatInterface() {
   const newConvId = 'current';
-  const [conversations, setConversations] = useState<Conversation[]>([
-    { id: newConvId, title: 'محادثة جديدة', createdAt: Date.now(), messages: [makeSaraGreeting('g0')] },
-    ...SEED_CONVERSATIONS,
-  ]);
-  const [activeId, setActiveId] = useState(newConvId);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeId, setActiveId] = useState<string>('');
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   // Default closed on mobile (< 1024px), open on desktop
@@ -88,53 +81,84 @@ export function ChatInterface() {
   const isDesktop = () => window.innerWidth >= 1024;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const user = getUser();
 
   const activeConv = conversations.find(c => c.id === activeId) ?? conversations[0];
-  const messages = activeConv.messages;
+  const messages = activeConv?.messages ?? [];
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const generateAIResponse = (userMessage: string): ChatMessage => {
-    const lower = userMessage.toLowerCase();
-    let relevantListings = mockListings;
+  // Load conversations from API on mount
+  useEffect(() => {
+    chatApi.listConversations().then((data) => {
+      const convs = (data as Array<Record<string, unknown>>).map((c) => ({
+        id: String(c.id ?? c._id ?? ''),
+        title: String(c.title ?? c.summary ?? 'محادثة'),
+        messages: [] as ChatMessage[],
+        createdAt: c.created_at ? new Date(String(c.created_at)).getTime() : Date.now(),
+      }));
+      if (convs.length > 0) {
+        setConversations(convs);
+        setActiveId(convs[0].id);
+        loadMessages(convs[0].id, convs);
+      } else {
+        // No conversations yet – create the first one automatically
+        createNewConversation();
+      }
+    }).catch(() => {
+      // Not authenticated or network error – start with a greeting-only view
+      const id = newConvId;
+      setConversations([{ id, title: 'محادثة جديدة', createdAt: Date.now(), messages: [makeSaraGreeting(`${id}_g`)] }]);
+      setActiveId(id);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    if (lower.includes('فيلا') || lower.includes('villa')) relevantListings = mockListings.filter(l => l.property_type === 'Villa');
-    if (lower.includes('شقة') || lower.includes('apartment')) relevantListings = mockListings.filter(l => l.property_type === 'Apartment');
-    if (lower.includes('الرياض') || lower.includes('riyadh')) relevantListings = relevantListings.filter(l => l.city_id === '1');
-    if (lower.includes('جدة') || lower.includes('jeddah')) relevantListings = relevantListings.filter(l => l.city_id === '2');
-    if (lower.includes('800') || lower.includes('٨٠٠')) relevantListings = relevantListings.filter(l => l.price >= 600000 && l.price <= 1000000);
-    if (lower.includes('مليون') || lower.includes('million')) relevantListings = relevantListings.filter(l => l.price >= 1000000);
-
-    if (relevantListings.length > 0) {
-      return {
-        id: Date.now().toString(),
-        role: 'assistant',
-        content: `عثرت على ${relevantListings.length} عقار يطابق معاييرك. إليك أفضل الخيارات:`,
-        timestamp: new Date().toISOString(),
-        listings: relevantListings.slice(0, 3),
-        suggestions: ['أريد رؤية المزيد', 'هل يمكن ترتيب زيارة؟', 'أريد التفاوض على السعر', 'ابحث عن خيارات أخرى'],
-      };
-    }
-    return {
-      id: Date.now().toString(),
-      role: 'assistant',
-      content: 'أفهم متطلباتك. دعني أساعدك في العثور على العقار المثالي. يمكنك أيضاً تقديم طلب عقار مخصص.',
-      timestamp: new Date().toISOString(),
-      suggestions: ['ميزانيتي 800 ألف إلى مليون', 'أفضل شمال الرياض', '3 غرف نوم على الأقل', 'عقار بحديقة'],
-      hasNoDemandCTA: true,
-    };
+  const loadMessages = (convId: string, convList: Conversation[]) => {
+    chatApi.getMessages(convId).then((data) => {
+      const raw = data as Record<string, unknown>;
+      const msgs: ChatMessage[] = ((raw.messages ?? []) as Array<Record<string, unknown>>).map((m) => ({
+        id: String(m.id ?? Date.now()),
+        role: m.role === 'user' ? 'user' : 'assistant',
+        content: String(m.content ?? ''),
+        timestamp: String(m.created_at ?? new Date().toISOString()),
+      }));
+      if (msgs.length === 0) {
+        msgs.push(makeSaraGreeting(`${convId}_g`));
+      }
+      setConversations(convList.map(c => c.id === convId ? { ...c, messages: msgs } : c));
+    }).catch(() => {});
   };
 
-  const handleSend = (text?: string) => {
+  const createNewConversation = async () => {
+    try {
+      const res = await chatApi.startConversation();
+      const raw = res as Record<string, unknown>;
+      const id = String(raw.id ?? raw._id ?? `local_${Date.now()}`);
+      const greeting = makeSaraGreeting(`${id}_g`);
+      const newConv: Conversation = { id, title: 'محادثة جديدة', createdAt: Date.now(), messages: [greeting] };
+      setConversations(prev => [newConv, ...prev]);
+      setActiveId(id);
+    } catch {
+      // Fallback: local-only conversation
+      const id = `local_${Date.now()}`;
+      const greeting = makeSaraGreeting(`${id}_g`);
+      setConversations(prev => [{ id, title: 'محادثة جديدة', createdAt: Date.now(), messages: [greeting] }, ...prev]);
+      setActiveId(id);
+    }
+  };
+
+  const handleSend = async (text?: string) => {
     const textToSend = text || inputValue.trim();
     if (!textToSend) return;
 
     const userMsg: ChatMessage = { id: Date.now().toString(), role: 'user', content: textToSend, timestamp: new Date().toISOString() };
+    const convId = activeId;
 
     setConversations(prev => prev.map(c => {
-      if (c.id !== activeId) return c;
+      if (c.id !== convId) return c;
       const hasUserMsg = c.messages.some(m => m.role === 'user');
       return {
         ...c,
@@ -144,31 +168,64 @@ export function ChatInterface() {
     }));
     setInputValue('');
     setIsTyping(true);
-    setTimeout(() => {
-      const aiMsg = generateAIResponse(textToSend);
+
+    try {
+      const res = await chatApi.sendMessage(convId, textToSend);
+      const raw = res as Record<string, unknown>;
+      // Backend returns the AI message (or full conversation)
+      const assistantContent = String(
+        (raw.assistant_message as Record<string, unknown>)?.content ??
+        raw.reply ?? raw.content ?? raw.message ??
+        'أفهم متطلباتك. دعني أساعدك في العثور على العقار المثالي.'
+      );
+      const aiMsg: ChatMessage = {
+        id: String(raw.id ?? (Date.now() + 1).toString()),
+        role: 'assistant',
+        content: assistantContent,
+        timestamp: new Date().toISOString(),
+        suggestions: (raw.suggestions as string[] | undefined) ?? ['أريد رؤية المزيد', 'هل يمكن ترتيب زيارة؟', 'أريد التفاوض على السعر'],
+        listings: (raw.listings as ChatMessage['listings'] | undefined),
+      };
       setConversations(prev => prev.map(c =>
-        c.id !== activeId ? c : { ...c, messages: [...c.messages, aiMsg] }
+        c.id !== convId ? c : { ...c, messages: [...c.messages, aiMsg] }
       ));
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : 'حدث خطأ في إرسال الرسالة';
+      const errAiMsg: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: errMsg,
+        timestamp: new Date().toISOString(),
+      };
+      setConversations(prev => prev.map(c =>
+        c.id !== convId ? c : { ...c, messages: [...c.messages, errAiMsg] }
+      ));
+    } finally {
       setIsTyping(false);
-    }, 1000);
+    }
   };
 
   const startNewChat = () => {
-    const id = `chat_${Date.now()}`;
-    const greeting = makeSaraGreeting(`${id}_g`);
-    setConversations(prev => [{ id, title: 'محادثة جديدة', createdAt: Date.now(), messages: [greeting] }, ...prev]);
-    setActiveId(id);
-    setInputValue('');
+    createNewConversation();
     if (!isDesktop()) setSidebarOpen(false);
   };
 
   const selectConversation = (id: string) => {
     setActiveId(id);
+    // Lazy-load messages for this conversation if not yet loaded
+    setConversations(prev => {
+      const conv = prev.find(c => c.id === id);
+      if (conv && conv.messages.length === 0) {
+        loadMessages(id, prev);
+      }
+      return prev;
+    });
     if (!isDesktop()) setSidebarOpen(false);
   };
 
   const deleteConversation = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    chatApi.deleteConversation(id).catch(() => {});
     setConversations(prev => {
       const next = prev.filter(c => c.id !== id);
       if (activeId === id && next.length > 0) setActiveId(next[0].id);
@@ -311,7 +368,7 @@ export function ChatInterface() {
             <button onClick={() => navigate('/demand')} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
               <MessageSquare className="w-4 h-4" />
             </button>
-            <button onClick={() => navigate('/')} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
+            <button onClick={() => { authLogout(); navigate('/'); }} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
               <LogOut className="w-4 h-4" />
             </button>
           </div>
@@ -529,22 +586,7 @@ export function ChatInterface() {
                 </SheetTitle>
               </SheetHeader>
               <div className="space-y-3">
-                {mockListings.slice(0, 4).map(l => (
-                  <div
-                    key={l.id}
-                    className="flex gap-3 p-3 rounded-xl border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/40 cursor-pointer transition-all"
-                    onClick={() => { setSidebarPanel(null); navigate(`/listings/${l.id}`); }}
-                  >
-                    <img src={l.images[0]} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-800 truncate">{l.property_type} — {l.address}</p>
-                      <p className="text-xs text-indigo-600 font-bold mt-0.5">{formatPrice(l.price)}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">{l.bedrooms} غرف · {l.area} م²</p>
-                    </div>
-                    <Heart className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5 fill-rose-400" />
-                  </div>
-                ))}
-                <p className="text-xs text-slate-400 text-center pt-2">احفظ العقارات من الشات لتظهر هنا</p>
+                <p className="text-xs text-slate-400 text-center py-8">احفظ العقارات من الشات لتظهر هنا</p>
               </div>
             </>
           )}
@@ -692,7 +734,7 @@ export function ChatInterface() {
 
                 {/* Logout */}
                 <button
-                  onClick={() => { setSidebarPanel(null); navigate('/'); }}
+                  onClick={() => { setSidebarPanel(null); authLogout(); navigate('/'); }}
                   className="w-full py-3 rounded-2xl bg-red-50 border border-red-100 text-red-500 text-sm font-semibold hover:bg-red-100 active:bg-red-200 transition-colors flex items-center justify-center gap-2"
                 >
                   <LogOut className="w-4 h-4" />

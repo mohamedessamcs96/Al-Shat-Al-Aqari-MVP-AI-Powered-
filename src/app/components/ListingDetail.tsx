@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { ArrowLeft, MapPin, Bed, Bath, Maximize, Star, Phone, Mail, Calendar, MessageCircle, DollarSign, LogOut } from 'lucide-react';
 import { Button } from './ui/button';
@@ -9,7 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
-import { mockListings, mockOffices, getCityName, formatPrice } from '../lib/mock-data';
+import { formatPrice } from '../lib/formatters';
+import { listings as listingsApi } from '../lib/api-client';
+import { logout as authLogout } from '../lib/auth';
 import { toast } from 'sonner';
 
 export function ListingDetail() {
@@ -20,11 +22,24 @@ export function ListingDetail() {
   const [visitNotes, setVisitNotes] = useState('');
   const [offerAmount, setOfferAmount] = useState('');
   const [offerMessage, setOfferMessage] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [listing, setListing] = useState<any | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [similarListings, setSimilarListings] = useState<any[]>([]);
 
-  const listing = mockListings.find(l => l.id === id);
-  const office = listing ? mockOffices.find(o => o.id === listing.office_id) : null;
+  useEffect(() => {
+    if (!id) return;
+    listingsApi.get(id)
+      .then(data => setListing(data))
+      .catch(() => {});
+    listingsApi.getSimilar(id)
+      .then(data => setSimilarListings(data as any[]))
+      .catch(() => {});
+  }, [id]);
 
-  if (!listing || !office) {
+  const office = listing?.office ?? {};
+
+  if (!listing) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -37,23 +52,33 @@ export function ListingDetail() {
     );
   }
 
-  const handleScheduleVisit = () => {
+  const handleScheduleVisit = async () => {
     if (!visitDate) {
       toast.error('الرجاء اختيار تاريخ الزيارة');
       return;
     }
-    toast.success('تم إرسال طلب الزيارة بنجاح! سيتم التواصل معك قريباً.');
-    setVisitDate('');
-    setVisitNotes('');
+    try {
+      await listingsApi.scheduleVisit(id!, visitDate, visitNotes);
+      toast.success('تم إرسال طلب الزيارة بنجاح! سيتم التواصل معك قريباً.');
+      setVisitDate('');
+      setVisitNotes('');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    }
   };
 
-  const handleSubmitOffer = () => {
+  const handleSubmitOffer = async () => {
     if (!offerAmount) {
       toast.error('الرجاء إدخال قيمة العرض');
       return;
     }
-    toast.success('تم إرسال عرضك بنجاح! سيقوم المكتب بمراجعته قريباً.');
-    navigate('/buyer/dashboard');
+    try {
+      await listingsApi.startNegotiation(id!, Number(offerAmount), offerMessage);
+      toast.success('تم إرسال عرضك بنجاح! سيقوم المكتب بمراجعته قريباً.');
+      navigate('/buyer/dashboard');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    }
   };
 
   return (
@@ -66,7 +91,7 @@ export function ListingDetail() {
             رجوع
           </Button>
           <h1 className="text-lg font-semibold text-gray-900" dir="rtl">تفاصيل العقار</h1>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+          <Button variant="ghost" size="sm" onClick={() => { authLogout(); navigate('/'); }}>
             <LogOut className="w-4 h-4 mr-2" />
             خروج
           </Button>
@@ -81,13 +106,13 @@ export function ListingDetail() {
             <Card className="overflow-hidden">
               <div className="aspect-video bg-gray-900">
                 <img
-                  src={listing.images[selectedImage]}
+                  src={listing.images?.[selectedImage] ?? ''}
                   alt={listing.property_type}
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="p-4 flex gap-2 overflow-x-auto">
-                {listing.images.map((img, idx) => (
+                {(listing.images ?? []).map((img: string, idx: number) => (
                   <button
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
@@ -155,7 +180,7 @@ export function ListingDetail() {
                 
                 <TabsContent value="features" className="mt-4">
                   <div className="grid grid-cols-2 gap-3" dir="rtl">
-                    {listing.features.map((feature, idx) => (
+                    {(listing.features ?? []).map((feature: string, idx: number) => (
                       <div key={idx} className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
                         <div className="w-2 h-2 bg-blue-600 rounded-full" />
                         <span className="text-gray-700">{feature}</span>
@@ -321,17 +346,14 @@ export function ListingDetail() {
             <Card className="p-6">
               <h3 className="font-semibold text-gray-900 mb-3" dir="rtl">عقارات مشابهة</h3>
               <div className="space-y-3">
-                {mockListings
-                  .filter(l => l.id !== listing.id && l.city_id === listing.city_id)
-                  .slice(0, 2)
-                  .map((similar) => (
+                {similarListings.slice(0, 2).map((similar: any) => (
                     <div
                       key={similar.id}
                       onClick={() => navigate(`/listings/${similar.id}`)}
                       className="flex gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
                     >
                       <img
-                        src={similar.images[0]}
+                        src={similar.images?.[0] ?? ''}
                         alt={similar.property_type}
                         className="w-16 h-16 rounded object-cover"
                       />

@@ -1,10 +1,7 @@
-"use client";
-
 import * as React from "react";
-import { Phone, CheckCircle, AlertCircle, ArrowLeft, LogOut } from "lucide-react";
+import { Phone, CheckCircle, AlertCircle, ArrowLeft, LogOut, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router";
-import mockApi from "../lib/mock-api";
-import { mockCities } from "../lib/mock-data";
+import { auth as apiAuth, demands, cities as citiesApi } from "../lib/api-client";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Input } from "./ui/input";
@@ -16,7 +13,8 @@ export function DemandForm() {
   const navigate = useNavigate();
   const [step, setStep] = React.useState<"form" | "otp" | "success">("form");
   const [buyerName, setBuyerName] = React.useState("");
-  const [cityId, setCityId] = React.useState(mockCities[0]?.id || "1");
+  const [cityList, setCityList] = React.useState<{ id: string; name: string }[]>([]);
+  const [cityId, setCityId] = React.useState("");
   const [budgetMin, setBudgetMin] = React.useState("");
   const [budgetMax, setBudgetMax] = React.useState("");
   const [propertyType, setPropertyType] = React.useState("");
@@ -25,7 +23,17 @@ export function DemandForm() {
   const [phone, setPhone] = React.useState("");
   const [otp, setOtp] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(false);
   const [createdDemandId, setCreatedDemandId] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    citiesApi.list().then((data) => {
+      setCityList(data);
+      if (data.length > 0) setCityId(data[0].id);
+    }).catch(() => {
+      // fallback – keep fields empty
+    });
+  }, []);
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,8 +46,15 @@ export function DemandForm() {
       setError("الاسم مطلوب");
       return;
     }
-    mockApi.sendOtp(phone);
-    setStep("otp");
+    setLoading(true);
+    try {
+      await apiAuth.sendOtp(phone);
+      setStep("otp");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "حدث خطأ في إرسال رمز التحقق");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVerifyOtp = async () => {
@@ -48,25 +63,26 @@ export function DemandForm() {
       setError("أدخل رمز التحقق");
       return;
     }
-    const res = mockApi.verifyOtp(phone, otp);
-    if (!res.ok) {
-      setError(`فشل التحقق: ${res.reason === "expired" ? "انتهت صلاحية الرمز" : "الرمز غير صحيح"}`);
-      return;
+    setLoading(true);
+    try {
+      await apiAuth.verifyOtp(phone, otp);
+      const demand = await demands.create({
+        buyer_name: buyerName,
+        city: cityId,
+        budget_min: budgetMin ? Number(budgetMin) : 0,
+        budget_max: budgetMax ? Number(budgetMax) : 0,
+        property_type: propertyType || "أي نوع",
+        bedrooms_min: bedroomsMin ? Number(bedroomsMin) : 0,
+        intent_level: "serious",
+        notes,
+      });
+      setCreatedDemandId((demand as { id?: string }).id ?? null);
+      setStep("success");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "حدث خطأ في التحقق");
+    } finally {
+      setLoading(false);
     }
-    // Proceed to create demand
-    const demand = mockApi.createDemand({
-      buyer_name: buyerName,
-      city_id: cityId,
-      budget_min: budgetMin ? Number(budgetMin) : 0,
-      budget_max: budgetMax ? Number(budgetMax) : 0,
-      property_type: propertyType || "أي نوع",
-      bedrooms_min: bedroomsMin ? Number(bedroomsMin) : 0,
-      intent_level: "serious",
-      validation_status: "validated",
-      notes,
-    } as any);
-    setCreatedDemandId(demand.id);
-    setStep("success");
   };
 
   return (
@@ -118,11 +134,11 @@ export function DemandForm() {
                     onChange={(e) => setCityId(e.target.value)}
                     className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                   >
-                    {mockCities.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
+                      {cityList.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
                   </select>
                 </div>
 
@@ -212,8 +228,10 @@ export function DemandForm() {
                 {/* Submit Button */}
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3"
+                  disabled={loading}
+                  className="w-full bg-gradient-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 disabled:opacity-60"
                 >
+                  {loading ? <Loader2 className="w-4 h-4 ml-2 animate-spin" /> : null}
                   إرسال الطلب والتحقق
                 </Button>
               </form>
@@ -256,14 +274,12 @@ export function DemandForm() {
                 {/* Verify Button */}
                 <Button
                   onClick={handleVerifyOtp}
-                  className="w-full bg-gradient-to-br from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3"
+                  disabled={loading}
+                  className="w-full bg-gradient-to-br from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 disabled:opacity-60"
                 >
+                  {loading ? <Loader2 className="w-4 h-4 ml-2 animate-spin" /> : null}
                   التحقق وإرسال الطلب
                 </Button>
-
-                <p className="text-xs text-gray-500 text-center">
-                  لم تستقبل رمزاً؟ تحقق من وحدة التحكم في متصفحك (مرحلة التطوير)
-                </p>
               </div>
             </Card>
           )}

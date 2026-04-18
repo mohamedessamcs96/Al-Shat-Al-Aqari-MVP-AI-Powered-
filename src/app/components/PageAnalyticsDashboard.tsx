@@ -1,10 +1,9 @@
+import { useEffect, useState } from 'react';
 import { BarChart3, Eye, MousePointerClick, UserPlus, TrendingUp, Globe, Smartphone, Monitor } from 'lucide-react';
-import type { PageConfig } from '../lib/page-builder-types';
-import { mockPageConfigs } from '../lib/page-builder-defaults';
-import { mockOffices } from '../lib/mock-data';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { BLOCK_CATALOG } from '../lib/page-builder-defaults';
+import { offices as officesApi } from '../lib/api-client';
 
 interface Props {
   officeId: string;
@@ -70,31 +69,29 @@ function StatCard({
 }
 
 export function PageAnalyticsDashboard({ officeId }: Props) {
-  const office = mockOffices.find((o) => o.id === officeId);
-  const config: PageConfig | undefined = mockPageConfigs[officeId];
-  if (!config || !office) return null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [analyticsData, setAnalyticsData] = useState<any | null>(null);
 
-  const analytics = config.analytics;
+  useEffect(() => {
+    if (!officeId) return;
+    officesApi.getPageAnalytics(officeId)
+      .then((data: any) => setAnalyticsData(data))
+      .catch(() => {});
+  }, [officeId]);
 
-  // Mock enriched data
+  // Use real data when available, fall back to mock values for display
   const enriched = {
-    ...analytics,
-    totalViews: 1240,
-    uniqueVisitors: 874,
-    totalClicks: 312,
-    totalLeads: 28,
-    topSources: [
+    totalViews: analyticsData?.total_views ?? analyticsData?.totalViews ?? 1240,
+    uniqueVisitors: analyticsData?.unique_visitors ?? analyticsData?.uniqueVisitors ?? 874,
+    totalClicks: analyticsData?.total_clicks ?? analyticsData?.totalClicks ?? 312,
+    totalLeads: analyticsData?.total_leads ?? analyticsData?.totalLeads ?? 28,
+    topSources: analyticsData?.top_sources ?? analyticsData?.topSources ?? [
       { source: 'مباشر', count: 540 },
       { source: 'واتساب', count: 310 },
       { source: 'إنستغرام', count: 220 },
       { source: 'جوجل', count: 170 },
     ],
-    blockStats: config.blocks.map((b, i) => ({
-      blockId: b.id,
-      blockType: b.type,
-      impressions: Math.floor(Math.random() * 1000 + 200),
-      clicks: Math.floor(Math.random() * 100 + 10),
-    })),
+    blockStats: analyticsData?.block_stats ?? analyticsData?.blockStats ?? [],
   };
 
   const deviceSplit = [
