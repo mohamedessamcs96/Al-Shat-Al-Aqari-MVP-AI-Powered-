@@ -124,10 +124,14 @@ export function PublicOfficePage() {
 
   useEffect(() => {
     if (!slug) return;
-    // Load office by slug
+    // Try slug first, fall back to ID lookup (allows preview via officeId)
     officesApi.getBySlug(slug)
       .then((data: any) => setOffice(data))
-      .catch(() => setOffice(null));
+      .catch(() => {
+        officesApi.getById(slug)
+          .then((data: any) => setOffice(data))
+          .catch(() => setOffice(null));
+      });
     // Load public page config
     pagesApi.getPublicPage(slug)
       .then((data: any) => setPageConfig(data as PageConfig))

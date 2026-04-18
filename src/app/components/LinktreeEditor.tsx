@@ -314,11 +314,8 @@ export function LinktreeEditor() {
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" className="gap-1.5" onClick={() => {
-                if (officeSlug) {
-                  window.open(`/office/${officeSlug}`, '_blank');
-                } else {
-                  setPreviewOpen(true);
-                }
+                const target = officeSlug || officeId;
+                if (target) window.open(`/office/${target}`, '_blank');
               }}>
                 <Eye className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">معاينة</span>
