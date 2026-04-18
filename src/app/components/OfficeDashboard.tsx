@@ -72,7 +72,7 @@ export function OfficeDashboard() {
   const [currentPlan, setCurrentPlan] = useState('professional');
 
   const officeId = getUser()?.id || '';
-  const [apiOffice, setApiOffice] = useState<Record<string, unknown> | null>(null);
+  const [apiAnalytics, setApiAnalytics] = useState<any>(null);
   const [apiListings, setApiListings] = useState<any[] | null>(null);
   const [apiLeads, setApiLeads] = useState<any[] | null>(null);
   const [apiCampaigns, setApiCampaigns] = useState<any[] | null>(null);
@@ -82,6 +82,9 @@ export function OfficeDashboard() {
     const toArr = (d: unknown) => Array.isArray(d) ? d : ((d as any)?.results ?? []);
     officesApi.getById(officeId)
       .then((d) => setApiOffice(d))
+      .catch(() => {});
+    officesApi.getAnalytics(officeId)
+      .then((d) => setApiAnalytics(d))
       .catch(() => {});
     officesApi.listListings(officeId)
       .then((d) => setApiListings(toArr(d)))
@@ -116,13 +119,18 @@ export function OfficeDashboard() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const campaignsData: any[] = apiCampaigns ?? [];
 
+  // KPI values from API analytics
+  const totalViews = apiAnalytics?.views ?? apiAnalytics?.total_views ?? 0;
+  const totalLeads = apiAnalytics?.leads ?? apiAnalytics?.total_leads ?? leadsData.length;
+  const conversionRate = apiAnalytics?.conversion_rate ?? 0;
+  const inquiries = apiAnalytics?.inquiries ?? 0;
+  const visits = apiAnalytics?.visits ?? apiAnalytics?.total_visits ?? 0;
+  const trendPoints: number[] = Array.isArray(apiAnalytics?.monthly_trends) ? apiAnalytics.monthly_trends : [];
+
   // Helper accessors for typed display
   const pendingLeadsCount = leadsData.filter(l => l.validation_status === 'pending').length;
   const urgentLeadsCount = leadsData.filter(l => l.intent_level === 'urgent').length;
   const activeCampaignsCount = campaignsData.filter(c => c.status === 'active').length;
-  const totalViews = 1234;
-  const totalLeads = 45;
-  const conversionRate = 8.5;
 
   const pageUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/office/${office.slug}`
@@ -248,9 +256,9 @@ export function OfficeDashboard() {
 
   const stats = [
     { label: 'إجمالي العقارات', value: officeListings.length, delta: '+3 هذا الشهر', positive: true, sparkColor: '#3b82f6', sparkData: [1,1,2,2,2,2,3,2,3,3,2,3,3,2,3], icon: <Building2 className="w-5 h-5" />, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'المشاهدات', value: totalViews.toLocaleString(), delta: '+12% هذا الأسبوع', positive: true, sparkColor: '#8b5cf6', sparkData: [20,35,22,40,38,55,48,62,58,70,75,68,82,79,90], icon: <Eye className="w-5 h-5" />, color: 'text-purple-600', bg: 'bg-purple-50' },
-    { label: 'العملاء المحتملون', value: totalLeads, delta: '+8 جديد', positive: true, sparkColor: '#10b981', sparkData: [5,8,6,10,12,9,14,16,13,18,17,20,22,19,24], icon: <Users className="w-5 h-5" />, color: 'text-green-600', bg: 'bg-green-50' },
-    { label: 'معدل التحويل', value: `${conversionRate}%`, delta: '+2.3% هذا الشهر', positive: true, sparkColor: '#f97316', sparkData: [5,6,5.5,7,6.5,7.5,7,8,7.5,8.5,8,8.5,9,8.5,9], icon: <TrendingUp className="w-5 h-5" />, color: 'text-orange-600', bg: 'bg-orange-50' },
+    { label: 'المشاهدات', value: totalViews.toLocaleString(), delta: apiAnalytics ? '' : '—', positive: true, sparkColor: '#8b5cf6', sparkData: trendPoints.length ? trendPoints : [], icon: <Eye className="w-5 h-5" />, color: 'text-purple-600', bg: 'bg-purple-50' },
+    { label: 'العملاء المحتملون', value: totalLeads, delta: '', positive: true, sparkColor: '#10b981', sparkData: [], icon: <Users className="w-5 h-5" />, color: 'text-green-600', bg: 'bg-green-50' },
+    { label: 'معدل التحويل', value: conversionRate ? `${conversionRate}%` : '—', delta: '', positive: true, sparkColor: '#f97316', sparkData: [], icon: <TrendingUp className="w-5 h-5" />, color: 'text-orange-600', bg: 'bg-orange-50' },
   ];
 
   return (
@@ -706,10 +714,10 @@ export function OfficeDashboard() {
             <div className="h-px bg-gray-100" />
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               {[
-                { label: 'الاستفسارات', value: '187', delta: '↑ 12% من الشهر الماضي', green: true },
-                { label: 'الزيارات', value: '94', delta: 'معايير الأداء', green: false },
-                { label: 'المشاهدات', value: '12,563', delta: '↑ 8% من الأسبوع الماضي', green: true },
-                { label: 'معدل التحويل', value: '88%', delta: 'من إجمالي المشاهدات', green: false, blue: true },
+                { label: 'الاستفسارات', value: inquiries ? String(inquiries) : '—', delta: '', green: true },
+                { label: 'الزيارات', value: visits ? String(visits) : '—', delta: '', green: false },
+                { label: 'المشاهدات', value: totalViews ? totalViews.toLocaleString() : '—', delta: '', green: true },
+                { label: 'معدل التحويل', value: conversionRate ? `${conversionRate}%` : '—', delta: '', green: false, blue: true },
               ].map(m => (
                 <Card key={m.label} className="p-4 border-0 shadow-sm">
                   <p className="text-xs text-gray-500 mb-1">{m.label}</p>
@@ -730,7 +738,7 @@ export function OfficeDashboard() {
                   >
                     <div className="w-full h-full rounded-full bg-white flex flex-col items-center justify-center shadow-inner">
                       <p className="text-xs text-gray-500">نسبة النجاح</p>
-                      <p className="text-2xl font-bold text-gray-900">88%</p>
+                      <p className="text-2xl font-bold text-gray-900">{conversionRate ? `${conversionRate}%` : '—'}</p>
                     </div>
                   </div>
                 </div>

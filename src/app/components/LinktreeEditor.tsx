@@ -245,7 +245,18 @@ export function LinktreeEditor() {
       .then((data: any) => {
         if (data.profile) setProfile({ name: data.profile.name ?? '', bio: data.profile.bio ?? '', avatar: data.profile.avatar ?? '' });
         if (data.links && Array.isArray(data.links)) setLinks(data.links);
-        if (data.appearance) setAppearance(prev => ({ ...prev, ...data.appearance }));
+        if (data.appearance) {
+          // Map API field names → internal state
+          const a = data.appearance;
+          setAppearance(prev => ({
+            ...prev,
+            bg: a.background ?? a.bg ?? prev.bg,
+            btnStyle: a.buttonStyle ?? a.btnStyle ?? prev.btnStyle,
+            btnRadius: a.buttonRadius ?? a.btnRadius ?? prev.btnRadius,
+            btnColor: a.buttonColor ?? a.btnColor ?? prev.btnColor,
+            font: a.font ?? prev.font,
+          }));
+        }
       })
       .catch(() => {});
   }, [officeId]);
@@ -315,18 +326,32 @@ export function LinktreeEditor() {
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" className="gap-1.5" onClick={() => {
                 const target = officeSlug || officeId;
-                if (target) window.open(`/office/${target}`, '_blank');
+                if (target) {
+                  window.open(`/office/${target}`, '_blank');
+                } else {
+                  toast.error('لم يتم تحديد المكتب بعد');
+                }
               }}>
                 <Eye className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">معاينة</span>
               </Button>
               <Button size="sm" className="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white" onClick={async () => {
-                if (officeId) {
-                  try {
-                    await officesApi.saveLinktree(officeId, { profile, links, appearance } as unknown as Record<string, unknown>);
-                  } catch { /* ignore */ }
+                if (!officeId) { toast.error('يرجى تسجيل الدخول أولاً'); return; }
+                try {
+                  // Map internal state → API field names
+                  const apiAppearance = {
+                    background: appearance.bg,
+                    buttonStyle: appearance.btnStyle,
+                    buttonRadius: appearance.btnRadius,
+                    buttonColor: appearance.btnColor,
+                    font: appearance.font,
+                  };
+                  await officesApi.saveLinktree(officeId, { profile, links, appearance: apiAppearance });
+                  setIsDirty(false);
+                  toast.success('تم حفظ التغييرات!');
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : 'فشل الحفظ');
                 }
-                setIsDirty(false); toast.success('تم حفظ التغييرات!');
               }}>
                 <Save className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">حفظ</span>
