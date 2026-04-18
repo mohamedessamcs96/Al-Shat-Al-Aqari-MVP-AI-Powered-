@@ -234,9 +234,13 @@ export function LinktreeEditor() {
   const [leftTab, setLeftTab] = useState<'profile' | 'links' | 'appearance'>('links');
   const [isDirty, setIsDirty] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [officeSlug, setOfficeSlug] = useState<string>('');
 
   useEffect(() => {
     if (!officeId) return;
+    officesApi.getById(officeId)
+      .then((d: any) => { if (d?.slug) setOfficeSlug(d.slug); })
+      .catch(() => {});
     officesApi.getLinktree(officeId)
       .then((data: any) => {
         if (data.profile) setProfile({ name: data.profile.name ?? '', bio: data.profile.bio ?? '', avatar: data.profile.avatar ?? '' });
@@ -309,7 +313,13 @@ export function LinktreeEditor() {
               {isDirty && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium border border-amber-200">غير محفوظ</span>}
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setPreviewOpen(true)}>
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => {
+                if (officeSlug) {
+                  window.open(`/office/${officeSlug}`, '_blank');
+                } else {
+                  setPreviewOpen(true);
+                }
+              }}>
                 <Eye className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">معاينة</span>
               </Button>
