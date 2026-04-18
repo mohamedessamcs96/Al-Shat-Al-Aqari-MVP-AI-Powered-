@@ -73,6 +73,7 @@ export function OfficeDashboard() {
 
   const officeId = getUser()?.id || '';
   const [apiAnalytics, setApiAnalytics] = useState<any>(null);
+  const [apiOffice, setApiOffice] = useState<Record<string, unknown> | null>(null);
   const [apiListings, setApiListings] = useState<any[] | null>(null);
   const [apiLeads, setApiLeads] = useState<any[] | null>(null);
   const [apiCampaigns, setApiCampaigns] = useState<any[] | null>(null);
