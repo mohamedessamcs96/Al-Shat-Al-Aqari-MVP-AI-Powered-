@@ -36,7 +36,7 @@ export function OfficeListings() {
   useEffect(() => {
     if (!officeId) return;
     officesApi.listListings(officeId)
-      .then(data => setOfficeListings(data as any[]))
+      .then(data => setOfficeListings(Array.isArray(data) ? data : ((data as any)?.results ?? [])))
       .catch(() => {});
   }, [officeId]);
 

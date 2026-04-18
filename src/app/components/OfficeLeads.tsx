@@ -26,7 +26,7 @@ export function OfficeLeads() {
   useEffect(() => {
     if (!officeId) return;
     officesApi.listLeads(officeId)
-      .then((data) => setLeads(data as any[]))
+      .then((data) => setLeads(Array.isArray(data) ? data : ((data as any)?.results ?? [])))
       .catch(() => {});
   }, [officeId]);
 

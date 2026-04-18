@@ -33,7 +33,7 @@ export function ListingDetail() {
       .then(data => setListing(data))
       .catch(() => {});
     listingsApi.getSimilar(id)
-      .then(data => setSimilarListings(data as any[]))
+      .then(data => setSimilarListings(Array.isArray(data) ? data : ((data as any)?.results ?? [])))
       .catch(() => {});
   }, [id]);
 

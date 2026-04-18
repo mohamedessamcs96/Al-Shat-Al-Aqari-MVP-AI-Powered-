@@ -38,7 +38,7 @@ export function OfficeVisits() {
   useEffect(() => {
     if (!officeId) { setLoading(false); return; }
     officesApi.listVisits(officeId)
-      .then((data) => setVisits(data as any[]))
+      .then((data) => setVisits(Array.isArray(data) ? data : ((data as any)?.results ?? [])))
       .catch(() => toast.error('تعذّر تحميل بيانات الزيارات'))
       .finally(() => setLoading(false));
   }, [officeId]);

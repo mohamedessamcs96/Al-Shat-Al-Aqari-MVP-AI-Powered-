@@ -30,10 +30,10 @@ export function AdminConsole() {
       .then(data => setStats(data as any))
       .catch(() => {});
     adminApi.listOffices()
-      .then(data => setOffices(data as any[]))
+      .then(data => setOffices(Array.isArray(data) ? data : ((data as any)?.results ?? [])))
       .catch(() => {});
     adminApi.listCompliance()
-      .then(data => setIncidents(data as any[]))
+      .then(data => setIncidents(Array.isArray(data) ? data : ((data as any)?.results ?? [])))
       .catch(() => {});
   }, []);
 

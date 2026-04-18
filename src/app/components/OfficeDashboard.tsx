@@ -79,18 +79,19 @@ export function OfficeDashboard() {
 
   // Fetch office data from API, fall back to mock data on error
   useEffect(() => {
+    const toArr = (d: unknown) => Array.isArray(d) ? d : ((d as any)?.results ?? []);
     officesApi.getById(officeId)
       .then((d) => setApiOffice(d))
       .catch(() => {});
     officesApi.listListings(officeId)
-      .then((d) => setApiListings(d))
-      .catch(() => {});
+      .then((d) => setApiListings(toArr(d)))
+      .catch(() => setApiListings([]));
     officesApi.listLeads(officeId)
-      .then((d) => setApiLeads(d))
-      .catch(() => {});
+      .then((d) => setApiLeads(toArr(d)))
+      .catch(() => setApiLeads([]));
     officesApi.listCampaigns(officeId)
-      .then((d) => setApiCampaigns(d))
-      .catch(() => {});
+      .then((d) => setApiCampaigns(toArr(d)))
+      .catch(() => setApiCampaigns([]));
   }, [officeId]);
 
   // Derive display data from API

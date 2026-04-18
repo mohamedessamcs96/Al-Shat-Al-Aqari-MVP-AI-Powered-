@@ -21,10 +21,10 @@ export function BuyerDashboard() {
   useEffect(() => {
     if (!buyerId) return;
     buyersApi.listVisits(buyerId)
-      .then(data => setVisits(data as any[]))
+      .then(data => setVisits(Array.isArray(data) ? data : ((data as any)?.results ?? [])))
       .catch(() => {});
     buyersApi.listNegotiations(buyerId)
-      .then(data => setNegotiations(data as any[]))
+      .then(data => setNegotiations(Array.isArray(data) ? data : ((data as any)?.results ?? [])))
       .catch(() => {});
   }, [buyerId]);
 

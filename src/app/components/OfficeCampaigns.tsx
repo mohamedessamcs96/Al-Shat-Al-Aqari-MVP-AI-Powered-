@@ -29,10 +29,10 @@ export function OfficeCampaigns() {
   useEffect(() => {
     if (!officeId) return;
     officesApi.listCampaigns(officeId)
-      .then(data => setCampaigns(data as any[]))
+      .then(data => setCampaigns(Array.isArray(data) ? data : ((data as any)?.results ?? [])))
       .catch(() => {});
     officesApi.listListings(officeId)
-      .then(data => setOfficeListings(data as any[]))
+      .then(data => setOfficeListings(Array.isArray(data) ? data : ((data as any)?.results ?? [])))
       .catch(() => {});
   }, [officeId]);
 

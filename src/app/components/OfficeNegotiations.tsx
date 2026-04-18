@@ -35,7 +35,7 @@ export function OfficeNegotiations() {
   useEffect(() => {
     if (!officeId) { setLoading(false); return; }
     officesApi.listNegotiations(officeId)
-      .then((data) => setNegotiations(data as any[]))
+      .then((data) => setNegotiations(Array.isArray(data) ? data : ((data as any)?.results ?? [])))
       .catch(() => toast.error('تعذّر تحميل بيانات التفاوض'))
       .finally(() => setLoading(false));
   }, [officeId]);
