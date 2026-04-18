@@ -12,7 +12,7 @@ import { Textarea } from './ui/textarea';
 import { Progress } from './ui/progress';
 import { formatPrice, getCityName } from '../lib/formatters';
 import { offices as officesApi } from '../lib/api-client';
-import { getUser } from '../lib/auth';
+import { getUser, getOfficeIdFromToken, getOfficeIdFromRawResponse, setUser } from '../lib/auth';
 import { toast } from 'sonner';
 
 export function OfficeListings() {
@@ -29,7 +29,15 @@ export function OfficeListings() {
     city_id: '1',
   });
 
-  const officeId = getUser()?.id ?? '';
+  const officeId = (() => {
+    const stored = getUser()?.id;
+    if (stored) return stored;
+    const fromToken = getOfficeIdFromToken();
+    if (fromToken) { setUser({ id: fromToken }); return fromToken; }
+    const fromRaw = getOfficeIdFromRawResponse();
+    if (fromRaw) { setUser({ id: fromRaw }); return fromRaw; }
+    return '';
+  })();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [officeListings, setOfficeListings] = useState<any[]>([]);
 
