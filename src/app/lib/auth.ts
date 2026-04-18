@@ -82,13 +82,15 @@ export function getOfficeIdFromRawResponse(): string | null {
   if (!raw) return null;
   try {
     const r = JSON.parse(raw) as Record<string, unknown>;
+    const d = r.data as Record<string, unknown> | undefined;
     return (
+      (d?.office_id as string | undefined) ||
+      (d?.id as string | undefined) ||
+      ((d?.user as Record<string, unknown> | undefined)?.id as string | undefined) ||
       (r.office_id as string | undefined) ||
       (r.id as string | undefined) ||
       ((r.office as Record<string, unknown> | undefined)?.id as string | undefined) ||
       ((r.user as Record<string, unknown> | undefined)?.id as string | undefined) ||
-      ((r.data as Record<string, unknown> | undefined)?.office_id as string | undefined) ||
-      ((r.data as Record<string, unknown> | undefined)?.id as string | undefined) ||
       null
     );
   } catch {

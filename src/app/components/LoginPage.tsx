@@ -81,8 +81,10 @@ export function LoginPage() {
     try {
       const res = await apiAuth.officeLogin(officeEmail, officePassword);
       const raw = res as any;
-      // Try every known token field name that backends use
-      const tok = raw.token || raw.access || raw.key || raw.auth_token || raw.session_token || raw.jwt || raw.jwt_token || raw.data?.token || raw.data?.access || '';
+      // API returns { success, code, message, data, meta, tokens }
+      const tok = raw.tokens?.access || raw.tokens?.token || raw.tokens?.key ||
+        raw.token || raw.access || raw.key || raw.auth_token || raw.session_token ||
+        raw.jwt || raw.jwt_token || raw.data?.token || raw.data?.access || '';
       console.info('[login] full response:', JSON.stringify(res));
       if (!tok) {
         toast.error(`لم يُعثر على رمز المصادقة — حقول الاستجابة: ${Object.keys(raw).join(', ')}`);
@@ -91,9 +93,10 @@ export function LoginPage() {
       setToken(tok);
       setRole('office');
       setRawAuthResponse(res as Record<string, unknown>);
-      const offId = raw.office_id || raw.id || raw.office?.id || raw.user?.id || raw.data?.office_id || raw.data?.id || '';
+      const offId = raw.data?.office_id || raw.data?.id || raw.office_id || raw.id ||
+        raw.office?.id || raw.user?.id || raw.data?.user?.id || '';
       if (offId) setUser({ id: String(offId), email: officeEmail });
-      else console.warn('[login] officeId not found in:', JSON.stringify(res));
+      else console.warn('[login] officeId not found. data keys:', Object.keys(raw.data ?? {}));
       toast.success('مرحباً بك في لوحة التحكم!');
       navigate('/office/dashboard');
     } catch (err) {
@@ -111,7 +114,9 @@ export function LoginPage() {
     try {
       const res = await apiAuth.officeRegister(registerOfficeName, registerEmail, registerPhone, registerPassword);
       const rawReg = res as any;
-      const tok = rawReg.token || rawReg.access || rawReg.key || rawReg.auth_token || rawReg.session_token || rawReg.jwt || rawReg.jwt_token || rawReg.data?.token || rawReg.data?.access || '';
+      const tok = rawReg.tokens?.access || rawReg.tokens?.token || rawReg.tokens?.key ||
+        rawReg.token || rawReg.access || rawReg.key || rawReg.auth_token || rawReg.session_token ||
+        rawReg.jwt || rawReg.jwt_token || rawReg.data?.token || rawReg.data?.access || '';
       if (!tok) {
         toast.error(`لم يُعثر على رمز المصادقة — حقول الاستجابة: ${Object.keys(rawReg).join(', ')}`);
         return;
@@ -119,7 +124,8 @@ export function LoginPage() {
       setToken(tok);
       setRole('office');
       setRawAuthResponse(res as Record<string, unknown>);
-      const offRegId = rawReg.office_id || rawReg.id || rawReg.office?.id || rawReg.user?.id || rawReg.data?.office_id || rawReg.data?.id || '';
+      const offRegId = rawReg.data?.office_id || rawReg.data?.id || rawReg.office_id || rawReg.id ||
+        rawReg.office?.id || rawReg.user?.id || rawReg.data?.user?.id || '';
       if (offRegId) setUser({ id: String(offRegId), name: registerOfficeName, email: registerEmail });
       toast.success('تم إنشاء الحساب بنجاح! مرحباً بك في الشات العقاري');
       navigate('/office/dashboard');
