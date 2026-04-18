@@ -72,6 +72,7 @@ function extractFieldErrors(body: Record<string, unknown>): string | undefined {
 
 export interface AuthResponse {
   token: string;
+  id?: string;        // generic id some backends return
   buyer_id?: string;
   office_id?: string;
 }

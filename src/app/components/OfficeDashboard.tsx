@@ -71,7 +71,7 @@ export function OfficeDashboard() {
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [currentPlan, setCurrentPlan] = useState('professional');
 
-  const officeId = getUser()?.id || 'office-1';
+  const officeId = getUser()?.id || '';
   const [apiOffice, setApiOffice] = useState<Record<string, unknown> | null>(null);
   const [apiListings, setApiListings] = useState<any[] | null>(null);
   const [apiLeads, setApiLeads] = useState<any[] | null>(null);
@@ -701,7 +701,7 @@ export function OfficeDashboard() {
                 <BarChart3 className="w-4 h-4 text-blue-600" />
                 تحليلات صفحة المكتب العامة
               </h3>
-              <PageAnalyticsDashboard officeId="office-1" />
+              <PageAnalyticsDashboard officeId={officeId} />
             </div>
             <div className="h-px bg-gray-100" />
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

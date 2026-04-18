@@ -46,7 +46,8 @@ export function LoginPage() {
       const res = await apiAuth.buyerLogin(buyerPhone);
       setToken(res.token);
       setRole('buyer');
-      if (res.buyer_id) setUser({ id: res.buyer_id, phone: buyerPhone });
+      const buyerId = res.buyer_id || res.id || '';
+      if (buyerId) setUser({ id: buyerId, phone: buyerPhone });
       toast.success('تم تسجيل الدخول بنجاح!');
       navigate('/chat');
     } catch (err) {
@@ -63,7 +64,8 @@ export function LoginPage() {
       const res = await apiAuth.buyerRegister(buyerName, buyerPhone);
       setToken(res.token);
       setRole('buyer');
-      if (res.buyer_id) setUser({ id: res.buyer_id, name: buyerName, phone: buyerPhone });
+      const buyerRegId = res.buyer_id || res.id || '';
+      if (buyerRegId) setUser({ id: buyerRegId, name: buyerName, phone: buyerPhone });
       toast.success('تم إنشاء حسابك بنجاح! مرحباً بك');
       navigate('/chat');
     } catch (err) {
@@ -80,7 +82,8 @@ export function LoginPage() {
       const res = await apiAuth.officeLogin(officeEmail, officePassword);
       setToken(res.token);
       setRole('office');
-      if (res.office_id) setUser({ id: res.office_id, email: officeEmail });
+      const offId = res.office_id || res.id || '';
+      if (offId) setUser({ id: offId, email: officeEmail });
       toast.success('مرحباً بك في لوحة التحكم!');
       navigate('/office/dashboard');
     } catch (err) {
@@ -99,7 +102,8 @@ export function LoginPage() {
       const res = await apiAuth.officeRegister(registerOfficeName, registerEmail, registerPhone, registerPassword);
       setToken(res.token);
       setRole('office');
-      if (res.office_id) setUser({ id: res.office_id, name: registerOfficeName, email: registerEmail });
+      const offRegId = res.office_id || res.id || '';
+      if (offRegId) setUser({ id: offRegId, name: registerOfficeName, email: registerEmail });
       toast.success('تم إنشاء الحساب بنجاح! مرحباً بك في الشات العقاري');
       navigate('/office/dashboard');
     } catch (err) {
