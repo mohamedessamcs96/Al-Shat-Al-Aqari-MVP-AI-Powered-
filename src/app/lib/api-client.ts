@@ -11,10 +11,9 @@
 import { getToken, getLang } from './auth';
 
 // In development the Vite proxy forwards /api/* to the backend (no CORS).
-// In production, point VITE_API_URL to your server or leave empty if same-origin.
-const BASE_URL =
-  (import.meta.env.VITE_API_URL as string | undefined) ??
-  (import.meta.env.DEV ? '' : 'http://79.72.4.1:8000');
+// In production the Vercel rewrite proxies /api/v1/* server-side (no mixed content).
+// Set VITE_API_URL only if you need to override (e.g. staging).
+const BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? '';
 const API_PREFIX = '/api/v1';
 
 // ── Core fetch wrapper ────────────────────────────────────────────────────────
