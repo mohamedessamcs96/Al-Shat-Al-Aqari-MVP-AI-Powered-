@@ -11,7 +11,7 @@ import { useDrag, useDrop, DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useRef } from 'react';
 import { offices as officesApi } from '../lib/api-client';
-import { getUser } from '../lib/auth';
+import { getUser, getOfficeIdFromToken, setUser } from '../lib/auth';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -208,7 +208,19 @@ function Preview({ profile, links, appearance }: { profile: Profile; links: Link
 // ─── Main component ───────────────────────────────────────────────────────────
 export function LinktreeEditor() {
   const navigate = useNavigate();
-  const officeId = getUser()?.id || '';
+
+  // Recover office ID: prefer stored user, fall back to JWT token payload
+  // (handles stale sessions where auth_user was saved without an id).
+  const officeId = (() => {
+    const stored = getUser()?.id;
+    if (stored) return stored;
+    const fromToken = getOfficeIdFromToken();
+    if (fromToken) {
+      // Persist so future calls don't need to decode again
+      setUser({ id: fromToken });
+    }
+    return fromToken ?? '';
+  })();
 
   const [profile, setProfile] = useState<Profile>({
     name: '',

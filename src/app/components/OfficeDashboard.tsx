@@ -23,7 +23,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { formatPrice, getCityName } from '../lib/formatters';
 import { offices as officesApi } from '../lib/api-client';
-import { getUser, logout as authLogout } from '../lib/auth';
+import { getUser, getOfficeIdFromToken, setUser, logout as authLogout } from '../lib/auth';
 import { toast } from 'sonner';
 
 function DashSparkline({ data, color }: { data: number[]; color: string }) {
@@ -71,7 +71,13 @@ export function OfficeDashboard() {
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [currentPlan, setCurrentPlan] = useState('professional');
 
-  const officeId = getUser()?.id || '';
+  const officeId = (() => {
+    const stored = getUser()?.id;
+    if (stored) return stored;
+    const fromToken = getOfficeIdFromToken();
+    if (fromToken) setUser({ id: fromToken });
+    return fromToken ?? '';
+  })();
   const [apiAnalytics, setApiAnalytics] = useState<any>(null);
   const [apiOffice, setApiOffice] = useState<Record<string, unknown> | null>(null);
   const [apiListings, setApiListings] = useState<any[] | null>(null);

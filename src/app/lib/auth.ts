@@ -67,6 +67,32 @@ export function setLang(lang: string): void {
   localStorage.setItem(KEYS.LANG, lang);
 }
 
+// ── JWT decode ───────────────────────────────────────────────────────────────
+
+/**
+ * Decodes the JWT payload (no verification) and returns the office_id
+ * or subject claim. Used as a fallback when auth_user is missing from
+ * localStorage (e.g. stale session before the auth fix was deployed).
+ */
+export function getOfficeIdFromToken(): string | null {
+  const token = getToken();
+  if (!token) return null;
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return (
+      payload?.office_id ??
+      payload?.sub ??
+      payload?.id ??
+      payload?.user_id ??
+      null
+    );
+  } catch {
+    return null;
+  }
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 export function isAuthenticated(): boolean {

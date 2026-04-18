@@ -82,7 +82,7 @@ export function LoginPage() {
       const res = await apiAuth.officeLogin(officeEmail, officePassword);
       setToken(res.token);
       setRole('office');
-      const offId = res.office_id || res.id || '';
+      const offId = res.office_id || res.id || (res.office as any)?.id || (res.user as any)?.id || '';
       if (offId) setUser({ id: offId, email: officeEmail });
       toast.success('مرحباً بك في لوحة التحكم!');
       navigate('/office/dashboard');
@@ -102,7 +102,7 @@ export function LoginPage() {
       const res = await apiAuth.officeRegister(registerOfficeName, registerEmail, registerPhone, registerPassword);
       setToken(res.token);
       setRole('office');
-      const offRegId = res.office_id || res.id || '';
+      const offRegId = res.office_id || res.id || (res.office as any)?.id || (res.user as any)?.id || '';
       if (offRegId) setUser({ id: offRegId, name: registerOfficeName, email: registerEmail });
       toast.success('تم إنشاء الحساب بنجاح! مرحباً بك في الشات العقاري');
       navigate('/office/dashboard');
