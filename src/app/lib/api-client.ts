@@ -10,7 +10,11 @@
 
 import { getToken, getLang } from './auth';
 
-const BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://79.72.4.1:8000';
+// In development the Vite proxy forwards /api/* to the backend (no CORS).
+// In production, point VITE_API_URL to your server or leave empty if same-origin.
+const BASE_URL =
+  (import.meta.env.VITE_API_URL as string | undefined) ??
+  (import.meta.env.DEV ? '' : 'http://79.72.4.1:8000');
 const API_PREFIX = '/api/v1';
 
 // ── Core fetch wrapper ────────────────────────────────────────────────────────

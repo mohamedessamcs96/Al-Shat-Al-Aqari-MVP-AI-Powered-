@@ -17,6 +17,17 @@ export default defineConfig({
     },
   },
 
+  // Proxy /api/v1 in dev to avoid CORS issues
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://79.72.4.1:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
+
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
 })
