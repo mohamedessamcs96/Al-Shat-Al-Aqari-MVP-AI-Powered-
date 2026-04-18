@@ -71,7 +71,9 @@ function extractFieldErrors(body: Record<string, unknown>): string | undefined {
 // ── 1. Auth ───────────────────────────────────────────────────────────────────
 
 export interface AuthResponse {
-  token: string;
+  token?: string;   // custom backends
+  access?: string;  // DRF SimpleJWT standard
+  refresh?: string;
   id?: string;
   buyer_id?: string;
   office_id?: string;

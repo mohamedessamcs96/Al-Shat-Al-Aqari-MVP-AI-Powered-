@@ -340,14 +340,14 @@ export function LinktreeEditor() {
                 if (target) {
                   window.open(`/office/${target}`, '_blank');
                 } else {
-                  toast.error('لم يتم تحديد المكتب بعد');
+                  navigate('/login');
                 }
               }}>
                 <Eye className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">معاينة</span>
               </Button>
               <Button size="sm" className="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white" onClick={async () => {
-                if (!officeId) { toast.error('يرجى تسجيل الدخول أولاً'); return; }
+                if (!officeId) { navigate('/login'); return; }
                 try {
                   // Map internal state → API field names
                   const apiAppearance = {

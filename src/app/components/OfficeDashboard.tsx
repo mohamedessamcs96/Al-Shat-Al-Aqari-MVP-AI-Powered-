@@ -88,6 +88,7 @@ export function OfficeDashboard() {
 
   // Fetch office data from API, fall back to mock data on error
   useEffect(() => {
+    if (!officeId) return; // not logged in yet – skip all requests
     const toArr = (d: unknown) => Array.isArray(d) ? d : ((d as any)?.results ?? []);
     officesApi.getById(officeId)
       .then((d) => setApiOffice(d))

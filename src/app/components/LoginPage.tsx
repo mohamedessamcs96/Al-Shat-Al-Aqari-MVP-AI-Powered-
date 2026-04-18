@@ -80,11 +80,16 @@ export function LoginPage() {
     setLoading(true);
     try {
       const res = await apiAuth.officeLogin(officeEmail, officePassword);
-      setToken(res.token);
+      const tok = res.token || res.access || '';
+      if (!tok) { toast.error('الاستجابة من الخادم لا تحتوي على رمز المصادقة'); return; }
+      setToken(tok);
       setRole('office');
       setRawAuthResponse(res as Record<string, unknown>);
-      const offId = res.office_id || res.id || (res.office as any)?.id || (res.user as any)?.id || '';
-      if (offId) setUser({ id: offId, email: officeEmail });
+      const raw = res as any;
+      const offId = raw.office_id || raw.id || raw.office?.id || raw.user?.id || raw.data?.office_id || raw.data?.id || '';
+      console.info('[login] raw response:', JSON.stringify(res));
+      if (offId) setUser({ id: String(offId), email: officeEmail });
+      else console.warn('[login] could not extract officeId from response', res);
       toast.success('مرحباً بك في لوحة التحكم!');
       navigate('/office/dashboard');
     } catch (err) {
@@ -101,11 +106,14 @@ export function LoginPage() {
     setLoading(true);
     try {
       const res = await apiAuth.officeRegister(registerOfficeName, registerEmail, registerPhone, registerPassword);
-      setToken(res.token);
+      const tok = res.token || res.access || '';
+      if (!tok) { toast.error('الاستجابة من الخادم لا تحتوي على رمز المصادقة'); return; }
+      setToken(tok);
       setRole('office');
       setRawAuthResponse(res as Record<string, unknown>);
-      const offRegId = res.office_id || res.id || (res.office as any)?.id || (res.user as any)?.id || '';
-      if (offRegId) setUser({ id: offRegId, name: registerOfficeName, email: registerEmail });
+      const raw = res as any;
+      const offRegId = raw.office_id || raw.id || raw.office?.id || raw.user?.id || raw.data?.office_id || raw.data?.id || '';
+      if (offRegId) setUser({ id: String(offRegId), name: registerOfficeName, email: registerEmail });
       toast.success('تم إنشاء الحساب بنجاح! مرحباً بك في الشات العقاري');
       navigate('/office/dashboard');
     } catch (err) {
