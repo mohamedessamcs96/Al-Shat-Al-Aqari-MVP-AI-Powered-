@@ -93,7 +93,14 @@ export function ChatInterface() {
   // Load conversations from API on mount
   useEffect(() => {
     chatApi.listConversations().then((data) => {
-      const convs = (data as Array<Record<string, unknown>>).map((c) => ({
+      // API may return wrapped response: { data: [...] } or { results: [...] } or raw array
+      const raw = data as unknown;
+      const list: Array<Record<string, unknown>> = Array.isArray(raw)
+        ? (raw as Array<Record<string, unknown>>)
+        : Array.isArray((raw as any)?.data) ? (raw as any).data
+        : Array.isArray((raw as any)?.results) ? (raw as any).results
+        : [];
+      const convs = list.map((c) => ({
         id: String(c.id ?? c._id ?? ''),
         title: String(c.title ?? c.summary ?? 'محادثة'),
         messages: [] as ChatMessage[],
@@ -154,8 +161,29 @@ export function ChatInterface() {
     const textToSend = text || inputValue.trim();
     if (!textToSend) return;
 
+    // If we only have a local/fallback conversation, create a real one on the backend first
+    let convId = activeId;
+    if (!convId || convId === 'current' || convId.startsWith('local_')) {
+      try {
+        const res = await chatApi.startConversation();
+        const raw = res as any;
+        const newId = String(raw.id ?? raw._id ?? (raw.data as any)?.id ?? `local_${Date.now()}`);
+        convId = newId;
+        setConversations(prev => prev.map(c =>
+          c.id === activeId ? { ...c, id: newId } : c
+        ));
+        setActiveId(newId);
+      } catch {
+        // No backend conversation – send as local_* so we don't hit /current/messages/
+        if (!convId || convId === 'current') {
+          convId = `local_${Date.now()}`;
+          setActiveId(convId);
+          setConversations(prev => prev.map(c => c.id === activeId ? { ...c, id: convId } : c));
+        }
+      }
+    }
+
     const userMsg: ChatMessage = { id: Date.now().toString(), role: 'user', content: textToSend, timestamp: new Date().toISOString() };
-    const convId = activeId;
 
     setConversations(prev => prev.map(c => {
       if (c.id !== convId) return c;
@@ -170,12 +198,15 @@ export function ChatInterface() {
     setIsTyping(true);
 
     try {
+      // Skip API call for local-only conversations (no backend session)
+      if (convId.startsWith('local_')) throw new Error('local');
       const res = await chatApi.sendMessage(convId, textToSend);
-      const raw = res as Record<string, unknown>;
-      // Backend returns the AI message (or full conversation)
+      const raw = res as any;
+      // Backend may wrap: { data: { message: '...' } } or flat { reply, content, message }
+      const rawData = raw?.data ?? raw;
       const assistantContent = String(
-        (raw.assistant_message as Record<string, unknown>)?.content ??
-        raw.reply ?? raw.content ?? raw.message ??
+        (rawData.assistant_message as Record<string, unknown>)?.content ??
+        rawData.reply ?? rawData.content ?? rawData.message ??
         'أفهم متطلباتك. دعني أساعدك في العثور على العقار المثالي.'
       );
       const aiMsg: ChatMessage = {

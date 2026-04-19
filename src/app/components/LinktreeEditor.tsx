@@ -361,7 +361,13 @@ export function LinktreeEditor() {
                   setIsDirty(false);
                   toast.success('تم حفظ التغييرات!');
                 } catch (err) {
-                  toast.error(err instanceof Error ? err.message : 'فشل الحفظ');
+                  const msg = err instanceof Error ? err.message : 'فشل الحفظ';
+                  // 405 means the backend endpoint isn't implemented yet
+                  if (msg.includes('405') || msg.includes('Method Not Allowed') || msg.includes('غير مسموح')) {
+                    toast.error('الخادم لا يدعم هذه العملية بعد — يرجى التواصل مع فريق التطوير');
+                  } else {
+                    toast.error(msg);
+                  }
                 }
               }}>
                 <Save className="w-3.5 h-3.5" />

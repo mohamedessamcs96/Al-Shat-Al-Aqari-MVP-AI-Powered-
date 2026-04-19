@@ -334,7 +334,7 @@ export const offices = {
 
   saveLinktree: (officeId: string, config: Record<string, unknown>) =>
     apiFetch<Record<string, unknown>>(`/offices/${officeId}/linktree/`, {
-      method: 'PATCH',
+      method: 'POST',
       body: JSON.stringify(config),
     }),
 };
