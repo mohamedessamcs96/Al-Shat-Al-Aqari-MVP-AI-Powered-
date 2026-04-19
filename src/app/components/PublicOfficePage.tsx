@@ -181,7 +181,7 @@ export function PublicOfficePage() {
 
   // Page background style
   const pageBgStyle: React.CSSProperties = (() => {
-    const bg = pageConfig.background ?? {};
+    const bg = (pageConfig.background ?? {}) as import('../lib/page-builder-types').Background;
     if (bg.type === 'gradient' && bg.gradient) return { background: bg.gradient };
     if (bg.type === 'image' && bg.imageUrl) return {
       backgroundImage: `url(${bg.imageUrl})`,
