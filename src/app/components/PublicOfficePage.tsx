@@ -126,15 +126,25 @@ export function PublicOfficePage() {
     if (!slug) return;
     // Try slug first, fall back to ID lookup (allows preview via officeId)
     officesApi.getBySlug(slug)
-      .then((data: any) => setOffice(data))
+      .then((data: any) => setOffice(data?.data ?? data))
       .catch(() => {
         officesApi.getById(slug)
-          .then((data: any) => setOffice(data))
+          .then((data: any) => setOffice(data?.data ?? data))
           .catch(() => setOffice(null));
       });
     // Load public page config
     pagesApi.getPublicPage(slug)
-      .then((data: any) => setPageConfig(data as PageConfig))
+      .then((data: any) => {
+        // unwrap API envelope: { success, data: {...} } or raw config
+        const raw = data?.data ?? data;
+        if (raw && Array.isArray(raw.blocks)) {
+          setPageConfig(raw as PageConfig);
+        } else if (raw) {
+          setPageConfig({ ...raw, blocks: raw.blocks ?? [] } as PageConfig);
+        } else {
+          setPageConfig(null);
+        }
+      })
       .catch(() => setPageConfig(null));
   }, [slug]);
 
@@ -161,7 +171,7 @@ export function PublicOfficePage() {
     );
   }
 
-  const sortedBlocks = [...pageConfig.blocks]
+  const sortedBlocks = [...(pageConfig.blocks ?? [])]
     .filter((b) => b.visible)
     .sort((a, b) => a.order - b.order);
 
