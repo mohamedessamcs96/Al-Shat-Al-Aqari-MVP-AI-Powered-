@@ -44,9 +44,14 @@ export function LoginPage() {
     setLoading(true);
     try {
       const res = await apiAuth.buyerLogin(buyerPhone);
-      setToken(res.token);
+      const raw = res as any;
+      const tok = raw.tokens?.accessToken || raw.tokens?.access || raw.tokens?.token || raw.tokens?.key || raw.token || raw.access || '';
+      const refreshTok = raw.tokens?.refreshToken || raw.tokens?.refresh || raw.refresh || '';
+      if (!tok) { toast.error('فشل تسجيل الدخول: لم يُستلم توكن'); return; }
+      if (refreshTok) setRefreshToken(refreshTok);
+      setToken(tok);
       setRole('buyer');
-      const buyerId = res.buyer_id || res.id || '';
+      const buyerId = raw.data?.user?.id || raw.buyer_id || raw.id || '';
       if (buyerId) setUser({ id: buyerId, phone: buyerPhone });
       toast.success('تم تسجيل الدخول بنجاح!');
       navigate('/chat');
@@ -62,9 +67,14 @@ export function LoginPage() {
     setLoading(true);
     try {
       const res = await apiAuth.buyerRegister(buyerName, buyerPhone);
-      setToken(res.token);
+      const raw = res as any;
+      const tok = raw.tokens?.accessToken || raw.tokens?.access || raw.tokens?.token || raw.tokens?.key || raw.token || raw.access || '';
+      const refreshTok = raw.tokens?.refreshToken || raw.tokens?.refresh || raw.refresh || '';
+      if (!tok) { toast.error('فشل إنشاء الحساب: لم يُستلم توكن'); return; }
+      if (refreshTok) setRefreshToken(refreshTok);
+      setToken(tok);
       setRole('buyer');
-      const buyerRegId = res.buyer_id || res.id || '';
+      const buyerRegId = raw.data?.user?.id || raw.buyer_id || raw.id || '';
       if (buyerRegId) setUser({ id: buyerRegId, name: buyerName, phone: buyerPhone });
       toast.success('تم إنشاء حسابك بنجاح! مرحباً بك');
       navigate('/chat');
