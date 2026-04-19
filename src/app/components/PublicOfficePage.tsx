@@ -9,6 +9,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { offices as officesApi } from '../lib/api-client';
+import { getUser } from '../lib/auth';
 
 // ─── Linktree rendering constants (mirrored from LinktreeEditor) ──────────────
 const BG_PRESETS: { key: string; style: React.CSSProperties }[] = [
@@ -117,22 +118,52 @@ export function PublicOfficePage() {
   useEffect(() => {
     if (!slug) { setLoading(false); return; }
 
+    // If the logged-in user owns this slug, use their stored ID directly —
+    // avoids ID mismatch between getBySlug response and saved linktree.
+    const storedUser = getUser();
+    const storedOid = (storedUser?.slug === slug) ? storedUser?.id : null;
+
+    const fetchLinktree = (oid: string, officeData: any) => {
+      setOffice(officeData);
+      officesApi.getLinktree(oid)
+        .then((ltData: any) => {
+          const d = ltData?.data ?? ltData ?? {};
+          setLinktree(d);
+        })
+        .catch((_err) => {
+          console.warn('[public page] getLinktree failed', _err);
+          setLinktree({});
+        })
+        .finally(() => setLoading(false));
+    };
+
     officesApi.getBySlug(slug)
       .then((data: any) => {
         const raw = data?.data ?? data;
-        setOffice(raw);
-        const oid = raw?.id ?? raw?.user?.id ?? '';
+        // Try every possible ID field returned by the API
+        const oid = storedOid
+          ?? raw?.id
+          ?? raw?.user?.id
+          ?? raw?.office_id
+          ?? raw?.data?.id
+          ?? '';
         if (oid) {
-          officesApi.getLinktree(oid)
-            .then((ltData: any) => { setLinktree(ltData?.data ?? ltData ?? {}); })
-            .catch(() => setLinktree({}))
-            .finally(() => setLoading(false));
+          fetchLinktree(oid, raw);
         } else {
+          setOffice(raw);
           setLinktree({});
           setLoading(false);
         }
       })
-      .catch(() => { setOffice(null); setLoading(false); });
+      .catch(() => {
+        // getBySlug failed — if owner is previewing, we still have their ID
+        if (storedOid) {
+          fetchLinktree(storedOid, { name: storedUser?.name ?? '', id: storedOid, slug });
+        } else {
+          setOffice(null);
+          setLoading(false);
+        }
+      });
   }, [slug]);
 
   const pageUrl = typeof window !== 'undefined'

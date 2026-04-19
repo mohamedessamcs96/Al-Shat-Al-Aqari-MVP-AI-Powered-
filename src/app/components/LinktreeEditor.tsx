@@ -254,11 +254,13 @@ export function LinktreeEditor() {
       .catch(() => {});
     officesApi.getLinktree(officeId)
       .then((data: any) => {
-        if (data.profile) setProfile({ name: data.profile.name ?? '', bio: data.profile.bio ?? '', avatar: data.profile.avatar ?? '' });
-        if (data.links && Array.isArray(data.links)) setLinks(data.links);
-        if (data.appearance) {
+        // Unwrap API envelope: { success, data: {...} } or flat
+        const d = data?.data ?? data;
+        if (d.profile) setProfile({ name: d.profile.name ?? '', bio: d.profile.bio ?? '', avatar: d.profile.avatar ?? '' });
+        if (d.links && Array.isArray(d.links)) setLinks(d.links);
+        if (d.appearance) {
           // Map API field names → internal state
-          const a = data.appearance;
+          const a = d.appearance;
           setAppearance(prev => ({
             ...prev,
             bg: a.background ?? a.bg ?? prev.bg,
@@ -269,7 +271,7 @@ export function LinktreeEditor() {
           }));
         }
       })
-      .catch(() => {});
+      .catch((_err) => { console.warn('[linktree] load error', _err); });
   }, [officeId]);
 
   const selectedLink = links.find(l => l.id === selectedLinkId) ?? null;
