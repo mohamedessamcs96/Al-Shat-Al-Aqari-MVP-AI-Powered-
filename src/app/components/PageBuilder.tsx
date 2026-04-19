@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import {
   ArrowLeft, Eye, Save, Rocket, Smartphone, Monitor, Tablet,
@@ -164,6 +164,24 @@ export function PageBuilder() {
 
   const selectedBlock = config.blocks.find((b) => b.id === selectedId) ?? null;
   const sortedBlocks = [...config.blocks].sort((a, b) => a.order - b.order);
+
+  // ── Load existing config from API on mount ──────────────────────────────────
+  useEffect(() => {
+    if (!officeId) return;
+    officesApi.getPage(officeId).then((data: any) => {
+      const raw = data?.data ?? data;
+      if (raw && typeof raw === 'object' && (Array.isArray(raw.blocks) || raw.theme || raw.slug)) {
+        setConfig(prev => ({
+          ...prev,
+          ...raw,
+          blocks: Array.isArray(raw.blocks) ? raw.blocks : prev.blocks,
+          theme: raw.theme ? { ...prev.theme, ...raw.theme } : prev.theme,
+          background: raw.background ? { ...prev.background, ...raw.background } : prev.background,
+        }));
+      }
+    }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [officeId]);
 
   // ── block mutators ──────────────────────────────────────────────────────────
   const updateBlock = useCallback((id: string, patch: Partial<Block> | ((b: Block) => Partial<Block>)) => {
