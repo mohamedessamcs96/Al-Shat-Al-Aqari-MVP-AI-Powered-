@@ -7,6 +7,7 @@ export interface AuthUser {
   name?: string;
   phone?: string;
   email?: string;
+  slug?: string;
 }
 
 const KEYS = {
@@ -83,10 +84,11 @@ export function getOfficeIdFromRawResponse(): string | null {
   try {
     const r = JSON.parse(raw) as Record<string, unknown>;
     const d = r.data as Record<string, unknown> | undefined;
+    const u = d?.user as Record<string, unknown> | undefined;
     return (
+      (u?.id as string | undefined) ||
       (d?.office_id as string | undefined) ||
       (d?.id as string | undefined) ||
-      ((d?.user as Record<string, unknown> | undefined)?.id as string | undefined) ||
       (r.office_id as string | undefined) ||
       (r.id as string | undefined) ||
       ((r.office as Record<string, unknown> | undefined)?.id as string | undefined) ||
@@ -112,6 +114,7 @@ export function getOfficeIdFromToken(): string | null {
     const parts = token.split('.');
     if (parts.length !== 3) return null;
     const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    // JWT sub is the office/user UUID in this backend
     return (
       payload?.office_id ??
       payload?.sub ??

@@ -71,17 +71,16 @@ function extractFieldErrors(body: Record<string, unknown>): string | undefined {
 // ── 1. Auth ───────────────────────────────────────────────────────────────────
 
 export interface AuthResponse {
-  // Wrapped response: { success, code, message, data, meta, tokens }
+  // Actual API shape: { success, code, message, data: { user: {...} }, meta, tokens: { accessToken, refreshToken } }
   success?: boolean;
-  code?: number;
+  code?: string;
   message?: string;
-  data?: { id?: string; office_id?: string; [k: string]: unknown };
+  data?: { user?: { id?: string; name?: string; slug?: string; email?: string; [k: string]: unknown }; id?: string; office_id?: string; [k: string]: unknown };
   meta?: Record<string, unknown>;
-  tokens?: { access?: string; token?: string; refresh?: string; key?: string };
-  // Flat response fallbacks
+  tokens?: { accessToken?: string; refreshToken?: string; access?: string; token?: string; refresh?: string; key?: string };
+  // Flat fallbacks
   token?: string;
   access?: string;
-  refresh?: string;
   id?: string;
   buyer_id?: string;
   office_id?: string;

@@ -245,7 +245,7 @@ export function LinktreeEditor() {
   const [leftTab, setLeftTab] = useState<'profile' | 'links' | 'appearance'>('links');
   const [isDirty, setIsDirty] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [officeSlug, setOfficeSlug] = useState<string>('');
+  const [officeSlug, setOfficeSlug] = useState<string>(getUser()?.slug || '');
 
   useEffect(() => {
     if (!officeId) return;
