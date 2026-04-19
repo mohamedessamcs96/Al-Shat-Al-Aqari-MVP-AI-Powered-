@@ -132,15 +132,19 @@ export function PublicOfficePage() {
           .then((data: any) => setOffice(data?.data ?? data))
           .catch(() => setOffice(null));
       });
-    // Load public page config
+    // Unwrap API envelope and ensure required structure
     pagesApi.getPublicPage(slug)
       .then((data: any) => {
         // unwrap API envelope: { success, data: {...} } or raw config
         const raw = data?.data ?? data;
-        if (raw && Array.isArray(raw.blocks)) {
-          setPageConfig(raw as PageConfig);
-        } else if (raw) {
-          setPageConfig({ ...raw, blocks: raw.blocks ?? [] } as PageConfig);
+        if (raw && typeof raw === 'object') {
+          setPageConfig({
+            theme: {},
+            background: {},
+            analytics: { totalViews: 0, totalClicks: 0, totalLeads: 0 },
+            ...raw,
+            blocks: Array.isArray(raw.blocks) ? raw.blocks : [],
+          } as PageConfig);
         } else {
           setPageConfig(null);
         }
@@ -177,14 +181,14 @@ export function PublicOfficePage() {
 
   // Page background style
   const pageBgStyle: React.CSSProperties = (() => {
-    const bg = pageConfig.background;
+    const bg = pageConfig.background ?? {};
     if (bg.type === 'gradient' && bg.gradient) return { background: bg.gradient };
     if (bg.type === 'image' && bg.imageUrl) return {
       backgroundImage: `url(${bg.imageUrl})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
     };
-    return { background: bg.color || pageConfig.theme.bgColor };
+    return { background: bg.color || pageConfig.theme?.bgColor || '#fff' };
   })();
 
   return (
@@ -257,7 +261,7 @@ export function PublicOfficePage() {
       />
 
       {/* Analytics bar */}
-      {showAnalytics && <AnalyticsBar analytics={pageConfig.analytics} />}
+      {showAnalytics && pageConfig.analytics && <AnalyticsBar analytics={pageConfig.analytics} />}
     </div>
   );
 }

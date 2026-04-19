@@ -75,13 +75,17 @@ async function apiFetch<T>(path: string, options: RequestInit & { _retry?: boole
 
   // 401 → try token refresh once, then retry
   if (res.status === 401 && !options._retry) {
+    const hadToken = !!getToken(); // was the user previously authenticated?
     const newToken = await tryRefreshToken();
     if (newToken) {
       return apiFetch<T>(path, { ...options, _retry: true });
     }
-    // Refresh failed — clear session and redirect to login
-    logout();
-    window.location.href = '/login';
+    // Only force-redirect if the user WAS logged in and refresh failed.
+    // Guests (no token) get a regular thrown error so callers can handle gracefully.
+    if (hadToken) {
+      logout();
+      window.location.href = '/login';
+    }
     throw new Error('انتهت جلستك. الرجاء تسجيل الدخول مجدداً.');
   }
 
