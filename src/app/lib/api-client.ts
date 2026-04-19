@@ -212,7 +212,7 @@ export const offices = {
 
   update: (officeId: string, data: Record<string, unknown>) =>
     apiFetch<Record<string, unknown>>(`/offices/${officeId}/`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(data),
     }),
 
@@ -240,7 +240,7 @@ export const offices = {
 
   updateListing: (officeId: string, listingId: string, data: Record<string, unknown>) =>
     apiFetch<Record<string, unknown>>(`/offices/${officeId}/listings/${listingId}/`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(data),
     }),
 
@@ -276,7 +276,7 @@ export const offices = {
 
   updateCampaign: (officeId: string, campaignId: string, data: Record<string, unknown>) =>
     apiFetch<Record<string, unknown>>(`/offices/${officeId}/campaigns/${campaignId}/`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(data),
     }),
 
@@ -297,7 +297,7 @@ export const offices = {
 
   updateSubscription: (officeId: string, planId: string, billingCycle: string) =>
     apiFetch<Record<string, unknown>>(`/offices/${officeId}/subscription/`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify({ plan_id: planId, billing_cycle: billingCycle }),
     }),
 
@@ -320,7 +320,7 @@ export const offices = {
 
   savePage: (officeId: string, config: Record<string, unknown>) =>
     apiFetch<Record<string, unknown>>(`/offices/${officeId}/page/`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(config),
     }),
 
@@ -334,7 +334,7 @@ export const offices = {
 
   saveLinktree: (officeId: string, config: Record<string, unknown>) =>
     apiFetch<Record<string, unknown>>(`/offices/${officeId}/linktree/`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(config),
     }),
 };
