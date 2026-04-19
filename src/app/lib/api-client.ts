@@ -8,7 +8,7 @@
  *    so the UI can display it directly without hardcoding error strings.
  */
 
-import { getToken, getLang } from './auth';
+import { getToken, getLang, getRefreshToken, setToken, logout } from './auth';
 
 // In development the Vite proxy forwards /api/* to the backend (no CORS).
 // In production the Vercel rewrite proxies /api/v1/* server-side (no mixed content).
@@ -18,7 +18,43 @@ const API_PREFIX = '/api/v1';
 
 // ── Core fetch wrapper ────────────────────────────────────────────────────────
 
-async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+// Track in-flight refresh to avoid concurrent refresh races
+let _refreshPromise: Promise<string | null> | null = null;
+
+async function tryRefreshToken(): Promise<string | null> {
+  if (_refreshPromise) return _refreshPromise;
+  _refreshPromise = (async () => {
+    try {
+      const refreshTok = getRefreshToken();
+      if (!refreshTok) return null;
+      const res = await fetch(`${BASE_URL}${API_PREFIX}/auth/token/refresh/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh: refreshTok }),
+      });
+      if (!res.ok) return null;
+      const data = await res.json().catch(() => null);
+      const newToken =
+        data?.tokens?.accessToken ??
+        data?.tokens?.access ??
+        data?.access ??
+        data?.token ??
+        null;
+      if (newToken) {
+        setToken(String(newToken));
+        return String(newToken);
+      }
+      return null;
+    } catch {
+      return null;
+    } finally {
+      _refreshPromise = null;
+    }
+  })();
+  return _refreshPromise;
+}
+
+async function apiFetch<T>(path: string, options: RequestInit & { _retry?: boolean } = {}): Promise<T> {
   const token = getToken();
   const lang = getLang();
 
@@ -36,6 +72,18 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
     ...options,
     headers,
   });
+
+  // 401 → try token refresh once, then retry
+  if (res.status === 401 && !options._retry) {
+    const newToken = await tryRefreshToken();
+    if (newToken) {
+      return apiFetch<T>(path, { ...options, _retry: true });
+    }
+    // Refresh failed — clear session and redirect to login
+    logout();
+    window.location.href = '/login';
+    throw new Error('انتهت جلستك. الرجاء تسجيل الدخول مجدداً.');
+  }
 
   // 204 No Content → return empty object
   if (res.status === 204) return {} as T;
@@ -319,21 +367,21 @@ export const offices = {
     apiFetch<Record<string, unknown>>(`/offices/${officeId}/page`),
 
   savePage: (officeId: string, config: Record<string, unknown>) =>
-    apiFetch<Record<string, unknown>>(`/offices/${officeId}/page/`, {
-      method: 'PATCH',
+    apiFetch<Record<string, unknown>>(`/offices/${officeId}/page`, {
+      method: 'POST',
       body: JSON.stringify(config),
     }),
 
   publishPage: (officeId: string) =>
-    apiFetch<Record<string, unknown>>(`/offices/${officeId}/page/publish/`, {
+    apiFetch<Record<string, unknown>>(`/offices/${officeId}/page/publish`, {
       method: 'POST',
     }),
 
   getLinktree: (officeId: string) =>
-    apiFetch<Record<string, unknown>>(`/offices/${officeId}/linktree/`),
+    apiFetch<Record<string, unknown>>(`/offices/${officeId}/linktree`),
 
   saveLinktree: (officeId: string, config: Record<string, unknown>) =>
-    apiFetch<Record<string, unknown>>(`/offices/${officeId}/linktree/`, {
+    apiFetch<Record<string, unknown>>(`/offices/${officeId}/linktree`, {
       method: 'POST',
       body: JSON.stringify(config),
     }),

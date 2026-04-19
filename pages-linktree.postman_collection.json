@@ -1,0 +1,140 @@
+{
+  "info": {
+    "name": "Pages & Linktree API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000/api/v1" },
+    { "key": "officeId", "value": "YOUR_OFFICE_UUID" },
+    { "key": "slug", "value": "prime-re" },
+    { "key": "token", "value": "YOUR_BEARER_TOKEN" }
+  ],
+  "item": [
+    {
+      "name": "Linktree",
+      "item": [
+        {
+          "name": "GET Linktree",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/offices/{{officeId}}/linktree",
+              "host": ["{{baseUrl}}"],
+              "path": ["offices", "{{officeId}}", "linktree"]
+            }
+          }
+        },
+        {
+          "name": "POST Linktree (Save)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"profile\": {\n    \"name\": \"Prime RE\",\n    \"bio\": \"Your bio here\",\n    \"avatar\": \"https://example.com/avatar.jpg\"\n  },\n  \"links\": [\n    {\n      \"id\": \"uuid\",\n      \"title\": \"WhatsApp\",\n      \"url\": \"https://wa.me/966500000000\",\n      \"icon\": \"whatsapp\",\n      \"active\": true\n    }\n  ],\n  \"appearance\": {\n    \"background\": \"indigo-dark\",\n    \"buttonStyle\": \"filled\",\n    \"buttonRadius\": \"lg\",\n    \"buttonColor\": \"#6366f1\",\n    \"font\": \"cairo\"\n  }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/offices/{{officeId}}/linktree",
+              "host": ["{{baseUrl}}"],
+              "path": ["offices", "{{officeId}}", "linktree"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public Office Page",
+      "item": [
+        {
+          "name": "GET Office by Slug (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/offices/slug/{{slug}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["offices", "slug", "{{slug}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Page Builder",
+      "item": [
+        {
+          "name": "GET Page",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/offices/{{officeId}}/page",
+              "host": ["{{baseUrl}}"],
+              "path": ["offices", "{{officeId}}", "page"]
+            }
+          }
+        },
+        {
+          "name": "POST Page (Save)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"theme\": {\n    \"primaryColor\": \"#6366f1\",\n    \"fontFamily\": \"cairo\"\n  },\n  \"background\": {\n    \"type\": \"solid\",\n    \"value\": \"#ffffff\"\n  },\n  \"seo\": {\n    \"title\": \"Prime RE\",\n    \"description\": \"Your real estate office\"\n  },\n  \"blocks\": [\n    {\n      \"type\": \"hero\",\n      \"order\": 0,\n      \"visible\": true,\n      \"data\": {\n        \"title\": \"Welcome to Prime RE\",\n        \"subtitle\": \"Find your dream property\"\n      }\n    },\n    {\n      \"type\": \"listings\",\n      \"order\": 1,\n      \"visible\": true,\n      \"data\": {}\n    }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/offices/{{officeId}}/page",
+              "host": ["{{baseUrl}}"],
+              "path": ["offices", "{{officeId}}", "page"]
+            }
+          }
+        },
+        {
+          "name": "POST Page Publish",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/offices/{{officeId}}/page/publish",
+              "host": ["{{baseUrl}}"],
+              "path": ["offices", "{{officeId}}", "page", "publish"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public Page",
+      "item": [
+        {
+          "name": "GET Published Page by Slug (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pages/{{slug}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pages", "{{slug}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

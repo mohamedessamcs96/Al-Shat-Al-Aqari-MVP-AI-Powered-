@@ -12,6 +12,7 @@ export interface AuthUser {
 
 const KEYS = {
   TOKEN: 'auth_token',
+  REFRESH: 'auth_refresh_token',
   ROLE: 'auth_role',
   USER: 'auth_user',
   LANG: 'lang',
@@ -29,6 +30,16 @@ export function setToken(token: string): void {
 
 export function removeToken(): void {
   localStorage.removeItem(KEYS.TOKEN);
+}
+
+// ── Refresh token ─────────────────────────────────────────────────────────────
+
+export function getRefreshToken(): string | null {
+  return localStorage.getItem(KEYS.REFRESH);
+}
+
+export function setRefreshToken(token: string): void {
+  localStorage.setItem(KEYS.REFRESH, token);
 }
 
 // ── Role ─────────────────────────────────────────────────────────────────────
@@ -136,6 +147,7 @@ export function isAuthenticated(): boolean {
 /** Clear every auth key from localStorage */
 export function logout(): void {
   localStorage.removeItem(KEYS.TOKEN);
+  localStorage.removeItem(KEYS.REFRESH);
   localStorage.removeItem(KEYS.ROLE);
   localStorage.removeItem('auth_raw');
   localStorage.removeItem(KEYS.USER);

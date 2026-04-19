@@ -10,7 +10,7 @@ import { Input } from './ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { toast } from 'sonner';
 import { auth as apiAuth } from '../lib/api-client';
-import { setToken, setRole, setUser, setRawAuthResponse } from '../lib/auth';
+import { setToken, setRefreshToken, setRole, setUser, setRawAuthResponse } from '../lib/auth';
 
 type Role = 'buyer' | 'office';
 
@@ -89,6 +89,8 @@ export function LoginPage() {
         return;
       }
       setToken(tok);
+      const refreshTok = raw.tokens?.refreshToken || raw.tokens?.refresh || '';
+      if (refreshTok) setRefreshToken(refreshTok);
       setRole('office');
       setRawAuthResponse(res as Record<string, unknown>);
       const offId = raw.data?.user?.id || raw.data?.office_id || raw.data?.id ||
@@ -118,6 +120,8 @@ export function LoginPage() {
         return;
       }
       setToken(tok);
+      const refreshTokReg = rawReg.tokens?.refreshToken || rawReg.tokens?.refresh || '';
+      if (refreshTokReg) setRefreshToken(refreshTokReg);
       setRole('office');
       setRawAuthResponse(res as Record<string, unknown>);
       const offRegId = rawReg.data?.user?.id || rawReg.data?.office_id || rawReg.data?.id ||
