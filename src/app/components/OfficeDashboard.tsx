@@ -1403,13 +1403,41 @@ export function OfficeDashboard() {
                   />
                 </div>
                 <div>
-                  <Label className="block mb-1 text-sm font-medium text-gray-700">رابط الشعار</Label>
-                  <Input
-                    value={profileLogoUrl}
-                    onChange={e => setProfileLogoUrl(e.target.value)}
-                    placeholder="https://..."
-                    dir="ltr"
-                  />
+                  <Label className="block mb-1 text-sm font-medium text-gray-700">شعار المكتب</Label>
+                  <div className="flex items-center gap-4" dir="ltr">
+                    {profileLogoUrl && (
+                      <img
+                        src={profileLogoUrl}
+                        alt="شعار المكتب"
+                        className="w-16 h-16 rounded-xl object-cover border border-gray-200"
+                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                    )}
+                    <label className="cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file || !officeId) return;
+                          try {
+                            const url = await officesApi.uploadLogo(officeId, file);
+                            setProfileLogoUrl(url);
+                            toast.success('تم رفع الشعار بنجاح');
+                          } catch (err) {
+                            toast.error(err instanceof Error ? err.message : 'فشل رفع الشعار');
+                          }
+                        }}
+                      />
+                      <span className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                        رفع صورة
+                      </span>
+                    </label>
+                    {profileLogoUrl && (
+                      <span className="text-xs text-gray-400 truncate max-w-[180px]" dir="ltr">{profileLogoUrl}</span>
+                    )}
+                  </div>
                 </div>
                 <div className="pt-2">
                   <Button

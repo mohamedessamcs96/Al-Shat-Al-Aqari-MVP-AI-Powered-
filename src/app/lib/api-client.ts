@@ -205,7 +205,7 @@ export const auth = {
 
 export const buyers = {
   getProfile: (buyerId: string) =>
-    apiFetch<Record<string, unknown>>(`/buyers/${buyerId}/`),
+    apiFetch<Record<string, unknown>>(`/buyers/${buyerId}`),
 
   updateProfile: (buyerId: string, data: {
     name?: string;
@@ -222,13 +222,13 @@ export const buyers = {
     }),
 
   deleteAccount: (buyerId: string) =>
-    apiFetch<void>(`/buyers/${buyerId}/`, { method: 'DELETE' }),
+    apiFetch<void>(`/buyers/${buyerId}`, { method: 'DELETE' }),
 
   listNegotiations: (buyerId: string) =>
-    apiFetch<unknown[]>(`/buyers/${buyerId}/negotiations/`),
+    apiFetch<unknown[]>(`/buyers/${buyerId}/negotiations`),
 
   listVisits: (buyerId: string) =>
-    apiFetch<unknown[]>(`/buyers/${buyerId}/visits/`),
+    apiFetch<unknown[]>(`/buyers/${buyerId}/visits`),
 };
 
 // ── 3. Listings ───────────────────────────────────────────────────────────────
@@ -275,13 +275,13 @@ export const listings = {
 // ── 4. Offices ────────────────────────────────────────────────────────────────
 
 export const offices = {
-  listAll: () => apiFetch<unknown[]>('/offices/'),
+  listAll: () => apiFetch<unknown[]>('/offices'),
 
   getById: (officeId: string) =>
-    apiFetch<Record<string, unknown>>(`/offices/${officeId}/`),
+    apiFetch<Record<string, unknown>>(`/offices/${officeId}`),
 
   getBySlug: (slug: string) =>
-    apiFetch<Record<string, unknown>>(`/offices/slug/${slug}/`),
+    apiFetch<Record<string, unknown>>(`/offices/slug/${slug}`),
 
   update: (officeId: string, data: {
     name?: string;
@@ -297,14 +297,39 @@ export const offices = {
       body: JSON.stringify(data),
     }),
 
+  uploadLogo: async (officeId: string, file: File): Promise<string> => {
+    const token = getToken();
+    const lang = getLang();
+    const form = new FormData();
+    form.append('logo', file);
+    const res = await fetch(`${BASE_URL}${API_PREFIX}/offices/${officeId}/logo`, {
+      method: 'POST',
+      headers: {
+        'Accept-Language': lang,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        // No Content-Type — browser sets it with the correct multipart boundary
+      },
+      body: form,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({})) as Record<string, unknown>;
+      const msg = body.detail ?? body.message ?? body.error ?? 'فشل رفع الشعار';
+      throw new Error(String(msg));
+    }
+    const data = await res.json().catch(() => ({})) as Record<string, unknown>;
+    // Backend may return { logo_url, url, logo, file_url, ... }
+    const url = data.logo_url ?? data.url ?? data.logo ?? data.file_url ?? '';
+    return String(url);
+  },
+
   suspend: (officeId: string, suspended: boolean) =>
-    apiFetch<Record<string, unknown>>(`/offices/${officeId}/suspend/`, {
+    apiFetch<Record<string, unknown>>(`/offices/${officeId}/suspend`, {
       method: 'PUT',
       body: JSON.stringify({ suspended }),
     }),
 
   updateRanking: (officeId: string, rankingScore: number) =>
-    apiFetch<Record<string, unknown>>(`/offices/${officeId}/ranking/`, {
+    apiFetch<Record<string, unknown>>(`/offices/${officeId}/ranking`, {
       method: 'PUT',
       body: JSON.stringify({ ranking_score: rankingScore }),
     }),
@@ -331,23 +356,23 @@ export const offices = {
   // Leads
   listLeads: (officeId: string, params: Record<string, string> = {}) => {
     const qs = new URLSearchParams(params).toString();
-    return apiFetch<unknown[]>(`/offices/${officeId}/leads/${qs ? `?${qs}` : ''}`);
+    return apiFetch<unknown[]>(`/offices/${officeId}/leads${qs ? `?${qs}` : ''}`);
   },
 
   getLeadDetail: (officeId: string, demandId: string) =>
-    apiFetch<Record<string, unknown>>(`/offices/${officeId}/leads/${demandId}/`),
+    apiFetch<Record<string, unknown>>(`/offices/${officeId}/leads/${demandId}`),
 
   respondToLead: (officeId: string, demandId: string) =>
-    apiFetch<Record<string, unknown>>(`/offices/${officeId}/leads/${demandId}/respond/`, {
+    apiFetch<Record<string, unknown>>(`/offices/${officeId}/leads/${demandId}/respond`, {
       method: 'POST',
     }),
 
   // Campaigns
   listCampaigns: (officeId: string) =>
-    apiFetch<unknown[]>(`/offices/${officeId}/campaigns/`),
+    apiFetch<unknown[]>(`/offices/${officeId}/campaigns`),
 
   getCampaign: (officeId: string, campaignId: string) =>
-    apiFetch<Record<string, unknown>>(`/offices/${officeId}/campaigns/${campaignId}/`),
+    apiFetch<Record<string, unknown>>(`/offices/${officeId}/campaigns/${campaignId}`),
 
   createCampaign: (officeId: string, data: Record<string, unknown>) =>
     apiFetch<Record<string, unknown>>(`/offices/${officeId}/campaigns`, {
@@ -356,44 +381,44 @@ export const offices = {
     }),
 
   updateCampaign: (officeId: string, campaignId: string, data: Record<string, unknown>) =>
-    apiFetch<Record<string, unknown>>(`/offices/${officeId}/campaigns/${campaignId}/`, {
-      method: 'PATCH',
+    apiFetch<Record<string, unknown>>(`/offices/${officeId}/campaigns/${campaignId}`, {
+      method: 'PUT',
       body: JSON.stringify(data),
     }),
 
   deleteCampaign: (officeId: string, campaignId: string) =>
-    apiFetch<void>(`/offices/${officeId}/campaigns/${campaignId}/`, { method: 'DELETE' }),
+    apiFetch<void>(`/offices/${officeId}/campaigns/${campaignId}`, { method: 'DELETE' }),
 
   // Negotiations
   listNegotiations: (officeId: string) =>
-    apiFetch<unknown[]>(`/offices/${officeId}/negotiations/`),
+    apiFetch<unknown[]>(`/offices/${officeId}/negotiations`),
 
   // Visits
   listVisits: (officeId: string) =>
-    apiFetch<unknown[]>(`/offices/${officeId}/visits/`),
+    apiFetch<unknown[]>(`/offices/${officeId}/visits`),
 
   // Subscription
   getSubscription: (officeId: string) =>
-    apiFetch<Record<string, unknown>>(`/offices/${officeId}/subscription/`),
+    apiFetch<Record<string, unknown>>(`/offices/${officeId}/subscription`),
 
   updateSubscription: (officeId: string, planId: string, billingCycle: string) =>
-    apiFetch<Record<string, unknown>>(`/offices/${officeId}/subscription/`, {
-      method: 'PATCH',
+    apiFetch<Record<string, unknown>>(`/offices/${officeId}/subscription`, {
+      method: 'PUT',
       body: JSON.stringify({ plan_id: planId, billing_cycle: billingCycle }),
     }),
 
   cancelSubscription: (officeId: string) =>
-    apiFetch<void>(`/offices/${officeId}/subscription/`, { method: 'DELETE' }),
+    apiFetch<void>(`/offices/${officeId}/subscription`, { method: 'DELETE' }),
 
   // Analytics
   getAnalytics: (officeId: string) =>
-    apiFetch<Record<string, unknown>>(`/offices/${officeId}/analytics/`),
+    apiFetch<Record<string, unknown>>(`/offices/${officeId}/analytics`),
 
   getListingAnalytics: (officeId: string) =>
-    apiFetch<unknown[]>(`/offices/${officeId}/analytics/listings/`),
+    apiFetch<unknown[]>(`/offices/${officeId}/analytics/listings`),
 
   getPageAnalytics: (officeId: string, range = '30d') =>
-    apiFetch<Record<string, unknown>>(`/offices/${officeId}/analytics/page/?range=${range}`),
+    apiFetch<Record<string, unknown>>(`/offices/${officeId}/analytics/page?range=${range}`),
 
   // Page builder
   getPage: (officeId: string) =>
@@ -401,7 +426,7 @@ export const offices = {
 
   savePage: (officeId: string, config: Record<string, unknown>) =>
     apiFetch<Record<string, unknown>>(`/offices/${officeId}/page`, {
-      method: 'POST',
+      method: 'PUT',
       body: JSON.stringify(config),
     }),
 
@@ -415,7 +440,7 @@ export const offices = {
 
   saveLinktree: (officeId: string, config: Record<string, unknown>) =>
     apiFetch<Record<string, unknown>>(`/offices/${officeId}/linktree`, {
-      method: 'POST',
+      method: 'PUT',
       body: JSON.stringify(config),
     }),
 };
@@ -424,7 +449,7 @@ export const offices = {
 
 export const demands = {
   create: (data: Record<string, unknown>) =>
-    apiFetch<Record<string, unknown>>('/demands/', {
+    apiFetch<Record<string, unknown>>('/demands', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
@@ -434,21 +459,21 @@ export const demands = {
 
 export const negotiations = {
   get: (negotiationId: string) =>
-    apiFetch<Record<string, unknown>>(`/negotiations/${negotiationId}/`),
+    apiFetch<Record<string, unknown>>(`/negotiations/${negotiationId}`),
 
   submitOffer: (negotiationId: string, offer: number, message: string) =>
-    apiFetch<Record<string, unknown>>(`/negotiations/${negotiationId}/offers/`, {
+    apiFetch<Record<string, unknown>>(`/negotiations/${negotiationId}/offers`, {
       method: 'POST',
       body: JSON.stringify({ offer, message }),
     }),
 
   accept: (negotiationId: string) =>
-    apiFetch<Record<string, unknown>>(`/negotiations/${negotiationId}/accept/`, {
+    apiFetch<Record<string, unknown>>(`/negotiations/${negotiationId}/accept`, {
       method: 'PUT',
     }),
 
   reject: (negotiationId: string) =>
-    apiFetch<Record<string, unknown>>(`/negotiations/${negotiationId}/reject/`, {
+    apiFetch<Record<string, unknown>>(`/negotiations/${negotiationId}/reject`, {
       method: 'PUT',
     }),
 };
@@ -457,26 +482,26 @@ export const negotiations = {
 
 export const visits = {
   cancel: (visitId: string) =>
-    apiFetch<Record<string, unknown>>(`/visits/${visitId}/cancel/`, { method: 'PUT' }),
+    apiFetch<Record<string, unknown>>(`/visits/${visitId}/cancel`, { method: 'PUT' }),
 
   confirm: (visitId: string) =>
-    apiFetch<Record<string, unknown>>(`/visits/${visitId}/confirm/`, { method: 'PUT' }),
+    apiFetch<Record<string, unknown>>(`/visits/${visitId}/confirm`, { method: 'PUT' }),
 };
 
 // ── 8. Subscriptions ──────────────────────────────────────────────────────────
 
 export const subscriptions = {
-  listPlans: () => apiFetch<unknown[]>('/subscription-plans/'),
+  listPlans: () => apiFetch<unknown[]>('/subscription-plans'),
 
   getPlan: (planId: string) =>
-    apiFetch<Record<string, unknown>>(`/subscription-plans/${planId}/`),
+    apiFetch<Record<string, unknown>>(`/subscription-plans/${planId}`),
 };
 
 // ── 9. Chat / AI ──────────────────────────────────────────────────────────────
 
 export const chat = {
   listConversations: () =>
-    apiFetch<unknown[]>('/chat/conversations/'),
+    apiFetch<unknown[]>('/chat/conversations'),
 
   startConversation: () =>
     apiFetch<Record<string, unknown>>('/chat/conversations', { method: 'POST' }),
@@ -491,7 +516,7 @@ export const chat = {
     }),
 
   deleteConversation: (conversationId: string) =>
-    apiFetch<void>(`/chat/conversations/${conversationId}/`, { method: 'DELETE' }),
+    apiFetch<void>(`/chat/conversations/${conversationId}`, { method: 'DELETE' }),
 };
 
 // ── 10. Admin ─────────────────────────────────────────────────────────────────
@@ -500,56 +525,56 @@ export const admin = {
   listOffices: () => apiFetch<unknown[]>('/admin/offices'),
 
   suspendOffice: (officeId: string) =>
-    apiFetch<Record<string, unknown>>(`/admin/offices/${officeId}/suspend/`, { method: 'PUT' }),
+    apiFetch<Record<string, unknown>>(`/admin/offices/${officeId}/suspend`, { method: 'PUT' }),
 
   setOfficeRanking: (officeId: string, rankingScore: number) =>
-    apiFetch<Record<string, unknown>>(`/admin/offices/${officeId}/ranking/`, {
+    apiFetch<Record<string, unknown>>(`/admin/offices/${officeId}/ranking`, {
       method: 'PUT',
       body: JSON.stringify({ ranking_score: rankingScore }),
     }),
 
-  listCompliance: () => apiFetch<unknown[]>('/admin/compliance/'),
+  listCompliance: () => apiFetch<unknown[]>('/admin/compliance'),
 
   getCompliance: (complianceId: string) =>
-    apiFetch<Record<string, unknown>>(`/admin/compliance/${complianceId}/`),
+    apiFetch<Record<string, unknown>>(`/admin/compliance/${complianceId}`),
 
-  getSettings: () => apiFetch<Record<string, unknown>>('/admin/settings/'),
+  getSettings: () => apiFetch<Record<string, unknown>>('/admin/settings'),
 
   updateSettings: (data: Record<string, unknown>) =>
-    apiFetch<Record<string, unknown>>('/admin/settings/', {
+    apiFetch<Record<string, unknown>>('/admin/settings', {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
 
-  getAnalytics: () => apiFetch<Record<string, unknown>>('/admin/analytics/'),
+  getAnalytics: () => apiFetch<Record<string, unknown>>('/admin/analytics'),
 
-  getOfficeMetrics: () => apiFetch<unknown[]>('/admin/analytics/offices/'),
+  getOfficeMetrics: () => apiFetch<unknown[]>('/admin/analytics/offices'),
 
-  listDemands: () => apiFetch<unknown[]>('/admin/demands/'),
+  listDemands: () => apiFetch<unknown[]>('/admin/demands'),
 
   distributeDemand: (demandId: string, officeIds: string[]) =>
-    apiFetch<Record<string, unknown>>(`/admin/demands/${demandId}/distribute/`, {
+    apiFetch<Record<string, unknown>>(`/admin/demands/${demandId}/distribute`, {
       method: 'POST',
       body: JSON.stringify({ office_ids: officeIds }),
     }),
 
   viewDemandDistributions: (demandId: string) =>
-    apiFetch<unknown[]>(`/admin/demands/${demandId}/distributions/`),
+    apiFetch<unknown[]>(`/admin/demands/${demandId}/distributions`),
 
-  listBuyers: () => apiFetch<unknown[]>('/admin/buyers/'),
+  listBuyers: () => apiFetch<unknown[]>('/admin/buyers'),
 
-  listSubscriptions: () => apiFetch<unknown[]>('/admin/subscriptions/'),
+  listSubscriptions: () => apiFetch<unknown[]>('/admin/subscriptions'),
 };
 
 // ── 11. Cities ────────────────────────────────────────────────────────────────
 
 export const cities = {
-  list: () => apiFetch<{ id: string; name: string }[]>('/cities/'),
+  list: () => apiFetch<{ id: string; name: string }[]>('/cities'),
 };
 
 // ── 12. Public pages ──────────────────────────────────────────────────────────
 
 export const pages = {
   getPublicPage: (slug: string) =>
-    apiFetch<Record<string, unknown>>(`/pages/${slug}/`),
+    apiFetch<Record<string, unknown>>(`/pages/${slug}`),
 };
