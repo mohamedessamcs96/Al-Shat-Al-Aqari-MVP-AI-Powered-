@@ -41,13 +41,6 @@ function DashSparkline({ data, color }: { data: number[]; color: string }) {
   );
 }
 
-const RECENT_ACTIVITY = [
-  { text: 'عميل جديد: أحمد الرشيدي', sub: 'يبحث عن فيلا في الرياض · 800K–1.5M', time: 'منذ 5 د', dot: 'bg-emerald-500' },
-  { text: '43 مشاهدة جديدة اليوم', sub: 'فيلا 5 غرف – حي النرجس', time: 'منذ 15 د', dot: 'bg-blue-500' },
-  { text: 'حملة "Luxury Villa" حققت 12 عميل', sub: 'معدل النقر: 31.2%', time: 'منذ ساعة', dot: 'bg-purple-500' },
-  { text: 'رسالة من عميل', sub: 'سارة محمد – استفسار حول السعر', time: 'منذ 2 س', dot: 'bg-amber-500' },
-  { text: 'تحديث جودة إعلان', sub: 'شقة 3 غرف – جدة · رُفعت الجودة إلى 87%', time: 'أمس', dot: 'bg-slate-400' },
-];
 
 export function OfficeDashboard() {
   const navigate = useNavigate();
@@ -589,18 +582,7 @@ export function OfficeDashboard() {
                 <h3 className="font-semibold text-gray-900">النشاط الأخير</h3>
                 <Activity className="w-4 h-4 text-gray-400" />
               </div>
-              <div className="space-y-0.5" dir="rtl">
-                {RECENT_ACTIVITY.map((item, i) => (
-                  <div key={i} className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">
-                    <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${item.dot}`} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800">{item.text}</p>
-                      <p className="text-xs text-gray-400 mt-0.5 truncate">{item.sub}</p>
-                    </div>
-                    <span className="text-[11px] text-gray-400 flex-shrink-0 mt-0.5 whitespace-nowrap">{item.time}</span>
-                  </div>
-                ))}
-              </div>
+              <p className="text-sm text-gray-400 text-center py-4" dir="rtl">لا يوجد نشاط حديث</p>
             </Card>
 
             {/* QR Code card */}
@@ -756,23 +738,23 @@ export function OfficeDashboard() {
                     style={{ background: 'conic-gradient(#3b82f6 0deg 126deg, #8b5cf6 126deg 252deg, #10b981 252deg 360deg)', padding: '8px' }}
                   >
                     <div className="w-full h-full rounded-full bg-white flex flex-col items-center justify-center shadow-inner">
-                      <p className="text-xs text-gray-500">نسبة النجاح</p>
+                      <p className="text-xs text-gray-500">نسبة التحويل</p>
                       <p className="text-2xl font-bold text-gray-900">{conversionRate ? `${conversionRate}%` : '—'}</p>
                     </div>
                   </div>
                 </div>
                 <div className="space-y-2.5 text-sm">
                   {[
-                    { color: '#3b82f6', label: 'المشاهدات', pct: '35%' },
-                    { color: '#8b5cf6', label: 'الاستفسارات', pct: '44%' },
-                    { color: '#10b981', label: 'الزيارات', pct: '21%' },
+                    { color: '#3b82f6', label: 'المشاهدات', value: totalViews ? totalViews.toLocaleString() : '—' },
+                    { color: '#8b5cf6', label: 'الاستفسارات', value: inquiries ? String(inquiries) : '—' },
+                    { color: '#10b981', label: 'الزيارات', value: visits ? String(visits) : '—' },
                   ].map(row => (
                     <div key={row.label} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: row.color }} />
                         <span className="text-gray-600">{row.label}</span>
                       </div>
-                      <span className="font-semibold text-gray-900">{row.pct}</span>
+                      <span className="font-semibold text-gray-900">{row.value}</span>
                     </div>
                   ))}
                 </div>
@@ -781,33 +763,45 @@ export function OfficeDashboard() {
               {/* Trend chart */}
               <Card className="p-5 border-0 shadow-sm">
                 <h3 className="font-semibold text-gray-900 mb-5">الاتجاهات الشهرية</h3>
-                <div className="h-36 mb-4">
-                  <svg width="100%" height="100%" viewBox="0 0 300 120" preserveAspectRatio="none">
-                    <defs>
-                      <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.25" />
-                        <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                    <polygon
-                      points="10,80 40,70 70,60 100,50 130,55 160,45 190,40 220,35 250,38 280,30 280,120 10,120"
-                      fill="url(#areaGrad)"
-                    />
-                    <polyline
-                      points="10,80 40,70 70,60 100,50 130,55 160,45 190,40 220,35 250,38 280,30"
-                      fill="none"
-                      stroke="#3b82f6"
-                      strokeWidth="2.5"
-                      strokeLinejoin="round"
-                      strokeLinecap="round"
-                    />
-                    {([[10,80],[40,70],[70,60],[100,50],[130,55],[160,45],[190,40],[220,35],[250,38],[280,30]] as [number,number][]).map(([cx, cy], i) => (
-                      <circle key={i} cx={cx} cy={cy} r="3.5" fill="white" stroke="#3b82f6" strokeWidth="2" />
-                    ))}
-                  </svg>
-                </div>
+                {trendPoints.length >= 2 ? (
+                  <div className="h-36 mb-4">
+                    <svg width="100%" height="100%" viewBox="0 0 300 120" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.25" />
+                          <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      {(() => {
+                        const max = Math.max(...trendPoints);
+                        const min = Math.min(...trendPoints);
+                        const range = max - min || 1;
+                        const pts = trendPoints.map((v, i) => {
+                          const x = 10 + (i / (trendPoints.length - 1)) * 280;
+                          const y = 10 + (1 - (v - min) / range) * 100;
+                          return [x, y] as [number, number];
+                        });
+                        const lineStr = pts.map(([x, y]) => `${x},${y}`).join(' ');
+                        const areaStr = `${pts[0][0]},120 ` + lineStr + ` ${pts[pts.length-1][0]},120`;
+                        return (
+                          <>
+                            <polygon points={areaStr} fill="url(#areaGrad)" />
+                            <polyline points={lineStr} fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+                            {pts.map(([cx, cy], i) => <circle key={i} cx={cx} cy={cy} r="3.5" fill="white" stroke="#3b82f6" strokeWidth="2" />)}
+                          </>
+                        );
+                      })()}
+                    </svg>
+                  </div>
+                ) : (
+                  <div className="h-36 flex items-center justify-center text-gray-400 text-sm">لا توجد بيانات كافية</div>
+                )}
                 <div className="grid grid-cols-3 gap-2 text-xs">
-                  {[{ label: 'الأدنى', v: '245' }, { label: 'المتوسط', v: '612' }, { label: 'الأعلى', v: '987' }].map(item => (
+                  {[
+                    { label: 'الأدنى', v: trendPoints.length ? Math.min(...trendPoints).toLocaleString() : '—' },
+                    { label: 'المتوسط', v: trendPoints.length ? Math.round(trendPoints.reduce((a,b)=>a+b,0)/trendPoints.length).toLocaleString() : '—' },
+                    { label: 'الأعلى', v: trendPoints.length ? Math.max(...trendPoints).toLocaleString() : '—' },
+                  ].map(item => (
                     <div key={item.label} className="text-center p-2 bg-gray-50 rounded-lg">
                       <p className="text-gray-500">{item.label}</p>
                       <p className="font-semibold text-gray-900 mt-0.5">{item.v}</p>
@@ -820,75 +814,70 @@ export function OfficeDashboard() {
             {/* Per-listing table */}
             <Card className="p-5 border-0 shadow-sm">
               <h3 className="font-semibold text-gray-900 mb-4">أداء العقارات</h3>
+              {officeListings.length === 0 ? (
+                <p className="text-sm text-gray-400 text-center py-6">لا توجد عقارات بعد</p>
+              ) : (
               <div className="space-y-2">
                 {officeListings.map((listing, idx) => (
                   <div key={listing.id} className="flex items-center gap-4 p-3 rounded-xl border hover:bg-gray-50 transition-colors">
                     <span className="text-xs font-bold text-gray-400 w-5 text-center shrink-0">#{idx + 1}</span>
-                    <img src={listing.images[0]} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" />
+                    {listing.images?.[0] && (
+                      <img src={listing.images[0]} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" />
+                    )}
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-gray-900 text-sm">{listing.property_type}</p>
                       <p className="text-xs text-gray-500 truncate">{listing.address}</p>
                     </div>
-                    <div className="hidden sm:grid grid-cols-4 gap-6 text-xs text-center shrink-0">
-                      <div>
-                        <p className="text-gray-400 mb-0.5">مشاهدات</p>
-                        <p className="font-semibold text-gray-900">
-                          {[312, 198, 445, 267, 389][idx % 5]}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-gray-400 mb-0.5">استفسارات</p>
-                        <p className="font-semibold text-gray-900">
-                          {[18, 9, 27, 14, 21][idx % 5]}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-gray-400 mb-0.5">زيارات</p>
-                        <p className="font-semibold text-gray-900">
-                          {[4, 2, 7, 3, 5][idx % 5]}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-gray-400 mb-0.5">تحويل</p>
-                        <p className="font-semibold text-green-600">
-                          {['5.8%', '4.5%', '6.1%', '5.2%', '5.4%'][idx % 5]}
-                        </p>
-                      </div>
-                    </div>
                   </div>
                 ))}
               </div>
+              )}
             </Card>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Card className="p-5 border-0 shadow-sm">
                 <h3 className="font-semibold text-gray-900 mb-4">التوزيع حسب نوع العقار</h3>
-                <div className="space-y-3">
-                  {[{ l: 'فيلا', v: 40 }, { l: 'شقة', v: 35 }, { l: 'أرض', v: 15 }, { l: 'تجاري', v: 10 }].map(row => (
-                    <div key={row.l}>
-                      <div className="flex items-center justify-between text-sm mb-1">
-                        <span className="text-gray-600">{row.l}</span>
-                        <span className="font-medium text-gray-900">{row.v}%</span>
-                      </div>
-                      <Progress value={row.v} className="h-2" />
-                    </div>
-                  ))}
-                </div>
+                {(() => {
+                  const counts: Record<string, number> = {};
+                  officeListings.forEach(l => { counts[l.property_type] = (counts[l.property_type] ?? 0) + 1; });
+                  const total = officeListings.length || 1;
+                  const rows = Object.entries(counts).map(([l, v]) => ({ l, v: Math.round((v / total) * 100) }));
+                  return rows.length === 0
+                    ? <p className="text-sm text-gray-400 text-center py-4">لا توجد بيانات</p>
+                    : <div className="space-y-3">{rows.map(row => (
+                        <div key={row.l}>
+                          <div className="flex items-center justify-between text-sm mb-1">
+                            <span className="text-gray-600">{row.l}</span>
+                            <span className="font-medium text-gray-900">{row.v}%</span>
+                          </div>
+                          <Progress value={row.v} className="h-2" />
+                        </div>
+                      ))}</div>;
+                })()}
               </Card>
 
               <Card className="p-5 border-0 shadow-sm">
                 <h3 className="font-semibold text-gray-900 mb-4">التوزيع حسب المدينة</h3>
-                <div className="space-y-3">
-                  {[{ l: 'الرياض', v: 55 }, { l: 'جدة', v: 30 }, { l: 'الدمام', v: 15 }].map(row => (
-                    <div key={row.l}>
-                      <div className="flex items-center justify-between text-sm mb-1">
-                        <span className="text-gray-600">{row.l}</span>
-                        <span className="font-medium text-gray-900">{row.v}%</span>
-                      </div>
-                      <Progress value={row.v} className="h-2" />
-                    </div>
-                  ))}
-                </div>
+                {(() => {
+                  const counts: Record<string, number> = {};
+                  officeListings.forEach(l => {
+                    const city = l.city_name ?? l.city ?? l.city_id ?? 'أخرى';
+                    counts[city] = (counts[city] ?? 0) + 1;
+                  });
+                  const total = officeListings.length || 1;
+                  const rows = Object.entries(counts).map(([l, v]) => ({ l, v: Math.round((v / total) * 100) }));
+                  return rows.length === 0
+                    ? <p className="text-sm text-gray-400 text-center py-4">لا توجد بيانات</p>
+                    : <div className="space-y-3">{rows.map(row => (
+                        <div key={row.l}>
+                          <div className="flex items-center justify-between text-sm mb-1">
+                            <span className="text-gray-600">{row.l}</span>
+                            <span className="font-medium text-gray-900">{row.v}%</span>
+                          </div>
+                          <Progress value={row.v} className="h-2" />
+                        </div>
+                      ))}</div>;
+                })()}
               </Card>
             </div>
           </TabsContent>

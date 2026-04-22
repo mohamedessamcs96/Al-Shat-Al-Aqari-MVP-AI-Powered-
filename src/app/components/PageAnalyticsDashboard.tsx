@@ -10,8 +10,8 @@ interface Props {
 }
 
 // Mock time-series data for sparkline
-const MOCK_VIEWS = [12, 19, 8, 25, 30, 22, 40, 35, 28, 50, 45, 62, 58, 70, 75];
-const MOCK_LEADS = [1, 2, 0, 3, 4, 2, 5, 3, 4, 6, 5, 8, 7, 9, 10];
+const MOCK_VIEWS: number[] = [];
+const MOCK_LEADS: number[] = [];
 
 function Sparkline({ data, color }: { data: number[]; color: string }) {
   const max = Math.max(...data);
@@ -79,35 +79,27 @@ export function PageAnalyticsDashboard({ officeId }: Props) {
       .catch(() => {});
   }, [officeId]);
 
-  // Use real data when available, fall back to mock values for display
+  // Use real data only — show 0 when API hasn't returned data yet
   const enriched = {
-    totalViews: analyticsData?.total_views ?? analyticsData?.totalViews ?? 1240,
-    uniqueVisitors: analyticsData?.unique_visitors ?? analyticsData?.uniqueVisitors ?? 874,
-    totalClicks: analyticsData?.total_clicks ?? analyticsData?.totalClicks ?? 312,
-    totalLeads: analyticsData?.total_leads ?? analyticsData?.totalLeads ?? 28,
-    topSources: analyticsData?.top_sources ?? analyticsData?.topSources ?? [
-      { source: 'مباشر', count: 540 },
-      { source: 'واتساب', count: 310 },
-      { source: 'إنستغرام', count: 220 },
-      { source: 'جوجل', count: 170 },
-    ],
+    totalViews: analyticsData?.total_views ?? analyticsData?.totalViews ?? 0,
+    uniqueVisitors: analyticsData?.unique_visitors ?? analyticsData?.uniqueVisitors ?? 0,
+    totalClicks: analyticsData?.total_clicks ?? analyticsData?.totalClicks ?? 0,
+    totalLeads: analyticsData?.total_leads ?? analyticsData?.totalLeads ?? 0,
+    topSources: analyticsData?.top_sources ?? analyticsData?.topSources ?? [],
     blockStats: analyticsData?.block_stats ?? analyticsData?.blockStats ?? [],
   };
 
-  const deviceSplit = [
-    { device: 'جوال', pct: 62, icon: Smartphone },
-    { device: 'حاسوب', pct: 31, icon: Monitor },
-    { device: 'تابلت', pct: 7, icon: Globe },
-  ];
+  const deviceSplit: { device: string; pct: number; icon: React.ComponentType<{ className?: string }> }[] =
+    analyticsData?.device_split ?? analyticsData?.deviceSplit ?? [];
 
   return (
     <div className="space-y-6" dir="rtl">
       {/* KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={Eye} label="المشاهدات الكلية" value={enriched.totalViews.toLocaleString()} color="#3b82f6" trend="+12% هذا الأسبوع" sparkData={MOCK_VIEWS} />
-        <StatCard icon={Globe} label="الزوار الفريدون" value={enriched.uniqueVisitors.toLocaleString()} color="#8b5cf6" trend="+8% هذا الأسبوع" />
-        <StatCard icon={MousePointerClick} label="النقرات" value={enriched.totalClicks.toLocaleString()} subtitle={`معدل النقر: ${((enriched.totalClicks / enriched.totalViews) * 100).toFixed(1)}%`} color="#f59e0b" sparkData={MOCK_VIEWS.map((v) => Math.floor(v * 0.25))} />
-        <StatCard icon={UserPlus} label="العملاء المحتملون" value={enriched.totalLeads.toLocaleString()} color="#10b981" trend="+3 هذا الأسبوع" sparkData={MOCK_LEADS} />
+        <StatCard icon={Eye} label="المشاهدات الكلية" value={enriched.totalViews.toLocaleString()} color="#3b82f6" />
+        <StatCard icon={Globe} label="الزوار الفريدون" value={enriched.uniqueVisitors.toLocaleString()} color="#8b5cf6" />
+        <StatCard icon={MousePointerClick} label="النقرات" value={enriched.totalClicks.toLocaleString()} subtitle={enriched.totalViews > 0 ? `معدل النقر: ${((enriched.totalClicks / enriched.totalViews) * 100).toFixed(1)}%` : undefined} color="#f59e0b" />
+        <StatCard icon={UserPlus} label="العملاء المحتملون" value={enriched.totalLeads.toLocaleString()} color="#10b981" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
