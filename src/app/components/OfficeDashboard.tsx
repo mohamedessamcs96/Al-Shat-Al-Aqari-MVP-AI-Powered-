@@ -105,18 +105,22 @@ export function OfficeDashboard() {
         : Array.isArray(r?.data?.results) ? r.data.results
         : [];
     };
+    const applyOfficeData = (d: Record<string, unknown>) => {
+      // Unwrap { data: {...} } or { data: { office: {...} } } envelope shapes
+      const raw = d as any;
+      const o: Record<string, unknown> =
+        raw?.data?.office ?? raw?.data ?? raw;
+      setApiOffice(o);
+      setProfileName(String(o.name ?? ''));
+      setProfileBio(String(o.bio ?? ''));
+      setProfilePhone(String(o.phone ?? ''));
+      setProfileWhatsapp(String(o.whatsapp ?? ''));
+      setProfileAddress(String(o.address ?? ''));
+      setProfileWebsite(String(o.website ?? ''));
+      setProfileLogoUrl(String(o.logo_url ?? ''));
+    };
     officesApi.getById(officeId)
-      .then((d) => {
-        setApiOffice(d);
-        const o = d as Record<string, unknown>;
-        setProfileName(String(o.name ?? ''));
-        setProfileBio(String(o.bio ?? ''));
-        setProfilePhone(String(o.phone ?? ''));
-        setProfileWhatsapp(String(o.whatsapp ?? ''));
-        setProfileAddress(String(o.address ?? ''));
-        setProfileWebsite(String(o.website ?? ''));
-        setProfileLogoUrl(String(o.logo_url ?? ''));
-      })
+      .then(applyOfficeData)
       .catch(() => {});
     officesApi.getAnalytics(officeId)
       .then((d) => setApiAnalytics(d))
@@ -202,6 +206,19 @@ export function OfficeDashboard() {
         website: profileWebsite,
         logo_url: profileLogoUrl,
       });
+      // Re-fetch to confirm server state is reflected in the UI
+      officesApi.getById(officeId).then((d) => {
+        const raw = d as any;
+        const o: Record<string, unknown> = raw?.data?.office ?? raw?.data ?? raw;
+        setApiOffice(o);
+        setProfileName(String(o.name ?? ''));
+        setProfileBio(String(o.bio ?? ''));
+        setProfilePhone(String(o.phone ?? ''));
+        setProfileWhatsapp(String(o.whatsapp ?? ''));
+        setProfileAddress(String(o.address ?? ''));
+        setProfileWebsite(String(o.website ?? ''));
+        setProfileLogoUrl(String(o.logo_url ?? ''));
+      }).catch(() => {});
       toast.success('تم حفظ الملف الشخصي بنجاح');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'فشل في حفظ الملف الشخصي');
@@ -1348,6 +1365,17 @@ export function OfficeDashboard() {
             <Card className="p-6 border-0 shadow-sm" dir="rtl">
               <h2 className="text-lg font-bold text-gray-900 mb-6">الملف الشخصي للمكتب</h2>
               <div className="space-y-4">
+                {/* Read-only email from signup */}
+                <div>
+                  <Label className="block mb-1 text-sm font-medium text-gray-700">البريد الإلكتروني</Label>
+                  <Input
+                    value={office.email || getUser()?.email || ''}
+                    readOnly
+                    dir="ltr"
+                    className="bg-gray-50 text-gray-500 cursor-not-allowed"
+                  />
+                  <p className="text-xs text-gray-400 mt-1" dir="rtl">لا يمكن تغيير البريد الإلكتروني</p>
+                </div>
                 <div>
                   <Label className="block mb-1 text-sm font-medium text-gray-700">اسم المكتب</Label>
                   <Input
