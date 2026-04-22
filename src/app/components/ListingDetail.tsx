@@ -306,7 +306,7 @@ export function ListingDetail() {
                         type="number"
                         value={offerAmount}
                         onChange={(e) => setOfferAmount(e.target.value)}
-                        placeholder={`السعر المطلوب: ${listing.price.toLocaleString()}`}
+                        placeholder={`السعر المطلوب: ${(listing.price ?? 0).toLocaleString()}`}
                         className="mt-1"
                       />
                     </div>

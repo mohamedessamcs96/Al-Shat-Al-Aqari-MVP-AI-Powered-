@@ -291,13 +291,13 @@ export const offices = {
     }),
 
   updateListing: (officeId: string, listingId: string, data: Record<string, unknown>) =>
-    apiFetch<Record<string, unknown>>(`/offices/${officeId}/listings/${listingId}/`, {
+    apiFetch<Record<string, unknown>>(`/offices/${officeId}/listings/${listingId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
 
   deleteListing: (officeId: string, listingId: string) =>
-    apiFetch<void>(`/offices/${officeId}/listings/${listingId}/`, { method: 'DELETE' }),
+    apiFetch<void>(`/offices/${officeId}/listings/${listingId}`, { method: 'DELETE' }),
 
   // Leads
   listLeads: (officeId: string, params: Record<string, string> = {}) => {

@@ -550,9 +550,10 @@ export function OfficeListings() {
           {filteredListings.map((listing) => (
             <Card key={listing.id} className="overflow-hidden hover:shadow-lg transition-shadow">
               <img
-                src={listing.images[0]}
+                src={listing.images?.[0] ?? ''}
                 alt={listing.property_type}
-                className="w-full h-48 object-cover"
+                className="w-full h-48 object-cover bg-gray-100"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
               />
               <div className="p-4" dir="rtl">
                 <div className="flex items-start justify-between mb-3">
