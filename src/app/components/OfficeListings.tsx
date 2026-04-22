@@ -83,8 +83,8 @@ export function OfficeListings() {
 
   const filteredListings = officeListings.filter(listing => {
     const matchesSearch = 
-      listing.property_type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      listing.address.toLowerCase().includes(searchQuery.toLowerCase());
+      (listing.property_type ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (listing.address ?? listing.location ?? listing.city ?? '').toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesStatus = filterStatus === 'all' || listing.status === filterStatus;
     
