@@ -1,18 +1,32 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Home, MessageSquare, Calendar, DollarSign, Heart, ArrowLeft, Clock, CheckCircle, XCircle, LogOut } from 'lucide-react';
+import { Home, MessageSquare, Calendar, DollarSign, Heart, ArrowLeft, Clock, CheckCircle, XCircle, LogOut, User } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Textarea } from './ui/textarea';
 import { formatPrice } from '../lib/formatters';
 import { buyers as buyersApi } from '../lib/api-client';
 import { getUser, logout as authLogout } from '../lib/auth';
+import { toast } from 'sonner';
 
 export function BuyerDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('visits');
   const buyerId = getUser()?.id ?? '';
+  const [profile, setProfile] = useState({
+    name: '',
+    bio: '',
+    phone: '',
+    whatsapp: '',
+    address: '',
+    website: '',
+    logo_url: '',
+  });
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [visits, setVisits] = useState<any[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,6 +34,20 @@ export function BuyerDashboard() {
 
   useEffect(() => {
     if (!buyerId) return;
+    buyersApi.getProfile(buyerId)
+      .then((data: any) => {
+        const d = data?.data ?? data;
+        setProfile({
+          name: d?.name ?? '',
+          bio: d?.bio ?? '',
+          phone: d?.phone ?? '',
+          whatsapp: d?.whatsapp ?? '',
+          address: d?.address ?? '',
+          website: d?.website ?? '',
+          logo_url: d?.logo_url ?? '',
+        });
+      })
+      .catch(() => {});
     buyersApi.listVisits(buyerId)
       .then(data => setVisits(Array.isArray(data) ? data : ((data as any)?.results ?? [])))
       .catch(() => {});
@@ -27,6 +55,19 @@ export function BuyerDashboard() {
       .then(data => setNegotiations(Array.isArray(data) ? data : ((data as any)?.results ?? [])))
       .catch(() => {});
   }, [buyerId]);
+
+  const handleSaveProfile = async () => {
+    if (!buyerId) return;
+    setIsSavingProfile(true);
+    try {
+      await buyersApi.updateProfile(buyerId, profile);
+      toast.success('تم حفظ الملف الشخصي بنجاح!');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
 
   // Saved listings are managed locally (favourites not yet backed by API)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -184,10 +225,11 @@ export function BuyerDashboard() {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full grid grid-cols-3">
+          <TabsList className="w-full grid grid-cols-4">
             <TabsTrigger value="visits">الزيارات</TabsTrigger>
             <TabsTrigger value="negotiations">العروض والتفاوض</TabsTrigger>
             <TabsTrigger value="saved">المحفوظات</TabsTrigger>
+            <TabsTrigger value="profile">الملف الشخصي</TabsTrigger>
           </TabsList>
 
           {/* Visits Tab */}
@@ -414,6 +456,102 @@ export function BuyerDashboard() {
                 </Button>
               </Card>
             )}
+          </TabsContent>
+
+          {/* Profile Tab */}
+          <TabsContent value="profile" className="mt-6">
+            <Card className="p-6 max-w-2xl mx-auto">
+              <div className="flex items-center gap-3 mb-6" dir="rtl">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                  <User className="w-5 h-5 text-blue-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900">الملف الشخصي</h3>
+              </div>
+              <div className="space-y-4" dir="rtl">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label>الاسم</Label>
+                    <Input
+                      value={profile.name}
+                      onChange={e => setProfile({ ...profile, name: e.target.value })}
+                      placeholder="الاسم الكامل"
+                      className="mt-1 text-right"
+                      dir="rtl"
+                    />
+                  </div>
+                  <div>
+                    <Label>رقم الجوال</Label>
+                    <Input
+                      value={profile.phone}
+                      onChange={e => setProfile({ ...profile, phone: e.target.value })}
+                      placeholder="+966501234567"
+                      className="mt-1"
+                      dir="ltr"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label>واتساب</Label>
+                    <Input
+                      value={profile.whatsapp}
+                      onChange={e => setProfile({ ...profile, whatsapp: e.target.value })}
+                      placeholder="+966501234567"
+                      className="mt-1"
+                      dir="ltr"
+                    />
+                  </div>
+                  <div>
+                    <Label>الموقع الإلكتروني</Label>
+                    <Input
+                      value={profile.website}
+                      onChange={e => setProfile({ ...profile, website: e.target.value })}
+                      placeholder="https://"
+                      className="mt-1"
+                      dir="ltr"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label>العنوان</Label>
+                  <Input
+                    value={profile.address}
+                    onChange={e => setProfile({ ...profile, address: e.target.value })}
+                    placeholder="المدينة، الشارع"
+                    className="mt-1 text-right"
+                    dir="rtl"
+                  />
+                </div>
+                <div>
+                  <Label>نبذة</Label>
+                  <Textarea
+                    value={profile.bio}
+                    onChange={e => setProfile({ ...profile, bio: e.target.value })}
+                    placeholder="اكتب نبذة عنك..."
+                    className="mt-1 text-right resize-none"
+                    dir="rtl"
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Label>رابط الصورة الشخصية</Label>
+                  <Input
+                    value={profile.logo_url}
+                    onChange={e => setProfile({ ...profile, logo_url: e.target.value })}
+                    placeholder="https://..."
+                    className="mt-1"
+                    dir="ltr"
+                  />
+                </div>
+                <Button
+                  onClick={handleSaveProfile}
+                  disabled={isSavingProfile}
+                  className="w-full bg-gradient-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                >
+                  {isSavingProfile ? 'جارٍ الحفظ...' : 'حفظ الملف الشخصي'}
+                </Button>
+              </div>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

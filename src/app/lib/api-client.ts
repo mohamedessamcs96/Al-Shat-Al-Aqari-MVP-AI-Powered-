@@ -194,10 +194,18 @@ export const buyers = {
   getProfile: (buyerId: string) =>
     apiFetch<Record<string, unknown>>(`/buyers/${buyerId}/`),
 
-  updateName: (buyerId: string, name: string) =>
+  updateProfile: (buyerId: string, data: {
+    name?: string;
+    bio?: string;
+    phone?: string;
+    whatsapp?: string;
+    address?: string;
+    website?: string;
+    logo_url?: string;
+  }) =>
     apiFetch<Record<string, unknown>>(`/buyers/${buyerId}`, {
       method: 'PUT',
-      body: JSON.stringify({ name }),
+      body: JSON.stringify(data),
     }),
 
   deleteAccount: (buyerId: string) =>

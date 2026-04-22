@@ -357,10 +357,6 @@ export function OfficeDashboard() {
                   <Link2 className="w-3.5 h-3.5" />
                   صفحة الروابط
                 </Button>
-                <Button size="sm" variant="outline" className="gap-1.5" onClick={() => navigate('/office/page-builder')}>
-                  <Settings className="w-3.5 h-3.5" />
-                  محرر الصفحة
-                </Button>
                 <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-700" onClick={() => navigate('/office/listings')}>
                   <Plus className="w-3.5 h-3.5" />
                   إضافة عقار
