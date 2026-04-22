@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
-import { ArrowLeft, Plus, Edit2, Trash2, Eye, Search, Filter } from 'lucide-react';
+import { ArrowLeft, Plus, Edit2, Trash2, Eye, Search, X, Upload } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
@@ -10,24 +10,36 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Textarea } from './ui/textarea';
 import { Progress } from './ui/progress';
-import { formatPrice, getCityName } from '../lib/formatters';
-import { offices as officesApi } from '../lib/api-client';
+import { ScrollArea } from './ui/scroll-area';
+import { formatPrice, getCityName, setCitiesCache } from '../lib/formatters';
+import { offices as officesApi, cities as citiesApi } from '../lib/api-client';
 import { getUser, getOfficeIdFromToken, getOfficeIdFromRawResponse, setUser } from '../lib/auth';
 import { toast } from 'sonner';
+
+const EMPTY_LISTING = {
+  property_type: '',
+  address: '',
+  price: '',
+  area: '',
+  bedrooms: '',
+  bathrooms: '',
+  description: '',
+  status: 'active',
+  city: '',
+  features: [] as string[],
+  images: [] as string[],
+  source_site: '',
+};
 
 export function OfficeListings() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newListing, setNewListing] = useState({
-    property_type: '',
-    address: '',
-    price: '',
-    bedrooms: '',
-    area: '',
-    city_id: '1',
-  });
+  const [newListing, setNewListing] = useState({ ...EMPTY_LISTING });
+  const [featureInput, setFeatureInput] = useState('');
+  const [cityList, setCityList] = useState<{ id: string; name: string; name_ar?: string }[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const officeId = (() => {
     const stored = getUser()?.id;
@@ -40,6 +52,16 @@ export function OfficeListings() {
   })();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [officeListings, setOfficeListings] = useState<any[]>([]);
+
+  useEffect(() => {
+    citiesApi.list()
+      .then(data => {
+        const list = Array.isArray(data) ? data : [];
+        setCityList(list);
+        setCitiesCache(list);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!officeId) return;
@@ -56,6 +78,33 @@ export function OfficeListings() {
       .catch(() => {});
   }, [officeId]);
 
+  const handleImageFiles = (files: FileList | null) => {
+    if (!files) return;
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const url = e.target?.result as string;
+        setNewListing(prev => ({ ...prev, images: [...prev.images, url] }));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImage = (index: number) => {
+    setNewListing(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
+  };
+
+  const addFeature = () => {
+    const trimmed = featureInput.trim();
+    if (!trimmed || newListing.features.includes(trimmed)) return;
+    setNewListing(prev => ({ ...prev, features: [...prev.features, trimmed] }));
+    setFeatureInput('');
+  };
+
+  const removeFeature = (f: string) => {
+    setNewListing(prev => ({ ...prev, features: prev.features.filter(x => x !== f) }));
+  };
+
   const handleAddListing = async () => {
     if (!newListing.property_type || !newListing.address || !newListing.price) {
       toast.error('الرجاء ملء جميع الحقول المطلوبة');
@@ -66,16 +115,23 @@ export function OfficeListings() {
         property_type: newListing.property_type,
         address: newListing.address,
         price: Number(newListing.price),
-        bedrooms: Number(newListing.bedrooms),
         area: Number(newListing.area),
-        city_id: newListing.city_id,
+        bedrooms: Number(newListing.bedrooms),
+        bathrooms: Number(newListing.bathrooms),
+        description: newListing.description,
+        status: newListing.status,
+        city: newListing.city || null,
+        features: newListing.features,
+        images: newListing.images,
+        source_site: newListing.source_site,
       });
       const raw = created as any;
       const listing = raw?.data ?? raw;
       setOfficeListings(prev => [...prev, listing]);
       toast.success('تم إضافة العقار بنجاح!');
       setIsDialogOpen(false);
-      setNewListing({ property_type: '', address: '', price: '', bedrooms: '', area: '', city_id: '1' });
+      setNewListing({ ...EMPTY_LISTING });
+      setFeatureInput('');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'حدث خطأ');
     }
@@ -122,11 +178,13 @@ export function OfficeListings() {
               <DialogHeader>
                 <DialogTitle>إضافة عقار جديد</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4 mt-4">
+              <ScrollArea className="max-h-[75vh] pr-2">
+              <div className="space-y-4 mt-4 pl-1">
+                {/* Row 1: Type + City */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>نوع العقار</Label>
-                    <Select value={newListing.property_type} onValueChange={(value) => 
+                    <Label>نوع العقار *</Label>
+                    <Select value={newListing.property_type} onValueChange={(value) =>
                       setNewListing({...newListing, property_type: value})
                     }>
                       <SelectTrigger className="mt-1">
@@ -137,28 +195,71 @@ export function OfficeListings() {
                         <SelectItem value="Apartment">شقة</SelectItem>
                         <SelectItem value="Duplex">دوبلكس</SelectItem>
                         <SelectItem value="Land">أرض</SelectItem>
+                        <SelectItem value="Commercial">تجاري</SelectItem>
+                        <SelectItem value="Warehouse">مستودع</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
                     <Label>المدينة</Label>
-                    <Select value={newListing.city_id} onValueChange={(value) => 
-                      setNewListing({...newListing, city_id: value})
+                    <Select value={newListing.city} onValueChange={(value) =>
+                      setNewListing({...newListing, city: value})
                     }>
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="اختر المدينة" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="1">الرياض</SelectItem>
-                        <SelectItem value="2">جدة</SelectItem>
-                        <SelectItem value="3">الدمام</SelectItem>
+                        {cityList.length > 0
+                          ? cityList.map(c => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.name_ar ?? c.name}
+                            </SelectItem>
+                          ))
+                          : (
+                            <>
+                              <SelectItem value="riyadh">الرياض</SelectItem>
+                              <SelectItem value="jeddah">جدة</SelectItem>
+                              <SelectItem value="dammam">الدمام</SelectItem>
+                            </>
+                          )
+                        }
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
 
+                {/* Row 2: Status + Source */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>الحالة</Label>
+                    <Select value={newListing.status} onValueChange={(value) =>
+                      setNewListing({...newListing, status: value})
+                    }>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">نشط</SelectItem>
+                        <SelectItem value="pending">معلق</SelectItem>
+                        <SelectItem value="sold">مباع</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>المصدر (اختياري)</Label>
+                    <Input
+                      value={newListing.source_site}
+                      onChange={(e) => setNewListing({...newListing, source_site: e.target.value})}
+                      placeholder="رابط المصدر"
+                      className="mt-1"
+                      dir="ltr"
+                    />
+                  </div>
+                </div>
+
+                {/* Row 3: Address */}
                 <div>
-                  <Label>العنوان</Label>
+                  <Label>العنوان *</Label>
                   <Input
                     value={newListing.address}
                     onChange={(e) => setNewListing({...newListing, address: e.target.value})}
@@ -168,11 +269,13 @@ export function OfficeListings() {
                   />
                 </div>
 
+                {/* Row 4: Price + Area */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>السعر</Label>
+                    <Label>السعر (ر.س) *</Label>
                     <Input
                       type="number"
+                      min="0"
                       value={newListing.price}
                       onChange={(e) => setNewListing({...newListing, price: e.target.value})}
                       placeholder="السعر بالريال"
@@ -183,6 +286,7 @@ export function OfficeListings() {
                     <Label>المساحة (م²)</Label>
                     <Input
                       type="number"
+                      min="0"
                       value={newListing.area}
                       onChange={(e) => setNewListing({...newListing, area: e.target.value})}
                       placeholder="المساحة"
@@ -191,18 +295,112 @@ export function OfficeListings() {
                   </div>
                 </div>
 
+                {/* Row 5: Bedrooms + Bathrooms */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>عدد الغرف</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={newListing.bedrooms}
+                      onChange={(e) => setNewListing({...newListing, bedrooms: e.target.value})}
+                      placeholder="عدد الغرف"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label>دورات المياه</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={newListing.bathrooms}
+                      onChange={(e) => setNewListing({...newListing, bathrooms: e.target.value})}
+                      placeholder="عدد دورات المياه"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+
+                {/* Row 6: Description */}
                 <div>
-                  <Label>عدد الغرف</Label>
-                  <Input
-                    type="number"
-                    value={newListing.bedrooms}
-                    onChange={(e) => setNewListing({...newListing, bedrooms: e.target.value})}
-                    placeholder="عدد الغرف"
-                    className="mt-1"
+                  <Label>الوصف</Label>
+                  <Textarea
+                    value={newListing.description}
+                    onChange={(e) => setNewListing({...newListing, description: e.target.value})}
+                    placeholder="وصف العقار..."
+                    className="mt-1 text-right resize-none"
+                    dir="rtl"
+                    rows={3}
                   />
                 </div>
 
-                <div className="flex gap-2 pt-4">
+                {/* Row 7: Features */}
+                <div>
+                  <Label>المميزات</Label>
+                  <div className="flex gap-2 mt-1">
+                    <Input
+                      value={featureInput}
+                      onChange={(e) => setFeatureInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addFeature(); } }}
+                      placeholder="مثال: مسبح، حديقة..."
+                      className="flex-1 text-right"
+                      dir="rtl"
+                    />
+                    <Button type="button" variant="outline" onClick={addFeature} className="shrink-0">إضافة</Button>
+                  </div>
+                  {newListing.features.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {newListing.features.map(f => (
+                        <span key={f} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs">
+                          {f}
+                          <button type="button" onClick={() => removeFeature(f)} className="hover:text-red-500">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Row 8: Images */}
+                <div>
+                  <Label>الصور</Label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => handleImageFiles(e.target.files)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mt-1 w-full border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center gap-2 text-gray-500 hover:border-blue-400 hover:text-blue-500 transition-colors"
+                  >
+                    <Upload className="w-6 h-6" />
+                    <span className="text-sm">اضغط لرفع الصور</span>
+                    <span className="text-xs text-gray-400">JPG, PNG, WebP</span>
+                  </button>
+                  {newListing.images.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {newListing.images.map((img, i) => (
+                        <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden border">
+                          <img src={img} alt="" className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(i)}
+                            className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-2 pt-2">
                   <Button onClick={handleAddListing} className="flex-1 bg-gradient-to-br from-blue-600 to-indigo-600">
                     إضافة العقار
                   </Button>
@@ -211,6 +409,7 @@ export function OfficeListings() {
                   </Button>
                 </div>
               </div>
+              </ScrollArea>
             </DialogContent>
           </Dialog>
         </div>
