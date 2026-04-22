@@ -64,6 +64,16 @@ export function OfficeDashboard() {
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [currentPlan, setCurrentPlan] = useState('professional');
 
+  // Office profile state
+  const [profileName, setProfileName] = useState('');
+  const [profileBio, setProfileBio] = useState('');
+  const [profilePhone, setProfilePhone] = useState('');
+  const [profileWhatsapp, setProfileWhatsapp] = useState('');
+  const [profileAddress, setProfileAddress] = useState('');
+  const [profileWebsite, setProfileWebsite] = useState('');
+  const [profileLogoUrl, setProfileLogoUrl] = useState('');
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+
   const officeId = (() => {
     const stored = getUser()?.id;
     if (stored) return stored;
@@ -91,7 +101,17 @@ export function OfficeDashboard() {
         : [];
     };
     officesApi.getById(officeId)
-      .then((d) => setApiOffice(d))
+      .then((d) => {
+        setApiOffice(d);
+        const o = d as Record<string, unknown>;
+        setProfileName(String(o.name ?? ''));
+        setProfileBio(String(o.bio ?? ''));
+        setProfilePhone(String(o.phone ?? ''));
+        setProfileWhatsapp(String(o.whatsapp ?? ''));
+        setProfileAddress(String(o.address ?? ''));
+        setProfileWebsite(String(o.website ?? ''));
+        setProfileLogoUrl(String(o.logo_url ?? ''));
+      })
       .catch(() => {});
     officesApi.getAnalytics(officeId)
       .then((d) => setApiAnalytics(d))
@@ -162,6 +182,27 @@ export function OfficeDashboard() {
     }
     setResponseMessage('');
     setSelectedLead(null);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!officeId) return;
+    setIsSavingProfile(true);
+    try {
+      await officesApi.update(officeId, {
+        name: profileName,
+        bio: profileBio,
+        phone: profilePhone,
+        whatsapp: profileWhatsapp,
+        address: profileAddress,
+        website: profileWebsite,
+        logo_url: profileLogoUrl,
+      });
+      toast.success('تم حفظ الملف الشخصي بنجاح');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'فشل في حفظ الملف الشخصي');
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
 
   const handleToggleCampaign = async (campaignId: string, currentStatus: string) => {
@@ -376,6 +417,7 @@ export function OfficeDashboard() {
               { label: 'العملاء', icon: <Users className="w-4 h-4" />, tab: 'leads', badge: pendingLeadsCount },
               { label: 'الحملات', icon: <Megaphone className="w-4 h-4" />, tab: 'campaigns', badge: activeCampaignsCount },
               { label: 'الأداء', icon: <BarChart3 className="w-4 h-4" />, tab: 'performance', badge: 0 },
+              { label: 'الملف الشخصي', icon: <Settings className="w-4 h-4" />, tab: 'profile', badge: 0 },
               { label: 'الاشتراك', icon: <CreditCard className="w-4 h-4" />, tab: 'subscription', badge: 0 },
             ].map((item) => (
               <button
@@ -429,6 +471,7 @@ export function OfficeDashboard() {
             <TabsTrigger value="leads" />
             <TabsTrigger value="campaigns" />
             <TabsTrigger value="subscription" />
+            <TabsTrigger value="profile" />
           </TabsList>
 
           {/* ── Overview ── */}
@@ -1291,6 +1334,87 @@ export function OfficeDashboard() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </Card>
+          </TabsContent>
+
+          {/* ── Office Profile ── */}
+          <TabsContent value="profile" className="mt-0 space-y-5">
+            <Card className="p-6 border-0 shadow-sm" dir="rtl">
+              <h2 className="text-lg font-bold text-gray-900 mb-6">الملف الشخصي للمكتب</h2>
+              <div className="space-y-4">
+                <div>
+                  <Label className="block mb-1 text-sm font-medium text-gray-700">اسم المكتب</Label>
+                  <Input
+                    value={profileName}
+                    onChange={e => setProfileName(e.target.value)}
+                    placeholder="اسم المكتب"
+                  />
+                </div>
+                <div>
+                  <Label className="block mb-1 text-sm font-medium text-gray-700">نبذة تعريفية</Label>
+                  <Textarea
+                    value={profileBio}
+                    onChange={e => setProfileBio(e.target.value)}
+                    placeholder="نبذة عن المكتب..."
+                    rows={3}
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="block mb-1 text-sm font-medium text-gray-700">رقم الهاتف</Label>
+                    <Input
+                      value={profilePhone}
+                      onChange={e => setProfilePhone(e.target.value)}
+                      placeholder="+966501234567"
+                      dir="ltr"
+                    />
+                  </div>
+                  <div>
+                    <Label className="block mb-1 text-sm font-medium text-gray-700">واتساب</Label>
+                    <Input
+                      value={profileWhatsapp}
+                      onChange={e => setProfileWhatsapp(e.target.value)}
+                      placeholder="+966501234567"
+                      dir="ltr"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="block mb-1 text-sm font-medium text-gray-700">العنوان</Label>
+                  <Input
+                    value={profileAddress}
+                    onChange={e => setProfileAddress(e.target.value)}
+                    placeholder="العنوان الكامل للمكتب"
+                  />
+                </div>
+                <div>
+                  <Label className="block mb-1 text-sm font-medium text-gray-700">الموقع الإلكتروني</Label>
+                  <Input
+                    value={profileWebsite}
+                    onChange={e => setProfileWebsite(e.target.value)}
+                    placeholder="https://example.com"
+                    dir="ltr"
+                  />
+                </div>
+                <div>
+                  <Label className="block mb-1 text-sm font-medium text-gray-700">رابط الشعار</Label>
+                  <Input
+                    value={profileLogoUrl}
+                    onChange={e => setProfileLogoUrl(e.target.value)}
+                    placeholder="https://..."
+                    dir="ltr"
+                  />
+                </div>
+                <div className="pt-2">
+                  <Button
+                    onClick={handleSaveProfile}
+                    disabled={isSavingProfile}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isSavingProfile ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+                  </Button>
+                </div>
               </div>
             </Card>
           </TabsContent>

@@ -270,9 +270,17 @@ export const offices = {
   getBySlug: (slug: string) =>
     apiFetch<Record<string, unknown>>(`/offices/slug/${slug}/`),
 
-  update: (officeId: string, data: Record<string, unknown>) =>
+  update: (officeId: string, data: {
+    name?: string;
+    bio?: string;
+    phone?: string;
+    whatsapp?: string;
+    address?: string;
+    website?: string;
+    logo_url?: string;
+  }) =>
     apiFetch<Record<string, unknown>>(`/offices/${officeId}/`, {
-      method: 'PATCH',
+      method: 'PUT',
       body: JSON.stringify(data),
     }),
 
