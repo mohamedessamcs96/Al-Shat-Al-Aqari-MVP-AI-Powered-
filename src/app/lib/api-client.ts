@@ -292,7 +292,7 @@ export const offices = {
     website?: string;
     logo_url?: string;
   }) =>
-    apiFetch<Record<string, unknown>>(`/offices/${officeId}/`, {
+    apiFetch<Record<string, unknown>>(`/offices/${officeId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
