@@ -292,7 +292,7 @@ export const offices = {
 
   updateListing: (officeId: string, listingId: string, data: Record<string, unknown>) =>
     apiFetch<Record<string, unknown>>(`/offices/${officeId}/listings/${listingId}/`, {
-      method: 'PATCH',
+      method: 'PUT',
       body: JSON.stringify(data),
     }),
 

@@ -40,6 +40,16 @@ export function OfficeListings() {
   const [featureInput, setFeatureInput] = useState('');
   const [cityList, setCityList] = useState<{ id: string; name: string; name_ar?: string }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Edit state
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [editTarget, setEditTarget] = useState<any>(null);
+  const [editForm, setEditForm] = useState<{ price: string; status: string }>({ price: '', status: 'active' });
+
+  // Robust listing ID extractor (API may vary)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getListingId = (listing: any): string =>
+    listing?.id ?? listing?.uuid ?? listing?.listing_id ?? '';
 
   const officeId = (() => {
     const stored = getUser()?.id;
@@ -137,11 +147,39 @@ export function OfficeListings() {
     }
   };
 
-  const handleDeleteListing = async (id: string) => {
+  const handleDeleteListing = async (listing: any) => {
+    const id = getListingId(listing);
+    if (!id) { toast.error('معرّف العقار غير موجود'); return; }
     try {
       await officesApi.deleteListing(officeId, id);
-      setOfficeListings(prev => prev.filter((l: any) => l.id !== id));
+      setOfficeListings(prev => prev.filter((l: any) => getListingId(l) !== id));
       toast.success('تم حذف العقار بنجاح!');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    }
+  };
+
+  const handleOpenEdit = (listing: any) => {
+    setEditTarget(listing);
+    setEditForm({ price: String(listing.price ?? ''), status: listing.status ?? 'active' });
+    setIsEditOpen(true);
+  };
+
+  const handleUpdateListing = async () => {
+    const id = getListingId(editTarget);
+    if (!id) { toast.error('معرّف العقار غير موجود'); return; }
+    try {
+      const updated = await officesApi.updateListing(officeId, id, {
+        price: Number(editForm.price),
+        status: editForm.status,
+      });
+      const raw = updated as any;
+      const listing = raw?.data ?? raw;
+      setOfficeListings(prev =>
+        prev.map((l: any) => getListingId(l) === id ? { ...l, ...listing } : l)
+      );
+      toast.success('تم تحديث العقار بنجاح!');
+      setIsEditOpen(false);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'حدث خطأ');
     }
@@ -216,11 +254,7 @@ export function OfficeListings() {
                             </SelectItem>
                           ))
                           : (
-                            <>
-                              <SelectItem value="riyadh">الرياض</SelectItem>
-                              <SelectItem value="jeddah">جدة</SelectItem>
-                              <SelectItem value="dammam">الدمام</SelectItem>
-                            </>
+                            <div className="px-3 py-2 text-sm text-gray-400">جارٍ التحميل...</div>
                           )
                         }
                       </SelectContent>
@@ -412,6 +446,48 @@ export function OfficeListings() {
               </ScrollArea>
             </DialogContent>
           </Dialog>
+
+          {/* Edit listing dialog */}
+          <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+            <DialogContent dir="rtl" className="max-w-sm">
+              <DialogHeader>
+                <DialogTitle>تعديل العقار</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 mt-2">
+                <div>
+                  <Label>السعر (ر.س)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    value={editForm.price}
+                    onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>الحالة</Label>
+                  <Select value={editForm.status} onValueChange={(v) => setEditForm({ ...editForm, status: v })}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">نشط</SelectItem>
+                      <SelectItem value="pending">معلق</SelectItem>
+                      <SelectItem value="sold">مباع</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <Button onClick={handleUpdateListing} className="flex-1 bg-gradient-to-br from-blue-600 to-indigo-600">
+                    حفظ التعديلات
+                  </Button>
+                  <Button variant="outline" className="flex-1" onClick={() => setIsEditOpen(false)}>
+                    إلغاء
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </header>
 
@@ -527,19 +603,24 @@ export function OfficeListings() {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="flex-1">
+                  <Button size="sm" variant="outline" className="flex-1" onClick={() => handleOpenEdit(listing)}>
                     <Edit2 className="w-4 h-4 ml-2" />
                     تعديل
                   </Button>
-                  <Button size="sm" variant="outline" className="flex-1">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => navigate(`/listings/${getListingId(listing)}`)}
+                  >
                     <Eye className="w-4 h-4 ml-2" />
                     عرض
                   </Button>
                   <Button 
                     size="sm" 
                     variant="outline" 
-                    className="flex-1"
-                    onClick={() => handleDeleteListing(listing.id)}
+                    className="flex-1 text-red-600 hover:text-red-700 hover:border-red-300"
+                    onClick={() => handleDeleteListing(listing)}
                   >
                     <Trash2 className="w-4 h-4 ml-2" />
                   </Button>
