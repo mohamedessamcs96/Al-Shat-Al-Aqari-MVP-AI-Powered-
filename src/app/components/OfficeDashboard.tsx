@@ -77,6 +77,7 @@ export function OfficeDashboard() {
   const [profileAddress, setProfileAddress] = useState('');
   const [profileWebsite, setProfileWebsite] = useState('');
   const [profileLogoUrl, setProfileLogoUrl] = useState('');
+  const [logoImgError, setLogoImgError] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   const officeId = (() => {
@@ -218,6 +219,7 @@ export function OfficeDashboard() {
         setProfileAddress(String(o.address ?? ''));
         setProfileWebsite(String(o.website ?? ''));
         setProfileLogoUrl(String(o.logo_url ?? ''));
+        setLogoImgError(false); // reset so new logo is attempted
       }).catch(() => {});
       toast.success('تم حفظ الملف الشخصي بنجاح');
     } catch (err) {
@@ -373,12 +375,12 @@ export function OfficeDashboard() {
             <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-10 sm:-mt-12">
               {/* Logo */}
               <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-4 border-white shadow-xl overflow-hidden bg-gradient-to-br from-blue-500 to-indigo-600 flex-shrink-0 flex items-center justify-center">
-                {(profileLogoUrl || office.logo_url) ? (
+                {(profileLogoUrl || office.logo_url) && !logoImgError ? (
                   <img
                     src={profileLogoUrl || office.logo_url}
                     alt={office.name}
                     className="w-full h-full object-cover"
-                    onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                    onError={() => setLogoImgError(true)}
                   />
                 ) : (
                   <span className="text-white text-2xl sm:text-3xl font-bold select-none">
@@ -1372,17 +1374,6 @@ export function OfficeDashboard() {
             <Card className="p-6 border-0 shadow-sm" dir="rtl">
               <h2 className="text-lg font-bold text-gray-900 mb-6">الملف الشخصي للمكتب</h2>
               <div className="space-y-4">
-                {/* Read-only email from signup */}
-                <div>
-                  <Label className="block mb-1 text-sm font-medium text-gray-700">البريد الإلكتروني</Label>
-                  <Input
-                    value={office.email || getUser()?.email || ''}
-                    readOnly
-                    dir="ltr"
-                    className="bg-gray-50 text-gray-500 cursor-not-allowed"
-                  />
-                  <p className="text-xs text-gray-400 mt-1" dir="rtl">لا يمكن تغيير البريد الإلكتروني</p>
-                </div>
                 <div>
                   <Label className="block mb-1 text-sm font-medium text-gray-700">اسم المكتب</Label>
                   <Input
@@ -1459,6 +1450,7 @@ export function OfficeDashboard() {
                           try {
                             const url = await officesApi.uploadLogo(officeId, file);
                             setProfileLogoUrl(url);
+                            setLogoImgError(false); // reset error so new image is attempted
                             toast.success('تم رفع الشعار بنجاح');
                           } catch (err) {
                             toast.error(err instanceof Error ? err.message : 'فشل رفع الشعار');
