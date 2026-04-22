@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import {
   Building2, TrendingUp, Users, Eye, MessageSquare, ArrowRight,
   Plus, BarChart3, Settings, CreditCard, Star, MapPin, Phone,
@@ -44,7 +44,12 @@ function DashSparkline({ data, color }: { data: number[]; color: string }) {
 
 export function OfficeDashboard() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(() => {
+    const tab = searchParams.get('tab');
+    const valid = ['overview','listings','leads','campaigns','performance','profile','subscription'];
+    return valid.includes(tab ?? '') ? tab! : 'overview';
+  });
   const [qrCopied, setQrCopied] = useState(false);
   const qrRef = useRef<SVGSVGElement>(null);
 

@@ -96,14 +96,18 @@ async function apiFetch<T>(path: string, options: RequestInit & { _retry?: boole
 
   if (!res.ok) {
     // Backend may return errors in several shapes:
-    // { detail: "…" }  |  { message: "…" }  |  { error: "…" }
-    // or DRF field-level errors: { field: ["msg"] }
-    const fallback = lang === 'en' ? 'An error occurred. Please try again.' : 'حدث خطأ. الرجاء المحاولة مجدداً.';
+    // { detail: "…" }  |  { message: "…" }  |  { error: "…" }  |  { errors: "…" }
+    // or DRF field-level errors: { field: ["msg"] }  |  { non_field_errors: ["msg"] }
+    const b = body as Record<string, unknown>;
+    const fallback = lang === 'en'
+      ? `Error ${res.status}. Please try again.`
+      : `حدث خطأ (${res.status}). الرجاء المحاولة مجدداً.`;
     const msg =
-      (body as Record<string, unknown>).detail ??
-      (body as Record<string, unknown>).message ??
-      (body as Record<string, unknown>).error ??
-      extractFieldErrors(body as Record<string, unknown[]>) ??
+      b.detail ??
+      b.message ??
+      b.error ??
+      (typeof b.errors === 'string' ? b.errors : undefined) ??
+      extractFieldErrors(b as Record<string, unknown[]>) ??
       fallback;
     throw new Error(String(msg));
   }
@@ -114,6 +118,15 @@ async function apiFetch<T>(path: string, options: RequestInit & { _retry?: boole
 function extractFieldErrors(body: Record<string, unknown>): string | undefined {
   const entries = Object.entries(body);
   if (entries.length === 0) return undefined;
+  // DRF non_field_errors first
+  const nfe = (body as Record<string, unknown[]>).non_field_errors;
+  if (Array.isArray(nfe) && typeof nfe[0] === 'string') return nfe[0];
+  // Nested errors object { errors: { field: ["msg"] } }
+  if (body.errors && typeof body.errors === 'object' && !Array.isArray(body.errors)) {
+    const nested = extractFieldErrors(body.errors as Record<string, unknown>);
+    if (nested) return nested;
+  }
+  // Generic field arrays
   for (const [, val] of entries) {
     if (Array.isArray(val) && typeof val[0] === 'string') return val[0];
   }

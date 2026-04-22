@@ -138,7 +138,7 @@ export function LoginPage() {
         rawReg.office_id || rawReg.id || rawReg.office?.id || rawReg.user?.id || '';
       if (offRegId) setUser({ id: String(offRegId), name: registerOfficeName, email: registerEmail });
       toast.success('تم إنشاء الحساب بنجاح! مرحباً بك في الشات العقاري');
-      navigate('/office/dashboard');
+      navigate('/office/dashboard?tab=profile');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'حدث خطأ');
     } finally {
