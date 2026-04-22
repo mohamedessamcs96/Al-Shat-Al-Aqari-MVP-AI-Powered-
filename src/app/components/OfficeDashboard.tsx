@@ -372,12 +372,19 @@ export function OfficeDashboard() {
           <div className="px-6 pb-6">
             <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-10 sm:-mt-12">
               {/* Logo */}
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-4 border-white shadow-xl overflow-hidden bg-white flex-shrink-0">
-                <img
-                  src={office.logo_url}
-                  alt={office.name}
-                  className="w-full h-full object-cover"
-                />
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-4 border-white shadow-xl overflow-hidden bg-gradient-to-br from-blue-500 to-indigo-600 flex-shrink-0 flex items-center justify-center">
+                {(profileLogoUrl || office.logo_url) ? (
+                  <img
+                    src={profileLogoUrl || office.logo_url}
+                    alt={office.name}
+                    className="w-full h-full object-cover"
+                    onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                  />
+                ) : (
+                  <span className="text-white text-2xl sm:text-3xl font-bold select-none">
+                    {office.name.charAt(0).toUpperCase()}
+                  </span>
+                )}
               </div>
 
               {/* Name & meta */}
