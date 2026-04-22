@@ -89,7 +89,14 @@ export function OfficeDashboard() {
   // Fetch office data from API, fall back to mock data on error
   useEffect(() => {
     if (!officeId) return; // not logged in yet – skip all requests
-    const toArr = (d: unknown) => Array.isArray(d) ? d : ((d as any)?.results ?? []);
+    const toArr = (d: unknown): any[] => {
+      if (Array.isArray(d)) return d;
+      const r = d as any;
+      return Array.isArray(r?.data) ? r.data
+        : Array.isArray(r?.results) ? r.results
+        : Array.isArray(r?.data?.results) ? r.data.results
+        : [];
+    };
     officesApi.getById(officeId)
       .then((d) => setApiOffice(d))
       .catch(() => {});
@@ -652,7 +659,7 @@ export function OfficeDashboard() {
           <TabsContent value="listings" className="mt-0">
             <div className="flex items-center justify-between mb-4" dir="rtl">
               <h3 className="font-semibold text-gray-900">عقاراتي ({officeListings.length})</h3>
-              <Button size="sm" className="gap-1 bg-blue-600 hover:bg-blue-700">
+              <Button size="sm" className="gap-1 bg-blue-600 hover:bg-blue-700" onClick={() => navigate('/office/listings')}>
                 <Plus className="w-4 h-4" /> إضافة عقار
               </Button>
             </div>
@@ -660,7 +667,9 @@ export function OfficeDashboard() {
               {officeListings.map((listing) => (
                 <Card key={listing.id} className="overflow-hidden border-0 shadow-sm hover:shadow-md transition-shadow">
                   <div className="relative">
-                    <img src={listing.images[0]} alt={listing.property_type} className="w-full h-44 object-cover" />
+                    {listing.images?.[0] && (
+                      <img src={listing.images[0]} alt={listing.property_type} className="w-full h-44 object-cover" />
+                    )}
                     <div className="absolute top-2 right-2">
                       <Badge className="bg-emerald-500 text-white border-0 text-xs">
                         {listing.status === 'active' ? 'نشط' : 'معلق'}
