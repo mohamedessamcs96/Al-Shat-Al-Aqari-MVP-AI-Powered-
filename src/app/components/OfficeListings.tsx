@@ -44,7 +44,15 @@ export function OfficeListings() {
   useEffect(() => {
     if (!officeId) return;
     officesApi.listListings(officeId)
-      .then(data => setOfficeListings(Array.isArray(data) ? data : ((data as any)?.results ?? [])))
+      .then(data => {
+        const raw = data as any;
+        const list = Array.isArray(raw) ? raw
+          : Array.isArray(raw?.data) ? raw.data
+          : Array.isArray(raw?.results) ? raw.results
+          : Array.isArray(raw?.data?.results) ? raw.data.results
+          : [];
+        setOfficeListings(list);
+      })
       .catch(() => {});
   }, [officeId]);
 
@@ -62,7 +70,9 @@ export function OfficeListings() {
         area: Number(newListing.area),
         city_id: newListing.city_id,
       });
-      setOfficeListings(prev => [...prev, created]);
+      const raw = created as any;
+      const listing = raw?.data ?? raw;
+      setOfficeListings(prev => [...prev, listing]);
       toast.success('تم إضافة العقار بنجاح!');
       setIsDialogOpen(false);
       setNewListing({ property_type: '', address: '', price: '', bedrooms: '', area: '', city_id: '1' });
