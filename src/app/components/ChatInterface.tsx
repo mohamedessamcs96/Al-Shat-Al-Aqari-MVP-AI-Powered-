@@ -695,18 +695,18 @@ export function ChatInterface() {
                   <div className="absolute top-0 left-0 w-32 h-32 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
                   <div className="flex items-center gap-3 relative z-10">
                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-300 to-indigo-400 flex items-center justify-center text-white font-extrabold text-lg shadow-lg ring-2 ring-white/20 flex-shrink-0">
-                      أ
+                      {((buyerProfile?.name ?? user?.name) ?? 'م')[0]}
                     </div>
                     <div>
-                      <p className="text-white font-bold text-sm">أحمد الرشيدي</p>
-                      <p className="text-blue-200 text-xs mt-0.5">ahmed@example.com</p>
+                      <p className="text-white font-bold text-sm">{buyerProfile?.name ?? user?.name ?? 'مستخدم'}</p>
+                      <p className="text-blue-200 text-xs mt-0.5">{buyerProfile?.email ?? user?.email ?? buyerProfile?.phone ?? user?.phone ?? ''}</p>
                     </div>
-                    <button className="mr-auto text-blue-200 hover:text-white transition-colors">
+                    <button className="mr-auto text-blue-200 hover:text-white transition-colors" onClick={() => { setSidebarPanel(null); navigate('/buyer/dashboard'); }}>
                       <ChevronRight className="w-4 h-4 rotate-180" />
                     </button>
                   </div>
                   <div className="flex gap-3 mt-3 relative z-10">
-                    <span className="text-[11px] bg-white/15 text-blue-100 px-2.5 py-1 rounded-full font-medium">عميل مميز</span>
+                    <span className="text-[11px] bg-white/15 text-blue-100 px-2.5 py-1 rounded-full font-medium">عميل</span>
                     <span className="text-[11px] bg-emerald-400/20 text-emerald-300 px-2.5 py-1 rounded-full font-medium">✔ حساب موثق</span>
                   </div>
                 </div>
@@ -741,17 +741,18 @@ export function ChatInterface() {
                 <div>
                   <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">الإشعارات</p>
                   <div className="rounded-2xl border border-slate-100 divide-y divide-slate-100 overflow-hidden bg-white">
-                    {[
-                      { label: 'عقارات جديدة', sub: 'إشعار عند توفر عقار مطابق', on: true },
-                      { label: 'تغيرات الأسعار', sub: 'متابعة انخفاض الأسعار', on: true },
-                      { label: 'رسائل المكاتب', sub: 'ردود ومحادثات جديدة', on: false },
-                    ].map((n) => (
+                    {([
+                      { label: 'عقارات جديدة', sub: 'إشعار عند توفر عقار مطابق', on: notifNew, set: setNotifNew },
+                      { label: 'تغيرات الأسعار', sub: 'متابعة انخفاض الأسعار', on: notifPrice, set: setNotifPrice },
+                      { label: 'رسائل المكاتب', sub: 'ردود ومحادثات جديدة', on: notifMessages, set: setNotifMessages },
+                    ] as const).map((n) => (
                       <div key={n.label} className="flex items-center justify-between px-4 py-3.5">
                         <div>
                           <p className="text-sm font-medium text-slate-800">{n.label}</p>
                           <p className="text-xs text-slate-400 mt-0.5">{n.sub}</p>
                         </div>
-                        <div
+                        <button
+                          onClick={() => n.set((v: boolean) => !v)}
                           className={`w-10 h-6 rounded-full relative transition-colors flex-shrink-0 ${
                             n.on ? 'bg-indigo-500' : 'bg-slate-200'
                           }`}
@@ -761,7 +762,7 @@ export function ChatInterface() {
                               n.on ? 'right-1' : 'left-1'
                             }`}
                           />
-                        </div>
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -772,12 +773,13 @@ export function ChatInterface() {
                   <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">الحساب</p>
                   <div className="rounded-2xl border border-slate-100 divide-y divide-slate-100 overflow-hidden bg-white">
                     {[
-                      { label: 'تعديل الملف الشخصي', icon: '✏️' },
-                      { label: 'الأمان وكلمة المرور', icon: '🔒' },
-                      { label: 'إدارة الاشتراك', icon: '💳' },
+                      { label: 'تعديل الملف الشخصي', icon: '✏️', action: () => { setSidebarPanel(null); navigate('/buyer/dashboard?tab=profile'); } },
+                      { label: 'الأمان وكلمة المرور', icon: '🔒', action: () => {} },
+                      { label: 'إدارة الاشتراك', icon: '💳', action: () => { setSidebarPanel(null); navigate('/buyer/dashboard?tab=subscription'); } },
                     ].map((a) => (
                       <button
                         key={a.label}
+                        onClick={a.action}
                         className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-slate-50 transition-colors text-right group"
                       >
                         <div className="flex items-center gap-3">
