@@ -166,9 +166,8 @@ export function PublicOfficePage() {
       });
   }, [slug]);
 
-  const pageUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/office/${slug}`
-    : `/office/${slug}`;
+  const PRODUCTION_URL = 'https://al-shat-al-aqari-mvp.vercel.app';
+  const pageUrl = `${PRODUCTION_URL}/office/${slug}`;
 
   // Show edit controls only to the office owner
   const storedUser = getUser();

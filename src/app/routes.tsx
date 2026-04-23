@@ -4,6 +4,7 @@ import { ListingDetail } from "./components/ListingDetail";
 import { OfficeDashboard } from "./components/OfficeDashboard";
 import { OfficeMiniPage } from "./components/OfficeMiniPage";
 import { PublicOfficePage } from "./components/PublicOfficePage";
+import { PublicPage } from "./components/PublicPage";
 import { PageBuilder } from "./components/PageBuilder";
 import { OfficeLeads } from "./components/OfficeLeads";
 import { OfficeCampaigns } from "./components/OfficeCampaigns";
@@ -95,6 +96,10 @@ export const router = createBrowserRouter([
   {
     path: "/office/:slug",
     Component: PublicOfficePage,
+  },
+  {
+    path: "/pages/:slug",
+    Component: PublicPage,
   },
   {
     // Keep old route for backwards compat

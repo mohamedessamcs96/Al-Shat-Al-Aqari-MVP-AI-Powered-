@@ -426,7 +426,7 @@ export const offices = {
 
   savePage: (officeId: string, config: Record<string, unknown>) =>
     apiFetch<Record<string, unknown>>(`/offices/${officeId}/page`, {
-      method: 'PUT',
+      method: 'POST',
       body: JSON.stringify(config),
     }),
 
@@ -440,7 +440,7 @@ export const offices = {
 
   saveLinktree: (officeId: string, config: Record<string, unknown>) =>
     apiFetch<Record<string, unknown>>(`/offices/${officeId}/linktree`, {
-      method: 'PUT',
+      method: 'POST',
       body: JSON.stringify(config),
     }),
 };

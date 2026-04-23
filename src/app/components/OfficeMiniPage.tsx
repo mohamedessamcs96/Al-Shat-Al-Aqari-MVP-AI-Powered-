@@ -34,9 +34,8 @@ export function OfficeMiniPage() {
       .finally(() => setLoading(false));
   }, [slug]);
 
-  const pageUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/office/${slug}`
-    : `/office/${slug}`;
+  const PRODUCTION_URL = 'https://al-shat-al-aqari-mvp.vercel.app';
+  const pageUrl = `${PRODUCTION_URL}/office/${slug}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(pageUrl);

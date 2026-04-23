@@ -172,9 +172,8 @@ export function OfficeDashboard() {
   const urgentLeadsCount = leadsData.filter(l => l.intent_level === 'urgent').length;
   const activeCampaignsCount = campaignsData.filter(c => c.status === 'active').length;
 
-  const pageUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/office/${office.slug}`
-    : `/office/${office.slug}`;
+  const PRODUCTION_URL = 'https://al-shat-al-aqari-mvp.vercel.app';
+  const pageUrl = `${PRODUCTION_URL}/office/${office.slug}`;
 
   const handleQrCopy = () => {
     navigator.clipboard.writeText(pageUrl);
