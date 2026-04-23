@@ -10,7 +10,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from './ui/sheet';
 import { useNavigate } from 'react-router';
 import { type ChatMessage } from '../lib/mock-data';
 import { formatPrice, getCityName } from '../lib/formatters';
-import { chat as chatApi } from '../lib/api-client';
+import { chat as chatApi, buyers as buyersApi } from '../lib/api-client';
 import { getUser, logout as authLogout } from '../lib/auth';
 
 type Conversation = {
@@ -82,6 +82,33 @@ export function ChatInterface() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const user = getUser();
+
+  // Settings panel – real buyer profile
+  const [buyerProfile, setBuyerProfile] = useState<{ name?: string; phone?: string; email?: string } | null>(null);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [notifNew, setNotifNew] = useState(true);
+  const [notifPrice, setNotifPrice] = useState(true);
+  const [notifMessages, setNotifMessages] = useState(false);
+
+  // Load buyer profile from API when settings panel opens (only once)
+  useEffect(() => {
+    if (sidebarPanel === 'settings' && !profileLoaded && user?.id) {
+      buyersApi.getProfile(user.id)
+        .then((raw: any) => {
+          const d = raw?.data ?? raw;
+          setBuyerProfile({
+            name: d?.name ?? user?.name,
+            phone: d?.phone ?? user?.phone,
+            email: d?.email ?? user?.email,
+          });
+        })
+        .catch(() => {
+          // Fallback to what's in localStorage
+          setBuyerProfile({ name: user?.name, phone: user?.phone, email: user?.email });
+        })
+        .finally(() => setProfileLoaded(true));
+    }
+  }, [sidebarPanel, profileLoaded, user?.id]);
 
   const activeConv = conversations.find(c => c.id === activeId) ?? conversations[0];
   const messages = activeConv?.messages ?? [];
@@ -298,10 +325,10 @@ export function ChatInterface() {
         {/* User header */}
         <div className="relative z-10 flex items-center gap-3 px-4 py-4 border-b border-white/10 flex-shrink-0">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-lg shadow-blue-900/40 ring-1 ring-white/20">
-            أ
+            {(user?.name ?? 'م')[0]}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white font-semibold text-sm truncate">أحمد</p>
+            <p className="text-white font-semibold text-sm truncate">{user?.name ?? 'مستخدم'}</p>
             <p className="text-blue-300/50 text-xs">عميل</p>
           </div>
         </div>
