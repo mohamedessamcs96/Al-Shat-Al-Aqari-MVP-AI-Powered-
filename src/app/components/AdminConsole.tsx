@@ -138,7 +138,7 @@ export function AdminConsole() {
     { label: 'المكاتب', value: analytics.total_offices ?? analytics.totalOffices ?? offices.length, sub: 'مكتب مسجل', color: 'text-indigo-700' },
     { label: 'المشترون', value: analytics.total_buyers ?? analytics.totalUsers ?? buyers.length, sub: 'مستخدم نشط', color: 'text-blue-700' },
     { label: 'العقارات', value: analytics.total_listings ?? analytics.totalListings ?? '—', sub: 'مدرج', color: 'text-emerald-700' },
-    { label: 'الاشتراكات', value: subscriptions.length || analytics.total_subscriptions ?? '—', sub: 'اشتراك نشط', color: 'text-amber-700' },
+      { label: 'الاشتراكات', value: (subscriptions.length || analytics.total_subscriptions) ?? '—', sub: 'اشتراك نشط', color: 'text-amber-700' },
     { label: 'التنبيهات', value: openIncidents, sub: 'قيد المراجعة', color: openIncidents > 0 ? 'text-red-600' : 'text-gray-500' },
   ];
 
