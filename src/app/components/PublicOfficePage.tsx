@@ -170,6 +170,10 @@ export function PublicOfficePage() {
     ? `${window.location.origin}/office/${slug}`
     : `/office/${slug}`;
 
+  // Show edit controls only to the office owner
+  const storedUser = getUser();
+  const isOwner = storedUser?.slug === slug || storedUser?.id === (office as any)?.id;
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center" dir="rtl">
@@ -226,25 +230,27 @@ export function PublicOfficePage() {
   return (
     <div className="min-h-screen" style={{ ...bgStyle, fontFamily }} dir="rtl">
 
-      {/* ── Floating action bar ── */}
-      <div className="fixed top-4 right-4 z-50 flex gap-2">
-        <button
-          onClick={() => setQrOpen(true)}
-          className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-all hover:scale-110"
-          style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)' }}
-          title="QR Code"
-        >
-          <QrCode className="w-5 h-5" style={{ color: textColor }} />
-        </button>
-        <button
-          onClick={() => navigate('/office/linktree')}
-          className="h-10 px-4 rounded-xl text-xs font-semibold shadow-lg transition-all hover:scale-105 flex items-center gap-1.5"
-          style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)', color: textColor }}
-        >
-          <Edit3 className="w-3.5 h-3.5" />
-          تعديل
-        </button>
-      </div>
+      {/* ── Floating action bar — owner only ── */}
+      {isOwner && (
+        <div className="fixed top-4 right-4 z-50 flex gap-2">
+          <button
+            onClick={() => setQrOpen(true)}
+            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-all hover:scale-110"
+            style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)' }}
+            title="QR Code"
+          >
+            <QrCode className="w-5 h-5" style={{ color: textColor }} />
+          </button>
+          <button
+            onClick={() => navigate('/office/linktree')}
+            className="h-10 px-4 rounded-xl text-xs font-semibold shadow-lg transition-all hover:scale-105 flex items-center gap-1.5"
+            style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)', color: textColor }}
+          >
+            <Edit3 className="w-3.5 h-3.5" />
+            تعديل
+          </button>
+        </div>
+      )}
 
       {/* ── Linktree content ── */}
       <div className="flex flex-col items-center py-16 px-5 min-h-screen">
@@ -300,14 +306,16 @@ export function PublicOfficePage() {
         </p>
       </div>
 
-      {/* QR Dialog */}
-      <QRDialog
-        open={qrOpen}
-        onClose={() => setQrOpen(false)}
-        url={pageUrl}
-        officeName={profile.name || office.name || ''}
-        logoUrl={office.logo_url}
-      />
+      {/* QR Dialog — owner only */}
+      {isOwner && (
+        <QRDialog
+          open={qrOpen}
+          onClose={() => setQrOpen(false)}
+          url={pageUrl}
+          officeName={profile.name || office.name || ''}
+          logoUrl={office.logo_url}
+        />
+      )}
     </div>
   );
 }
