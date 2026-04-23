@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { Home, MessageSquare, Calendar, DollarSign, Heart, ArrowLeft, Clock, CheckCircle, XCircle, LogOut, User } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -15,7 +15,8 @@ import { toast } from 'sonner';
 
 export function BuyerDashboard() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('visits');
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') ?? 'visits');
   const buyerId = getUser()?.id ?? '';
   const [profile, setProfile] = useState({
     name: '',

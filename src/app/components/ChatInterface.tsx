@@ -773,7 +773,7 @@ export function ChatInterface() {
                   <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">الحساب</p>
                   <div className="rounded-2xl border border-slate-100 divide-y divide-slate-100 overflow-hidden bg-white">
                     <button
-                      onClick={() => { setSidebarPanel(null); navigate('/buyer/dashboard?tab=profile'); }}
+                      onClick={() => { setSidebarPanel(null); setSidebarOpen(false); setTimeout(() => navigate('/buyer/dashboard?tab=profile'), 50); }}
                       className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-slate-50 transition-colors text-right group"
                     >
                       <span className="text-sm text-slate-700 font-medium">تعديل الملف الشخصي</span>
