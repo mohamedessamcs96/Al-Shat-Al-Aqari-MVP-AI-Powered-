@@ -415,10 +415,6 @@ export function OfficeDashboard() {
                     <Phone className="w-3.5 h-3.5 flex-shrink-0" />
                     {office.phone}
                   </span>
-                  <span className="flex items-center gap-1">
-                    <Mail className="w-3.5 h-3.5 flex-shrink-0" />
-                    {office.email}
-                  </span>
                 </div>
               </div>
 
@@ -445,10 +441,8 @@ export function OfficeDashboard() {
               { label: 'لوحة التحكم', icon: <Home className="w-4 h-4" />, tab: 'overview', badge: 0 },
               { label: 'عقاراتي', icon: <Building2 className="w-4 h-4" />, tab: 'listings', badge: officeListings.length },
               { label: 'العملاء', icon: <Users className="w-4 h-4" />, tab: 'leads', badge: pendingLeadsCount },
-              { label: 'الحملات', icon: <Megaphone className="w-4 h-4" />, tab: 'campaigns', badge: activeCampaignsCount },
               { label: 'الأداء', icon: <BarChart3 className="w-4 h-4" />, tab: 'performance', badge: 0 },
               { label: 'الملف الشخصي', icon: <Settings className="w-4 h-4" />, tab: 'profile', badge: 0 },
-              { label: 'الاشتراك', icon: <CreditCard className="w-4 h-4" />, tab: 'subscription', badge: 0 },
             ].map((item) => (
               <button
                 key={item.tab}
@@ -1428,41 +1422,23 @@ export function OfficeDashboard() {
                   />
                 </div>
                 <div>
-                  <Label className="block mb-1 text-sm font-medium text-gray-700">شعار المكتب</Label>
-                  <div className="flex items-center gap-4" dir="ltr">
-                    {profileLogoUrl && (
+                  <Label className="block mb-1 text-sm font-medium text-gray-700">رابط شعار المكتب</Label>
+                  <div className="flex items-center gap-3">
+                    {profileLogoUrl && !logoImgError && (
                       <img
                         src={profileLogoUrl}
                         alt="شعار المكتب"
-                        className="w-16 h-16 rounded-xl object-cover border border-gray-200"
-                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        className="w-14 h-14 rounded-xl object-cover border border-gray-200 flex-shrink-0"
+                        onError={() => setLogoImgError(true)}
                       />
                     )}
-                    <label className="cursor-pointer">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file || !officeId) return;
-                          try {
-                            const url = await officesApi.uploadLogo(officeId, file);
-                            setProfileLogoUrl(url);
-                            setLogoImgError(false); // reset error so new image is attempted
-                            toast.success('تم رفع الشعار بنجاح');
-                          } catch (err) {
-                            toast.error(err instanceof Error ? err.message : 'فشل رفع الشعار');
-                          }
-                        }}
-                      />
-                      <span className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                        رفع صورة
-                      </span>
-                    </label>
-                    {profileLogoUrl && (
-                      <span className="text-xs text-gray-400 truncate max-w-[180px]" dir="ltr">{profileLogoUrl}</span>
-                    )}
+                    <Input
+                      value={profileLogoUrl}
+                      onChange={e => { setProfileLogoUrl(e.target.value); setLogoImgError(false); }}
+                      placeholder="https://example.com/logo.png"
+                      dir="ltr"
+                      className="flex-1"
+                    />
                   </div>
                 </div>
                 <div className="pt-2">
