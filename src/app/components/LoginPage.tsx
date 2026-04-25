@@ -151,9 +151,15 @@ export function LoginPage() {
     setLoading(true);
     try {
       const res = await apiAuth.adminLogin(adminEmail, adminPassword);
-      setToken(res.token);
+      const raw = res as any;
+      const tok = raw.tokens?.accessToken || raw.tokens?.access || raw.tokens?.token ||
+        raw.token || raw.access || raw.key || raw.auth_token || '';
+      if (!tok) { toast.error('فشل تسجيل الدخول: لم يُستلم توكن'); return; }
+      const refreshTok = raw.tokens?.refreshToken || raw.tokens?.refresh || raw.refresh || '';
+      if (refreshTok) setRefreshToken(refreshTok);
+      setToken(tok);
       setRole('admin');
-      setUser({ id: 'admin', email: adminEmail });
+      setUser({ id: String(raw.data?.user?.id || raw.id || 'admin'), email: adminEmail });
       toast.success('مرحباً بك في لوحة تحكم المنصة!');
       navigate('/admin/dashboard');
     } catch (err) {
@@ -191,21 +197,26 @@ export function LoginPage() {
   // ── Admin-only route view ──
   if (isAdminRoute) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 p-6">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6" dir="rtl">
         <div className="w-full max-w-sm">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-red-500/10 ring-1 ring-red-500/30 mb-4">
-              <ShieldCheck className="w-8 h-8 text-red-400" />
+          {/* Brand */}
+          <div className="flex items-center justify-center gap-3 mb-8">
+            <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg">
+              <ShieldCheck className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-white">لوحة الإدارة</h1>
-            <p className="text-slate-400 text-sm mt-1">وصول مقتصر على المسؤولين</p>
+            <div>
+              <p className="text-lg font-bold text-gray-900 leading-none">الشات العقاري</p>
+              <p className="text-xs text-gray-500">لوحة الإدارة</p>
+            </div>
           </div>
-          <div className="bg-slate-900 rounded-3xl border border-slate-800 p-7 space-y-5">
-            <div className="rounded-xl bg-red-950/40 border border-red-900/40 p-3 flex items-center gap-2.5">
-              <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
-              <p className="text-xs text-red-400">هذه الصفحة مخصصة للمسؤولين فقط</p>
+
+          <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-7 space-y-4">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-0.5">تسجيل دخول المسؤول</h2>
+              <p className="text-sm text-gray-500">هذه الصفحة مخصصة للمسؤولين فقط</p>
             </div>
-            <FieldWithIcon icon={<Mail className="w-4 h-4 text-slate-500" />} className="bg-slate-800 border-slate-700">
+
+            <FieldWithIcon icon={<Mail className="w-4 h-4 text-gray-400" />}>
               <Input
                 type="email"
                 inputMode="email"
@@ -214,11 +225,12 @@ export function LoginPage() {
                 onChange={(e) => setAdminEmail(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAdminLogin()}
                 placeholder="البريد الإلكتروني"
-                className="pr-10 text-right rounded-xl bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-red-500"
+                className="pr-10 text-right rounded-xl"
                 dir="rtl"
               />
             </FieldWithIcon>
-            <FieldWithIcon icon={<Lock className="w-4 h-4 text-slate-500" />} className="bg-slate-800 border-slate-700">
+
+            <FieldWithIcon icon={<Lock className="w-4 h-4 text-gray-400" />}>
               <Input
                 type={showAdminPass ? 'text' : 'password'}
                 autoComplete="current-password"
@@ -226,28 +238,30 @@ export function LoginPage() {
                 onChange={(e) => setAdminPassword(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAdminLogin()}
                 placeholder="كلمة المرور"
-                className="pr-10 pl-10 text-right rounded-xl bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-red-500"
+                className="pr-10 pl-10 text-right rounded-xl"
                 dir="rtl"
               />
               <button
                 type="button"
                 onClick={() => setShowAdminPass((v) => !v)}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
               >
                 {showAdminPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </FieldWithIcon>
+
             <Button
               onClick={handleAdminLogin}
               disabled={loading}
-              className="w-full bg-red-600 hover:bg-red-700 rounded-xl h-11 font-semibold shadow-lg shadow-red-900/30 disabled:opacity-60"
+              className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl h-11 font-semibold disabled:opacity-60"
             >
               {loading ? <Loader2 className="w-4 h-4 ml-2 animate-spin" /> : <ShieldCheck className="w-4 h-4 ml-2" />}
               دخول الإدارة
             </Button>
+
             <button
               onClick={() => navigate('/')}
-              className="w-full flex items-center justify-center gap-1.5 text-sm text-slate-500 hover:text-slate-300 transition-colors pt-1"
+              className="w-full flex items-center justify-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors pt-1"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               العودة للصفحة الرئيسية
