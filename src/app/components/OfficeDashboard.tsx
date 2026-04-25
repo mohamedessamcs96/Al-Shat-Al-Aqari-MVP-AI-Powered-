@@ -492,36 +492,6 @@ export function OfficeDashboard() {
 
           {/* ── Overview ── */}
           <TabsContent value="overview" className="mt-0 space-y-4">
-            {/* Welcome Banner */}
-            <div
-              className="flex flex-col sm:flex-row items-center gap-4 p-5 rounded-2xl text-white"
-              style={{ background: 'linear-gradient(135deg, #1e40af 0%, #4f46e5 100%)' }}
-              dir="rtl"
-            >
-              <div className="flex-1">
-                <p className="text-xs text-blue-200 font-medium mb-0.5 flex items-center gap-1">
-                  <Zap className="w-3 h-3" /> لوحة التحكم
-                </p>
-                <h2 className="text-lg font-extrabold">مرحباً، {office.name}!</h2>
-                <p className="text-blue-100 text-sm mt-0.5">
-                  لديك{' '}
-                  <span className="font-bold text-white">{pendingLeadsCount} عملاء جدد</span>
-                  {' '}و{' '}
-                  <span className="font-bold text-white">{activeCampaignsCount} حملات نشطة</span>
-                  {' '}الآن.
-                </p>
-              </div>
-              <div className="flex gap-2 flex-shrink-0">
-                <button
-                  onClick={() => setActiveTab('leads')}
-                  className="bg-white/20 hover:bg-white/30 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors border border-white/30 whitespace-nowrap"
-                >عرض العملاء</button>
-                <button
-                  onClick={() => setActiveTab('campaigns')}
-                  className="bg-white text-indigo-700 text-sm font-semibold px-4 py-2 rounded-xl transition-colors hover:bg-blue-50 whitespace-nowrap"
-                >الحملات</button>
-              </div>
-            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Recent Leads */}
               <Card className="p-5 border-0 shadow-sm">
