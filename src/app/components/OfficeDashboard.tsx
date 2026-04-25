@@ -653,21 +653,27 @@ export function OfficeDashboard() {
               <div className="flex flex-col sm:flex-row items-center gap-6">
                 {/* QR Code */}
                 <div className="p-3 bg-white rounded-2xl border shadow-sm shrink-0">
+                  {office.slug ? (
                   <QRCodeSVG
                     ref={qrRef}
                     value={pageUrl}
                     size={140}
                     level="H"
                     includeMargin={false}
-                    imageSettings={{
-                      src: office.logo_url,
-                      x: undefined,
-                      y: undefined,
-                      height: 30,
-                      width: 30,
-                      excavate: true,
-                    }}
+                    {...(office.logo_url ? {
+                      imageSettings: {
+                        src: office.logo_url,
+                        x: undefined,
+                        y: undefined,
+                        height: 30,
+                        width: 30,
+                        excavate: true,
+                      }
+                    } : {})}
                   />
+                  ) : (
+                    <div className="w-[140px] h-[140px] flex items-center justify-center text-gray-300 text-xs">جاري التحميل…</div>
+                  )}
                 </div>
 
                 {/* Info + actions */}
@@ -711,9 +717,13 @@ export function OfficeDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {officeListings.map((listing) => (
                 <Card key={listing.id} className="overflow-hidden border-0 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="relative">
-                    {listing.images?.[0] && (
-                      <img src={listing.images[0]} alt={listing.property_type} className="w-full h-44 object-cover" />
+                  <div className="relative bg-gray-100 h-44 flex items-center justify-center">
+                    {listing.images?.[0] ? (
+                      <img src={listing.images[0]} alt={listing.property_type} className="w-full h-44 object-contain p-4" />
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-gray-300 p-6">
+                        <Building2 className="w-12 h-12" />
+                      </div>
                     )}
                     <div className="absolute top-2 right-2">
                       <Badge className="bg-emerald-500 text-white border-0 text-xs">
@@ -721,7 +731,7 @@ export function OfficeDashboard() {
                       </Badge>
                     </div>
                   </div>
-                  <div className="p-4" dir="rtl">
+                  <div className="p-4 text-right" dir="rtl">
                     <h4 className="font-semibold text-gray-900 mb-1">{listing.property_type}</h4>
                     <p className="text-xs text-gray-500 flex items-center gap-1 mb-2">
                       <MapPin className="w-3 h-3" /> {listing.address}
@@ -740,11 +750,11 @@ export function OfficeDashboard() {
                       <span>{listing.bedrooms} غرف</span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-                      <div className="text-center p-2 bg-gray-50 rounded-lg">
+                      <div className="text-right p-2 bg-gray-50 rounded-lg">
                         <p className="text-gray-500">الاستفسارات</p>
                         <p className="font-semibold text-gray-900 mt-0.5">12</p>
                       </div>
-                      <div className="text-center p-2 bg-gray-50 rounded-lg">
+                      <div className="text-right p-2 bg-gray-50 rounded-lg">
                         <p className="text-gray-500">المشاهدات</p>
                         <p className="font-semibold text-gray-900 mt-0.5">234</p>
                       </div>
@@ -1410,15 +1420,6 @@ export function OfficeDashboard() {
                     value={profileAddress}
                     onChange={e => setProfileAddress(e.target.value)}
                     placeholder="العنوان الكامل للمكتب"
-                  />
-                </div>
-                <div>
-                  <Label className="block mb-1 text-sm font-medium text-gray-700">الموقع الإلكتروني</Label>
-                  <Input
-                    value={profileWebsite}
-                    onChange={e => setProfileWebsite(e.target.value)}
-                    placeholder="https://example.com"
-                    dir="ltr"
                   />
                 </div>
                 <div>

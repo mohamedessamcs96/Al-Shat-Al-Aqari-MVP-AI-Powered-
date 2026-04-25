@@ -337,14 +337,7 @@ export function LinktreeEditor() {
               {isDirty && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium border border-amber-200">غير محفوظ</span>}
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => {
-                const target = officeSlug || officeId;
-                if (target) {
-                  window.open(`/office/${target}`, '_blank');
-                } else {
-                  navigate('/login');
-                }
-              }}>
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setPreviewOpen(true)}>
                 <Eye className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">معاينة</span>
               </Button>
