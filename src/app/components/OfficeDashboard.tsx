@@ -362,27 +362,19 @@ export function OfficeDashboard() {
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* ─── Company Hero Card ─── */}
         <Card className="mb-0 overflow-hidden border-0 shadow-md">
-          {/* Banner */}
-          <div className="h-24 sm:h-32 bg-gradient-to-l from-blue-600 via-indigo-600 to-purple-700 relative">
-            <div
-              className="absolute inset-0 opacity-10"
-              style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, white 10px, white 11px)' }}
-            />
-          </div>
-
-          <div className="px-6 pb-6">
-            <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-10 sm:-mt-12">
+          <div className="px-6 pb-6 pt-6">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               {/* Logo */}
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-4 border-white shadow-xl overflow-hidden bg-gradient-to-br from-blue-500 to-indigo-600 flex-shrink-0 flex items-center justify-center">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-4 border-white shadow-xl overflow-hidden bg-white flex-shrink-0 flex items-center justify-center">
                 {(profileLogoUrl || office.logo_url) && !logoImgError ? (
                   <img
                     src={profileLogoUrl || office.logo_url}
                     alt={office.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain p-1"
                     onError={() => setLogoImgError(true)}
                   />
                 ) : (
-                  <span className="text-white text-2xl sm:text-3xl font-bold select-none">
+                  <span className="text-blue-600 text-2xl sm:text-3xl font-bold select-none">
                     {office.name.charAt(0).toUpperCase()}
                   </span>
                 )}
@@ -578,43 +570,6 @@ export function OfficeDashboard() {
                 </div>
               </Card>
 
-              {/* Active Campaigns */}
-              <Card className="p-5 border-0 shadow-sm">
-                <div className="flex items-center justify-between mb-4" dir="rtl">
-                  <h3 className="font-semibold text-gray-900">الحملات النشطة</h3>
-                  <button
-                    className="text-sm text-blue-600 hover:underline flex items-center gap-1"
-                    onClick={() => setActiveTab('campaigns')}
-                  >
-                    <ChevronRight className="w-3.5 h-3.5" /> عرض الكل
-                  </button>
-                </div>
-                <div className="space-y-3">
-                  {campaignsData.filter((c) => c.status === 'active').map((campaign) => (
-                    <div key={campaign.id} className="p-3 bg-gray-50 rounded-xl">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <p className="font-medium text-gray-900 text-sm">{campaign.name}</p>
-                          <p className="text-xs text-gray-500 mt-0.5">{campaign.audience_filter}</p>
-                        </div>
-                        <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-xs">نشط</Badge>
-                      </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[
-                          { label: 'تم الإرسال', value: campaign.sent_count },
-                          { label: 'النقرات', value: campaign.click_count },
-                          { label: 'عملاء', value: campaign.lead_count },
-                        ].map(item => (
-                          <div key={item.label} className="text-center p-2 bg-white rounded-lg">
-                            <p className="text-gray-500 text-xs">{item.label}</p>
-                            <p className="font-semibold text-gray-900 text-sm mt-0.5">{item.value}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
             </div>
 
             {/* Quick Actions */}
