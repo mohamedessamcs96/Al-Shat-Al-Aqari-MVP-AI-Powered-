@@ -620,10 +620,9 @@ export function OfficeDashboard() {
             {/* Quick Actions */}
             <Card className="p-5 border-0 shadow-sm">
               <h3 className="font-semibold text-gray-900 mb-4 text-right">إجراءات سريعة</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
                   { icon: <Plus className="w-5 h-5 text-blue-600" />, label: 'إضافة عقار جديد', bg: 'bg-blue-50', onClick: () => setActiveTab('listings') },
-                  { icon: <BarChart3 className="w-5 h-5 text-purple-600" />, label: 'إنشاء حملة تسويقية', bg: 'bg-purple-50', onClick: () => setActiveTab('campaigns') },
                   { icon: <MessageSquare className="w-5 h-5 text-green-600" />, label: 'الرد على العملاء', bg: 'bg-green-50', onClick: () => setActiveTab('leads') },
                 ].map(action => (
                   <button
@@ -716,58 +715,74 @@ export function OfficeDashboard() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {officeListings.map((listing) => (
-                <Card key={listing.id} className="overflow-hidden border-0 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="relative bg-gray-100 h-44 flex items-center justify-center">
+                <Card key={listing.id} className="overflow-hidden border-0 shadow-sm hover:shadow-md transition-all duration-200 group">
+                  {/* Image / placeholder */}
+                  <div className="relative h-44 bg-gradient-to-br from-slate-100 to-blue-50 overflow-hidden">
                     {listing.images?.[0] ? (
-                      <img src={listing.images[0]} alt={listing.property_type} className="w-full h-44 object-contain p-4" />
+                      <img
+                        src={listing.images[0]}
+                        alt={listing.property_type}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                     ) : (
-                      <div className="flex flex-col items-center gap-2 text-gray-300 p-6">
-                        <Building2 className="w-12 h-12" />
+                      <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+                        <Building2 className="w-10 h-10 text-blue-200" />
+                        <span className="text-xs text-blue-300 font-medium">لا توجد صورة</span>
                       </div>
                     )}
-                    <div className="absolute top-2 right-2">
-                      <Badge className="bg-emerald-500 text-white border-0 text-xs">
+                    {/* Gradient overlay at bottom */}
+                    <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/30 to-transparent" />
+                    {/* Status badge */}
+                    <div className="absolute top-2.5 right-2.5">
+                      <Badge className={`text-xs border-0 shadow-sm ${listing.status === 'active' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>
                         {listing.status === 'active' ? 'نشط' : 'معلق'}
                       </Badge>
                     </div>
-                  </div>
-                  <div className="p-4 text-right" dir="rtl">
-                    <h4 className="font-semibold text-gray-900 mb-1">{listing.property_type}</h4>
-                    <p className="text-xs text-gray-500 flex items-center gap-1 mb-2">
-                      <MapPin className="w-3 h-3" /> {listing.address}
+                    {/* Price pinned to bottom-left of image */}
+                    <p className="absolute bottom-2.5 left-2.5 text-sm font-bold text-white drop-shadow">
+                      {formatPrice(listing.price)}
                     </p>
-                    <p className="text-lg font-bold text-blue-600 mb-3">{formatPrice(listing.price)}</p>
-                    <div className="mb-3">
+                  </div>
+
+                  <div className="p-4 text-right" dir="rtl">
+                    <h4 className="font-bold text-gray-900 mb-0.5">{listing.property_type}</h4>
+                    <p className="text-xs text-gray-400 flex items-center justify-end gap-1 mb-3">
+                      <MapPin className="w-3 h-3 flex-shrink-0" /> {listing.address}
+                    </p>
+
+                    {/* Stats row */}
+                    <div className="flex items-center justify-between text-xs text-gray-500 bg-gray-50 rounded-xl px-3 py-2 mb-3">
+                      <span className="flex items-center gap-1">
+                        <span className="font-semibold text-gray-800">{listing.area}</span> م²
+                      </span>
+                      <span className="w-px h-4 bg-gray-200" />
+                      <span className="flex items-center gap-1">
+                        <span className="font-semibold text-gray-800">{listing.bedrooms ?? '—'}</span> غرف
+                      </span>
+                      <span className="w-px h-4 bg-gray-200" />
+                      <span className="flex items-center gap-1">
+                        <span className="font-semibold text-gray-800">{listing.bathrooms ?? '—'}</span> حمام
+                      </span>
+                    </div>
+
+                    {/* Quality score */}
+                    <div className="mb-4">
                       <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                        <span>{listing.quality_score}%</span>
+                        <span className="font-medium text-blue-600">{listing.quality_score ?? 0}%</span>
                         <span>جودة الإعلان</span>
                       </div>
-                      <Progress value={listing.quality_score} className="h-1.5" />
+                      <Progress value={listing.quality_score ?? 0} className="h-1.5" />
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
-                      <span>م² {listing.area}</span>
-                      <span>·</span>
-                      <span>{listing.bedrooms} غرف</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-                      <div className="text-right p-2 bg-gray-50 rounded-lg">
-                        <p className="text-gray-500">الاستفسارات</p>
-                        <p className="font-semibold text-gray-900 mt-0.5">12</p>
-                      </div>
-                      <div className="text-right p-2 bg-gray-50 rounded-lg">
-                        <p className="text-gray-500">المشاهدات</p>
-                        <p className="font-semibold text-gray-900 mt-0.5">234</p>
-                      </div>
-                    </div>
+
                     <div className="flex gap-2">
                       <Button
                         size="sm"
-                        className="flex-1 text-xs bg-blue-600 hover:bg-blue-700"
+                        className="flex-1 text-xs bg-blue-600 hover:bg-blue-700 rounded-lg"
                         onClick={() => navigate(`/listings/${listing.id}`)}
                       >
                         عرض
                       </Button>
-                      <Button size="sm" variant="outline" className="flex-1 text-xs">تعديل</Button>
+                      <Button size="sm" variant="outline" className="flex-1 text-xs rounded-lg">تعديل</Button>
                     </div>
                   </div>
                 </Card>
@@ -963,7 +978,6 @@ export function OfficeDashboard() {
                 { label: 'إجمالي العملاء', value: leadsData.length, color: 'text-gray-900' },
                 { label: 'عملاء جدد', value: pendingLeadsCount, color: 'text-green-600' },
                 { label: 'عملاء عاجلون', value: urgentLeadsCount, color: 'text-red-600' },
-                { label: 'معدل الاستجابة', value: '85%', color: 'text-blue-600' },
               ].map(s => (
                 <Card key={s.label} className="p-4 border-0 shadow-sm">
                   <p className="text-sm text-gray-500 mb-1">{s.label}</p>
