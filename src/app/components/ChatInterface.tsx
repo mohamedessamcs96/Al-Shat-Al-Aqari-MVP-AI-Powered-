@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router';
 import { type ChatMessage } from '../lib/mock-data';
 import { formatPrice, getCityName } from '../lib/formatters';
 import { chat as chatApi, buyers as buyersApi } from '../lib/api-client';
-import { getUser, logout as authLogout } from '../lib/auth';
+import { getUser, getToken, logout as authLogout } from '../lib/auth';
 
 type Conversation = {
   id: string;
@@ -84,6 +84,7 @@ export function ChatInterface() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const user = getUser();
+  const isLoggedIn = !!getToken();
 
   // Settings panel – real buyer profile
   const [buyerProfile, setBuyerProfile] = useState<{ name?: string; phone?: string; email?: string } | null>(null);
@@ -249,8 +250,26 @@ export function ChatInterface() {
     setIsTyping(true);
 
     try {
-      // Skip API call for local-only conversations (no backend session)
-      if (convId.startsWith('local_')) throw new Error('local');
+      // Guest mode: provide a local fallback response without hitting the API
+      if (convId.startsWith('local_')) {
+        const guestReplies = [
+          'مرحباً! يمكنني مساعدتك في البحث عن العقار المثالي. لحفظ محادثاتك والوصول إلى جميع الميزات، يُنصح بتسجيل الدخول.',
+          'سؤال رائع! للحصول على توصيات مخصصة وإمكانية التواصل مع المكاتب العقارية مباشرة، سجّل دخولك الآن.',
+          'أفهم ما تبحث عنه. قم بتسجيل الدخول للاستفادة من كامل خدمات الشات العقاري وحفظ تفضيلاتك.',
+          'يسعدني مساعدتك. لتجربة أفضل مع خيارات أكثر وتوصيات دقيقة، ننصحك بإنشاء حساب مجاني.',
+        ];
+        const aiMsg: ChatMessage = {
+          id: String(Date.now() + 1),
+          role: 'assistant',
+          content: guestReplies[Math.floor(Math.random() * guestReplies.length)],
+          timestamp: new Date().toISOString(),
+          suggestions: ['سجّل دخولك الآن', 'إنشاء حساب مجاني', 'أريد الاستمرار كزائر'],
+        };
+        setConversations(prev => prev.map(c =>
+          c.id !== convId ? c : { ...c, messages: [...c.messages, aiMsg] }
+        ));
+        return;
+      }
       const res = await chatApi.sendMessage(convId, textToSend);
       const raw = res as any;
       console.log('[chat] sendMessage raw:', JSON.stringify(raw));
@@ -276,9 +295,7 @@ export function ChatInterface() {
       ));
     } catch (err) {
       console.error('[chat] sendMessage error:', err);
-      const errMsg = err instanceof Error && err.message !== 'local'
-        ? err.message
-        : 'تعذّر إرسال الرسالة. تحقق من تسجيل الدخول غ';
+      const errMsg = err instanceof Error ? err.message : 'تعذّر إرسال الرسالة';
       toast.error(errMsg);
       // Remove the optimistic user message on failure
       setConversations(prev => prev.map(c =>
@@ -350,13 +367,32 @@ export function ChatInterface() {
 
         {/* User header */}
         <div className="relative z-10 flex items-center gap-3 px-4 py-4 border-b border-white/10 flex-shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-lg shadow-blue-900/40 ring-1 ring-white/20">
-            {(user?.name ?? 'م')[0]}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-white font-semibold text-sm truncate">{user?.name ?? 'مستخدم'}</p>
-            <p className="text-blue-300/50 text-xs">عميل</p>
-          </div>
+          {isLoggedIn ? (
+            <>
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-lg shadow-blue-900/40 ring-1 ring-white/20">
+                {(user?.name ?? 'م')[0]}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-semibold text-sm truncate">{user?.name ?? 'مستخدم'}</p>
+                <p className="text-blue-300/50 text-xs">عميل</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white/60 flex-shrink-0 ring-1 ring-white/10">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white/70 font-semibold text-sm">زائر</p>
+                <button
+                  onClick={() => navigate('/')}
+                  className="text-blue-300 text-xs hover:text-blue-200 transition-colors"
+                >
+                  سجّل الدخول ←
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
         {/* New Chat */}
@@ -452,9 +488,15 @@ export function ChatInterface() {
             <button onClick={() => navigate('/demand')} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
               <MessageSquare className="w-4 h-4" />
             </button>
-            <button onClick={() => { authLogout(); navigate('/'); }} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
-              <LogOut className="w-4 h-4" />
-            </button>
+            {isLoggedIn ? (
+              <button onClick={() => { authLogout(); navigate('/'); }} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
+                <LogOut className="w-4 h-4" />
+              </button>
+            ) : (
+              <button onClick={() => navigate('/')} className="px-3 h-8 rounded-lg text-xs font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors">
+                دخول
+              </button>
+            )}
           </div>
         </header>
 
