@@ -28,8 +28,7 @@ export function LoginPage() {
   // OTP flow
   const [otpStep, setOtpStep] = useState<'phone' | 'otp'>('phone');
   const [otpCode, setOtpCode] = useState('');
-  const [otpPhone, setOtpPhone] = useState(''); // normalised phone used for verify
-
+  const [otpPhone, setOtpPhone] = useState('');
   // Office
   const [officeEmail, setOfficeEmail] = useState('');
   const [officePassword, setOfficePassword] = useState('');
@@ -44,7 +43,7 @@ export function LoginPage() {
   const [adminPassword, setAdminPassword] = useState('');
   const [showAdminPass, setShowAdminPass] = useState(false);
 
-  // Step 1: send OTP to phone
+  // Step 1: send OTP
   const handleSendOtp = async () => {
     if (!buyerPhone) { toast.error('الرجاء إدخال رقم الهاتف'); return; }
     const normalized = buyerPhone.startsWith('+') ? buyerPhone : `+966${buyerPhone.replace(/^0/, '')}`;
@@ -54,7 +53,7 @@ export function LoginPage() {
       setOtpPhone(normalized);
       setOtpCode('');
       setOtpStep('otp');
-      toast.success('تم إرسال رمز التحقق إلى هاتفك');
+      toast.success('تم إرسال رمز التحقق');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'تعذّر إرسال رمز التحقق');
     } finally {
@@ -64,14 +63,14 @@ export function LoginPage() {
 
   // Step 2: verify OTP → get token
   const handleVerifyOtp = async () => {
-    if (!otpCode || otpCode.length < 4) { toast.error('الرجاء إدخال رمز التحقق'); return; }
+    if (!otpCode) { toast.error('الرجاء إدخال رمز التحقق'); return; }
     setLoading(true);
     try {
       const res = await apiAuth.verifyOtp(otpPhone, otpCode);
       const raw = res as any;
       const tok = raw.tokens?.accessToken || raw.tokens?.access || raw.tokens?.token || raw.tokens?.key || raw.token || raw.access || '';
       const refreshTok = raw.tokens?.refreshToken || raw.tokens?.refresh || raw.refresh || '';
-      if (!tok) { toast.error('فشل التحقق: لم يُستلم توكن'); return; }
+      if (!tok) { toast.error('رمز التحقق غير صحيح'); return; }
       if (refreshTok) setRefreshToken(refreshTok);
       setToken(tok);
       setRole('buyer');
@@ -96,13 +95,22 @@ export function LoginPage() {
       const tok = raw.tokens?.accessToken || raw.tokens?.access || raw.tokens?.token || raw.tokens?.key || raw.token || raw.access || '';
       const refreshTok = raw.tokens?.refreshToken || raw.tokens?.refresh || raw.refresh || '';
       if (!tok) {
-        // Register might also require OTP — send one and switch to verify step
+        // Register requires OTP — try verifying with static 0000
         try {
           await apiAuth.sendOtp(normalized);
-          setOtpPhone(normalized);
-          setOtpCode('');
-          setOtpStep('otp');
-          toast.success('تم إرسال رمز التحقق لإتمام التسجيل');
+          const vRes = await apiAuth.verifyOtp(normalized, '0000');
+          const vRaw = vRes as any;
+          const vTok = vRaw.tokens?.accessToken || vRaw.tokens?.access || vRaw.token || vRaw.access || '';
+          if (vTok) {
+            setToken(vTok);
+            setRole('buyer');
+            const vId = vRaw.data?.user?.id || vRaw.id || '';
+            if (vId) setUser({ id: vId, name: buyerName, phone: normalized });
+            toast.success('تم إنشاء حسابك بنجاح! مرحباً بك');
+            navigate('/chat');
+          } else {
+            toast.error('تم إنشاء الحساب — الرجاء تسجيل الدخول');
+          }
         } catch {
           toast.error('تم إنشاء الحساب — الرجاء تسجيل الدخول');
         }
@@ -132,7 +140,7 @@ export function LoginPage() {
       const tok = raw.tokens?.accessToken || raw.tokens?.access || raw.tokens?.token || raw.tokens?.key ||
         raw.token || raw.access || raw.key || raw.auth_token || '';
       if (!tok) {
-        toast.error(`لم يُعثر على رمز المصادقة — حقول الاستجابة: ${Object.keys(raw).join(', ')}`);
+        toast.error('فشل تسجيل الدخول. تحقق من البريد وكلمة المرور');
         return;
       }
       setToken(tok);
@@ -163,7 +171,7 @@ export function LoginPage() {
       const tok = rawReg.tokens?.accessToken || rawReg.tokens?.access || rawReg.tokens?.token || rawReg.tokens?.key ||
         rawReg.token || rawReg.access || rawReg.key || rawReg.auth_token || '';
       if (!tok) {
-        toast.error(`لم يُعثر على رمز المصادقة — حقول الاستجابة: ${Object.keys(rawReg).join(', ')}`);
+        toast.error('فشل إنشاء الحساب. تحقق من البيانات المُدخلة');
         return;
       }
       setToken(tok);
@@ -498,9 +506,9 @@ export function LoginPage() {
                     </>
                   ) : (
                     <>
-                      <div className="text-center pb-1">
-                        <p className="text-sm text-slate-600">تم إرسال رمز التحقق إلى</p>
-                        <p className="font-bold text-slate-900 text-base">{otpPhone}</p>
+                      <div className="rounded-xl bg-blue-50 border border-blue-100 px-4 py-3 text-center" dir="rtl">
+                        <p className="text-xs text-slate-500">تم إرسال رمز التحقق إلى</p>
+                        <p className="font-bold text-slate-900">{otpPhone}</p>
                       </div>
                       <FieldWithIcon icon={<ShieldCheck className="w-4 h-4 text-slate-400" />}>
                         <Input
@@ -510,14 +518,15 @@ export function LoginPage() {
                           value={otpCode}
                           onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
                           onKeyDown={(e) => e.key === 'Enter' && handleVerifyOtp()}
-                          placeholder="رمز التحقق"
-                          className="pr-10 text-center rounded-xl h-12 text-xl font-bold tracking-widest"
+                          placeholder="أدخل رمز التحقق"
+                          className="pr-10 text-center rounded-xl h-12 text-2xl font-bold tracking-widest"
                           dir="ltr"
+                          autoFocus
                         />
                       </FieldWithIcon>
                       <Button
                         onClick={handleVerifyOtp}
-                        disabled={loading}
+                        disabled={loading || otpCode.length < 4}
                         className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl h-12 font-semibold shadow-md shadow-blue-500/20 gap-2 text-base disabled:opacity-60"
                       >
                         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
@@ -527,7 +536,7 @@ export function LoginPage() {
                         onClick={() => { setOtpStep('phone'); setOtpCode(''); }}
                         className="w-full text-sm text-slate-400 hover:text-blue-600 transition-colors py-1"
                       >
-                        تغيير رقم الهاتف
+                        ← تغيير رقم الهاتف
                       </button>
                     </>
                   )}
