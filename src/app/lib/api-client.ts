@@ -536,10 +536,10 @@ export const chat = {
     apiFetch<unknown[]>('/chat/conversations/'),
 
   startConversation: () =>
-    apiFetch<Record<string, unknown>>('/chat/conversations/', { method: 'POST' }),
+    apiFetch<Record<string, unknown>>('/chat/conversations', { method: 'POST' }),
 
   getMessages: (conversationId: string) =>
-    apiFetch<Record<string, unknown>>(`/chat/conversations/${conversationId}/`),
+    apiFetch<Record<string, unknown>>(`/chat/conversations/${conversationId}`),
 
   sendMessage: (conversationId: string, content: string) =>
     apiFetch<Record<string, unknown>>(`/chat/conversations/${conversationId}/messages/`, {
