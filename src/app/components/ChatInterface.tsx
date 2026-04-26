@@ -271,35 +271,31 @@ export function ChatInterface() {
     const textToSend = text || inputValue.trim();
     if (!textToSend) return;
 
-    // If we only have a local/fallback conversation, create a real one on the backend first
+    // If we only have a local/fallback conversation, try to create a real one on the backend
     let convId = activeId;
     if (!convId || convId === 'current' || convId.startsWith('local_')) {
       try {
         const res = await chatApi.startConversation();
         const raw = res as any;
-        console.log('[chat] startConversation raw:', JSON.stringify(raw));
         const newId = String(
           raw.id ??
           raw._id ??
           raw.conversation_id ??
           (raw.data as any)?.id ??
           (raw.data as any)?.conversation_id ??
-          `local_${Date.now()}`
+          ''
         );
-        console.log('[chat] resolved convId:', newId);
-        convId = newId;
-        setConversations(prev => prev.map(c =>
-          c.id === activeId ? { ...c, id: newId } : c
-        ));
-        setActiveId(newId);
+        if (newId && !newId.startsWith('local_')) {
+          convId = newId;
+          setConversations(prev => prev.map(c =>
+            c.id === activeId ? { ...c, id: newId } : c
+          ));
+          setActiveId(newId);
+        }
+        // If newId is empty/local, convId stays as-is → will hit the local fallback in catch below
       } catch (startErr) {
         console.warn('[chat] startConversation failed:', startErr);
-        // No backend conversation – send as local_* so we don't hit /current/messages/
-        if (!convId || convId === 'current') {
-          convId = `local_${Date.now()}`;
-          setActiveId(convId);
-          setConversations(prev => prev.map(c => c.id === activeId ? { ...c, id: convId } : c));
-        }
+        // convId stays local_* → handleSend catch will use guestSearch
       }
     }
 
@@ -318,22 +314,9 @@ export function ChatInterface() {
     setIsTyping(true);
 
     try {
-      // Guest mode: local property search without hitting the API
-      if (convId.startsWith('local_')) {
-        const result = guestSearch(textToSend);
-        const aiMsg: ChatMessage = {
-          id: String(Date.now() + 1),
-          role: 'assistant',
-          content: result.content,
-          timestamp: new Date().toISOString(),
-          suggestions: result.suggestions,
-          listings: result.listings.length > 0 ? result.listings : undefined,
-        };
-        setConversations(prev => prev.map(c =>
-          c.id !== convId ? c : { ...c, messages: [...c.messages, aiMsg] }
-        ));
-        return;
-      }
+      // If we still have no real conversation ID, fall back to local AI
+      if (!convId || convId.startsWith('local_')) throw new Error('local');
+
       const res = await chatApi.sendMessage(convId, textToSend);
       const raw = res as any;
       console.log('[chat] sendMessage raw:', JSON.stringify(raw));
@@ -359,12 +342,30 @@ export function ChatInterface() {
       ));
     } catch (err) {
       console.error('[chat] sendMessage error:', err);
-      const errMsg = err instanceof Error ? err.message : 'تعذّر إرسال الرسالة';
-      toast.error(errMsg);
-      // Remove the optimistic user message on failure
-      setConversations(prev => prev.map(c =>
-        c.id !== convId ? c : { ...c, messages: c.messages.filter(m => m.id !== userMsg.id) }
-      ));
+      const isLocal = err instanceof Error && err.message === 'local';
+      const isAuthErr = err instanceof Error && (err.message.includes('401') || err.message.includes('انتهت') || err.message.includes('session'));
+
+      // If backend refused (auth/local) → use local AI as graceful fallback for guests
+      if (isLocal || isAuthErr || !isLoggedIn) {
+        const result = guestSearch(textToSend);
+        const aiMsg: ChatMessage = {
+          id: String(Date.now() + 1),
+          role: 'assistant',
+          content: result.content,
+          timestamp: new Date().toISOString(),
+          suggestions: result.suggestions,
+          listings: result.listings.length > 0 ? result.listings : undefined,
+        };
+        setConversations(prev => prev.map(c =>
+          c.id !== convId ? c : { ...c, messages: [...c.messages, aiMsg] }
+        ));
+      } else {
+        // Real logged-in error – show toast and remove optimistic message
+        toast.error(err instanceof Error ? err.message : 'تعذّر إرسال الرسالة');
+        setConversations(prev => prev.map(c =>
+          c.id !== convId ? c : { ...c, messages: c.messages.filter(m => m.id !== userMsg.id) }
+        ));
+      }
     } finally {
       setIsTyping(false);
     }
