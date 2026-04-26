@@ -542,7 +542,7 @@ export const chat = {
     apiFetch<Record<string, unknown>>(`/chat/conversations/${conversationId}`),
 
   sendMessage: (conversationId: string, content: string) =>
-    apiFetch<Record<string, unknown>>(`/chat/conversations/${conversationId}/messages/`, {
+    apiFetch<Record<string, unknown>>(`/chat/conversations/${conversationId}/messages`, {
       method: 'POST',
       body: JSON.stringify({ content }),
     }),
