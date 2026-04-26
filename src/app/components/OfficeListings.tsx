@@ -67,7 +67,12 @@ export function OfficeListings() {
     citiesApi.list()
       .then(data => {
         const raw = data as any;
-        const list = Array.isArray(raw) ? raw : Array.isArray(raw?.results) ? raw.results : [];
+        const list =
+          Array.isArray(raw) ? raw
+          : Array.isArray(raw?.results) ? raw.results
+          : Array.isArray(raw?.data) ? raw.data
+          : Array.isArray(raw?.data?.results) ? raw.data.results
+          : [];
         setCityList(list);
         setCitiesCache(list);
       })

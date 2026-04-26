@@ -13,7 +13,7 @@ export function DemandForm() {
   const navigate = useNavigate();
   const [step, setStep] = React.useState<"form" | "otp" | "success">("form");
   const [buyerName, setBuyerName] = React.useState("");
-  const [cityList, setCityList] = React.useState<{ id: string; name: string }[]>([]);
+  const [cityList, setCityList] = React.useState<{ id: string; name: string; name_ar?: string }[]>([]);
   const [cityId, setCityId] = React.useState("");
   const [budgetMin, setBudgetMin] = React.useState("");
   const [budgetMax, setBudgetMax] = React.useState("");
@@ -28,8 +28,15 @@ export function DemandForm() {
 
   React.useEffect(() => {
     citiesApi.list().then((data) => {
-      setCityList(data);
-      if (data.length > 0) setCityId(data[0].id);
+      const raw = data as any;
+      const list: { id: string; name: string; name_ar?: string }[] =
+        Array.isArray(raw) ? raw
+        : Array.isArray(raw?.results) ? raw.results
+        : Array.isArray(raw?.data) ? raw.data
+        : Array.isArray(raw?.data?.results) ? raw.data.results
+        : [];
+      setCityList(list);
+      if (list.length > 0) setCityId(String(list[0].id));
     }).catch(() => {
       // fallback – keep fields empty
     });
@@ -135,8 +142,8 @@ export function DemandForm() {
                     className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                   >
                       {cityList.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
+                        <option key={c.id} value={String(c.id)}>
+                          {(c as any).name_ar ?? c.name}
                         </option>
                       ))}
                   </select>
