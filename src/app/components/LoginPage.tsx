@@ -68,16 +68,16 @@ export function LoginPage() {
     try {
       const res = await apiAuth.verifyOtp(otpPhone, otpCode);
       const raw = res as any;
-      const payload = raw.data ?? raw;
-      const tok = payload.tokens?.accessToken || payload.tokens?.access ||
-        payload.session_token || payload.auth_token || payload.token || payload.access || raw.token || '';
-      const ref = payload.tokens?.refreshToken || payload.tokens?.refresh || payload.refresh || raw.refresh || '';
+      // Response shape: { success, data: { user }, tokens: { accessToken, refreshToken } }
+      const tok = raw.tokens?.accessToken || raw.tokens?.access || raw.token || '';
+      const ref = raw.tokens?.refreshToken || raw.tokens?.refresh || raw.refresh || '';
       if (!tok) { toast.error('رمز التحقق غير صحيح'); return; }
       if (ref) setRefreshToken(ref);
       setToken(tok);
       setRole('buyer');
-      const bid = payload.user?.id || payload.buyer?.id || payload.buyer_id || raw.buyer_id || payload.id || '';
-      if (bid) setUser({ id: bid, phone: otpPhone, name: payload.user?.name || payload.buyer?.name || '' });
+      const userObj = raw.data?.user ?? raw.data ?? {};
+      const bid = userObj.id || raw.buyer_id || '';
+      if (bid) setUser({ id: bid, phone: userObj.phone || otpPhone, name: userObj.name || '' });
       toast.success('تم تسجيل الدخول بنجاح!');
       navigate('/chat');
     } catch (err) {
@@ -111,16 +111,16 @@ export function LoginPage() {
     try {
       const res = await apiAuth.verifyOtp(otpPhone, otpCode);
       const raw = res as any;
-      const payload = raw.data ?? raw;
-      const tok = payload.tokens?.accessToken || payload.tokens?.access ||
-        payload.session_token || payload.auth_token || payload.token || payload.access || raw.token || '';
-      const ref = payload.tokens?.refreshToken || payload.tokens?.refresh || payload.refresh || raw.refresh || '';
+      // Response shape: { success, data: { user }, tokens: { accessToken, refreshToken } }
+      const tok = raw.tokens?.accessToken || raw.tokens?.access || raw.token || '';
+      const ref = raw.tokens?.refreshToken || raw.tokens?.refresh || raw.refresh || '';
       if (!tok) { toast.error('رمز التحقق غير صحيح'); return; }
       if (ref) setRefreshToken(ref);
       setToken(tok);
       setRole('buyer');
-      const buyerId = payload.user?.id || payload.buyer?.id || payload.buyer_id || raw.buyer_id || payload.id || '';
-      if (buyerId) setUser({ id: buyerId, name: buyerName, phone: otpPhone });
+      const userObj = raw.data?.user ?? raw.data ?? {};
+      const buyerId = userObj.id || raw.buyer_id || '';
+      if (buyerId) setUser({ id: buyerId, name: buyerName || userObj.name || '', phone: userObj.phone || otpPhone });
       toast.success('تم إنشاء حسابك بنجاح! مرحباً بك');
       navigate('/chat');
     } catch (err) {
