@@ -71,6 +71,7 @@ export function LoginPage() {
       const payload = raw.data ?? raw;
       const tok =
         payload.tokens?.accessToken || payload.tokens?.access ||
+        payload.session_token || payload.auth_token ||
         payload.token || payload.access || '';
       const refreshTok =
         payload.tokens?.refreshToken || payload.tokens?.refresh ||
@@ -79,7 +80,7 @@ export function LoginPage() {
       if (refreshTok) setRefreshToken(refreshTok);
       setToken(tok);
       setRole('buyer');
-      const buyerId = payload.user?.id || payload.buyer_id || payload.id || '';
+      const buyerId = payload.user?.id || payload.buyer?.id || payload.buyer_id || payload.id || '';
       if (buyerId) setUser({ id: buyerId, phone: otpPhone });
       toast.success('تم تسجيل الدخول بنجاح!');
       navigate('/chat');
@@ -117,7 +118,7 @@ export function LoginPage() {
       const raw = res as any;
       // API: { tokens: { accessToken, refreshToken }, data: { user: { id, slug, ... } } }
       const tok = raw.tokens?.accessToken || raw.tokens?.access || raw.tokens?.token || raw.tokens?.key ||
-        raw.token || raw.access || raw.key || raw.auth_token || '';
+        raw.session_token || raw.auth_token || raw.token || raw.access || raw.key || '';
       if (!tok) {
         toast.error('فشل تسجيل الدخول. تحقق من البريد وكلمة المرور');
         return;
@@ -148,7 +149,7 @@ export function LoginPage() {
       const res = await apiAuth.officeRegister(registerOfficeName, registerEmail, registerPhone, registerPassword);
       const rawReg = res as any;
       const tok = rawReg.tokens?.accessToken || rawReg.tokens?.access || rawReg.tokens?.token || rawReg.tokens?.key ||
-        rawReg.token || rawReg.access || rawReg.key || rawReg.auth_token || '';
+        rawReg.session_token || rawReg.auth_token || rawReg.token || rawReg.access || rawReg.key || '';
       if (!tok) {
         toast.error('فشل إنشاء الحساب. تحقق من البيانات المُدخلة');
         return;
