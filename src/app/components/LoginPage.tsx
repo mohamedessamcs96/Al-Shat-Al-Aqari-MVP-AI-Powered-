@@ -43,14 +43,13 @@ export function LoginPage() {
   const [adminPassword, setAdminPassword] = useState('');
   const [showAdminPass, setShowAdminPass] = useState(false);
 
-  // Step 1: send OTP
+  // Step 1: call buyer/login → backend sends OTP
   const handleSendOtp = async () => {
     if (!buyerPhone) { toast.error('الرجاء إدخال رقم الهاتف'); return; }
-    const normalized = buyerPhone.startsWith('+') ? buyerPhone : `+966${buyerPhone.replace(/^0/, '')}`;
     setLoading(true);
     try {
-      await apiAuth.sendOtp(normalized);
-      setOtpPhone(normalized);
+      await apiAuth.buyerLogin(buyerPhone);
+      setOtpPhone(buyerPhone); // keep exactly what the user typed
       setOtpCode('');
       setOtpStep('otp');
       toast.success('تم إرسال رمز التحقق');
@@ -68,13 +67,13 @@ export function LoginPage() {
     try {
       const res = await apiAuth.verifyOtp(otpPhone, otpCode);
       const raw = res as any;
-      const tok = raw.tokens?.accessToken || raw.tokens?.access || raw.tokens?.token || raw.tokens?.key || raw.token || raw.access || '';
+      const tok = raw.tokens?.accessToken || raw.tokens?.access || raw.token || raw.access || '';
       const refreshTok = raw.tokens?.refreshToken || raw.tokens?.refresh || raw.refresh || '';
       if (!tok) { toast.error('رمز التحقق غير صحيح'); return; }
       if (refreshTok) setRefreshToken(refreshTok);
       setToken(tok);
       setRole('buyer');
-      const buyerId = raw.data?.user?.id || raw.buyer_id || raw.id || '';
+      const buyerId = raw.user?.id || raw.data?.user?.id || raw.buyer_id || raw.id || '';
       if (buyerId) setUser({ id: buyerId, phone: otpPhone });
       toast.success('تم تسجيل الدخول بنجاح!');
       navigate('/chat');
@@ -87,14 +86,13 @@ export function LoginPage() {
 
   const handleBuyerRegister = async () => {
     if (!buyerName || !buyerPhone) { toast.error('الرجاء ملء جميع الحقول'); return; }
-    const normalized = buyerPhone.startsWith('+') ? buyerPhone : `+966${buyerPhone.replace(/^0/, '')}`;
     setLoading(true);
     try {
-      // Attempt registration — ignore if user already exists
-      try { await apiAuth.buyerRegister(buyerName, normalized); } catch {}
-      // Send OTP then let user enter it manually
-      await apiAuth.sendOtp(normalized);
-      setOtpPhone(normalized);
+      // Attempt registration — ignore if user already exists (400)
+      try { await apiAuth.buyerRegister(buyerName, buyerPhone); } catch {}
+      // buyer/login triggers OTP send
+      await apiAuth.buyerLogin(buyerPhone);
+      setOtpPhone(buyerPhone);
       setOtpCode('');
       setOtpStep('otp');
       toast.success('تم إرسال رمز التحقق');

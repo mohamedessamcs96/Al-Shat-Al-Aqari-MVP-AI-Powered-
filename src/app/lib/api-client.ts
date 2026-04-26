@@ -169,21 +169,17 @@ export const auth = {
       body: JSON.stringify({ phone, code }),
     }),
 
-  buyerRegister: (name: string, phone: string) => {
-    const normalizedPhone = phone.startsWith('+') ? phone : `+966${phone.replace(/^0/, '')}`;
-    return apiFetch<AuthResponse>('/auth/buyer/register', {
+  buyerRegister: (name: string, phone: string) =>
+    apiFetch<AuthResponse>('/auth/buyer/register', {
       method: 'POST',
-      body: JSON.stringify({ name, phone: normalizedPhone }),
-    });
-  },
+      body: JSON.stringify({ name, phone }),
+    }),
 
-  buyerLogin: (phone: string) => {
-    const normalizedPhone = phone.startsWith('+') ? phone : `+966${phone.replace(/^0/, '')}`;
-    return apiFetch<AuthResponse>('/auth/buyer/login', {
+  buyerLogin: (phone: string) =>
+    apiFetch<AuthResponse>('/auth/buyer/login', {
       method: 'POST',
-      body: JSON.stringify({ phone: normalizedPhone }),
-    });
-  },
+      body: JSON.stringify({ phone }),
+    }),
 
   officeRegister: (name: string, email: string, phone: string, password: string) =>
     apiFetch<AuthResponse>('/auth/office/register', {
