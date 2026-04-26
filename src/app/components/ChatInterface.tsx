@@ -194,13 +194,23 @@ export function ChatInterface() {
       try {
         const res = await chatApi.startConversation();
         const raw = res as any;
-        const newId = String(raw.id ?? raw._id ?? (raw.data as any)?.id ?? `local_${Date.now()}`);
+        console.log('[chat] startConversation raw:', JSON.stringify(raw));
+        const newId = String(
+          raw.id ??
+          raw._id ??
+          raw.conversation_id ??
+          (raw.data as any)?.id ??
+          (raw.data as any)?.conversation_id ??
+          `local_${Date.now()}`
+        );
+        console.log('[chat] resolved convId:', newId);
         convId = newId;
         setConversations(prev => prev.map(c =>
           c.id === activeId ? { ...c, id: newId } : c
         ));
         setActiveId(newId);
-      } catch {
+      } catch (startErr) {
+        console.warn('[chat] startConversation failed:', startErr);
         // No backend conversation – send as local_* so we don't hit /current/messages/
         if (!convId || convId === 'current') {
           convId = `local_${Date.now()}`;
@@ -229,26 +239,32 @@ export function ChatInterface() {
       if (convId.startsWith('local_')) throw new Error('local');
       const res = await chatApi.sendMessage(convId, textToSend);
       const raw = res as any;
-      // Backend may wrap: { data: { message: '...' } } or flat { reply, content, message }
+      console.log('[chat] sendMessage raw:', JSON.stringify(raw));
+      // Backend may wrap: { data: { assistant_message: {content} } } or flat { role, content, ... }
       const rawData = raw?.data ?? raw;
       const assistantContent = String(
         (rawData.assistant_message as Record<string, unknown>)?.content ??
+        rawData.ai_message ??
         rawData.reply ?? rawData.content ?? rawData.message ??
+        (rawData.messages as any[])?.[rawData.messages?.length - 1]?.content ??
         'أفهم متطلباتك. دعني أساعدك في العثور على العقار المثالي.'
       );
       const aiMsg: ChatMessage = {
-        id: String(raw.id ?? (Date.now() + 1).toString()),
+        id: String(raw.id ?? rawData.id ?? (Date.now() + 1).toString()),
         role: 'assistant',
         content: assistantContent,
         timestamp: new Date().toISOString(),
-        suggestions: (raw.suggestions as string[] | undefined) ?? ['أريد رؤية المزيد', 'هل يمكن ترتيب زيارة؟', 'أريد التفاوض على السعر'],
-        listings: (raw.listings as ChatMessage['listings'] | undefined),
+        suggestions: (rawData.suggestions as string[] | undefined) ?? ['أريد رؤية المزيد', 'هل يمكن ترتيب زيارة؟', 'أريد التفاوض على السعر'],
+        listings: (rawData.listings as ChatMessage['listings'] | undefined),
       };
       setConversations(prev => prev.map(c =>
         c.id !== convId ? c : { ...c, messages: [...c.messages, aiMsg] }
       ));
     } catch (err) {
-      const errMsg = err instanceof Error ? err.message : 'حدث خطأ في إرسال الرسالة';
+      console.error('[chat] sendMessage error:', err);
+      const errMsg = err instanceof Error && err.message !== 'local'
+        ? err.message
+        : 'حدث خطأ في إرسال الرسالة';
       const errAiMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
