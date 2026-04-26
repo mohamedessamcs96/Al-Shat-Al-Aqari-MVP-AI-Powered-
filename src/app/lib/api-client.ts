@@ -158,13 +158,13 @@ export interface AuthResponse {
 
 export const auth = {
   sendOtp: (phone: string) =>
-    apiFetch<{ ok: boolean }>('/auth/otp/send/', {
+    apiFetch<{ ok: boolean }>('/auth/otp/send', {
       method: 'POST',
       body: JSON.stringify({ phone }),
     }),
 
   verifyOtp: (phone: string, code: string) =>
-    apiFetch<AuthResponse>('/auth/otp/verify/', {
+    apiFetch<AuthResponse>('/auth/otp/verify', {
       method: 'POST',
       body: JSON.stringify({ phone, code }),
     }),
