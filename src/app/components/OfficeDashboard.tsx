@@ -1402,7 +1402,17 @@ export function OfficeDashboard() {
                         const url = await officesApi.uploadLogo(officeId, file);
                         setProfileLogoUrl(url);
                         setLogoImgError(false);
-                        toast.success('تم رفع الشعار بنجاح');
+                        // Auto-save the new logo_url to the backend immediately
+                        await officesApi.update(officeId, {
+                          name: profileName,
+                          bio: profileBio,
+                          phone: profilePhone,
+                          whatsapp: profileWhatsapp,
+                          address: profileAddress,
+                          website: profileWebsite,
+                          logo_url: url,
+                        });
+                        toast.success('تم رفع الشعار وحفظه بنجاح');
                       } catch (err: any) {
                         toast.error(err?.message ?? 'فشل رفع الشعار');
                       } finally {
