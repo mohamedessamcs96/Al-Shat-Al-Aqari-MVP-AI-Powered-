@@ -571,7 +571,7 @@ export const admin = {
 // ── 11. Cities ────────────────────────────────────────────────────────────────
 
 export const cities = {
-  list: () => apiFetch<{ id: string; name: string }[]>('/cities'),
+  list: () => apiFetch<{ id: string; name: string }[] | { results: { id: string; name: string }[] }>('/cities/'),
 };
 
 // ── 12. Public pages ──────────────────────────────────────────────────────────

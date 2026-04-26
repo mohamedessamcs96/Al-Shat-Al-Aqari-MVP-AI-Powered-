@@ -66,7 +66,8 @@ export function OfficeListings() {
   useEffect(() => {
     citiesApi.list()
       .then(data => {
-        const list = Array.isArray(data) ? data : [];
+        const raw = data as any;
+        const list = Array.isArray(raw) ? raw : Array.isArray(raw?.results) ? raw.results : [];
         setCityList(list);
         setCitiesCache(list);
       })
