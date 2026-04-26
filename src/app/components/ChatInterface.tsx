@@ -10,10 +10,78 @@ import { toast } from 'sonner';
 import { Input } from './ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from './ui/sheet';
 import { useNavigate } from 'react-router';
-import { type ChatMessage } from '../lib/mock-data';
+import { type ChatMessage, mockListings } from '../lib/mock-data';
 import { formatPrice, getCityName } from '../lib/formatters';
 import { chat as chatApi, buyers as buyersApi } from '../lib/api-client';
 import { getUser, getToken, logout as authLogout } from '../lib/auth';
+
+// ── Guest local search ────────────────────────────────────────────────────────
+function guestSearch(text: string): { content: string; listings: any[]; suggestions: string[] } {
+  const t = text.toLowerCase();
+
+  // Detect city
+  const cityId =
+    /رياض|riyadh/.test(t) ? '1' :
+    /جد[هة]|jeddah/.test(t) ? '2' :
+    /دمام|dammam/.test(t) ? '3' : null;
+
+  // Detect property type
+  const wantedType =
+    /فيل[اة]|فله|villa/.test(t) ? 'Villa' :
+    /شق[هة]|apartment|flat/.test(t) ? 'Apartment' :
+    /دوبلكس|duplex/.test(t) ? 'Duplex' :
+    /أرض|ارض|land/.test(t) ? 'Land' :
+    /مكتب|office/.test(t) ? 'Office' : null;
+
+  // Detect budget ceiling (e.g. مليون => ×1,000,000 / ألف => ×1,000)
+  let budget: number | null = null;
+  const milMatch = t.match(/(\d[\d.,]*)\s*(مليون|million)/);
+  const alfMatch = t.match(/(\d[\d.,]*)\s*(ألف|الف|thousand|k)/);
+  if (milMatch) budget = parseFloat(milMatch[1].replace(/,/g, '')) * 1_000_000;
+  else if (alfMatch) budget = parseFloat(alfMatch[1].replace(/,/g, '')) * 1_000;
+
+  // Detect bedroom count
+  const bedMatch = t.match(/(\d)\s*(غرف|غرفة|rooms?|bed)/);
+  const wantedBeds = bedMatch ? parseInt(bedMatch[1]) : null;
+
+  // Filter
+  let results = mockListings.filter(l => l.status === 'active');
+  if (cityId) results = results.filter(l => l.city_id === cityId);
+  if (wantedType) results = results.filter(l => l.property_type.toLowerCase() === wantedType.toLowerCase());
+  if (budget) results = results.filter(l => l.price <= budget!);
+  if (wantedBeds) results = results.filter(l => l.bedrooms >= wantedBeds);
+
+  // If nothing matches exactly, relax city/type filter and return closest
+  if (results.length === 0) results = mockListings.filter(l => l.status === 'active').slice(0, 3);
+
+  // Convert to backend-shape listing cards (short_title, summary)
+  const listings = results.slice(0, 4).map(l => {
+    const cityName = l.city_id === '1' ? 'الرياض' : l.city_id === '2' ? 'جدة' : 'الدمام';
+    const typeName =
+      l.property_type === 'Villa' ? 'فيلا' :
+      l.property_type === 'Apartment' ? 'شقة' :
+      l.property_type === 'Duplex' ? 'دوبلكس' :
+      l.property_type === 'Land' ? 'أرض' : l.property_type;
+    return {
+      license: `MOCK-${l.id}`,
+      short_title: `${typeName} ${cityName} ${l.area}م ${l.price}`,
+      summary: `${l.bedrooms} غرف | ${l.bathrooms} حمّامات | ${l.area} م² | ${l.price}`,
+      description: l.description,
+    };
+  });
+
+  const cityLabel = cityId === '1' ? 'الرياض' : cityId === '2' ? 'جدة' : cityId === '3' ? 'الدمام' : '';
+  const found = listings.length;
+  const content = found > 0
+    ? `وجدت ${found} عقار${found > 1 ? 'ات' : ''} تناسب طلبك${cityLabel ? ` في ${cityLabel}` : ''}. إليك أفضل الخيارات المتاحة:`
+    : 'لم أجد عقارات تطابق طلبك بالضبط، لكن إليك أقرب الخيارات المتاحة:';
+
+  return {
+    content,
+    listings,
+    suggestions: ['أريد رؤية المزيد', 'غيّر المدينة', 'أريد ترتيب زيارة', 'سجّل للوصول لجميع العقارات'],
+  };
+}
 
 type Conversation = {
   id: string;
@@ -250,20 +318,16 @@ export function ChatInterface() {
     setIsTyping(true);
 
     try {
-      // Guest mode: provide a local fallback response without hitting the API
+      // Guest mode: local property search without hitting the API
       if (convId.startsWith('local_')) {
-        const guestReplies = [
-          'مرحباً! يمكنني مساعدتك في البحث عن العقار المثالي. لحفظ محادثاتك والوصول إلى جميع الميزات، يُنصح بتسجيل الدخول.',
-          'سؤال رائع! للحصول على توصيات مخصصة وإمكانية التواصل مع المكاتب العقارية مباشرة، سجّل دخولك الآن.',
-          'أفهم ما تبحث عنه. قم بتسجيل الدخول للاستفادة من كامل خدمات الشات العقاري وحفظ تفضيلاتك.',
-          'يسعدني مساعدتك. لتجربة أفضل مع خيارات أكثر وتوصيات دقيقة، ننصحك بإنشاء حساب مجاني.',
-        ];
+        const result = guestSearch(textToSend);
         const aiMsg: ChatMessage = {
           id: String(Date.now() + 1),
           role: 'assistant',
-          content: guestReplies[Math.floor(Math.random() * guestReplies.length)],
+          content: result.content,
           timestamp: new Date().toISOString(),
-          suggestions: ['سجّل دخولك الآن', 'إنشاء حساب مجاني', 'أريد الاستمرار كزائر'],
+          suggestions: result.suggestions,
+          listings: result.listings.length > 0 ? result.listings : undefined,
         };
         setConversations(prev => prev.map(c =>
           c.id !== convId ? c : { ...c, messages: [...c.messages, aiMsg] }
