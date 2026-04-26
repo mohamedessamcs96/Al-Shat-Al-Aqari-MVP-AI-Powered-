@@ -306,28 +306,14 @@ export const offices = {
     }),
 
   uploadLogo: async (officeId: string, file: File): Promise<string> => {
-    const token = getToken();
-    const lang = getLang();
-    const form = new FormData();
-    form.append('logo', file);
-    const res = await fetch(`${BASE_URL}${API_PREFIX}/offices/${officeId}/logo`, {
-      method: 'POST',
-      headers: {
-        'Accept-Language': lang,
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        // No Content-Type — browser sets it with the correct multipart boundary
-      },
-      body: form,
+    // Backend has no dedicated file upload endpoint — store logo as base64 data URL
+    // embedded in the profile. For production, swap this with a real CDN upload.
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('فشل قراءة الصورة'));
+      reader.readAsDataURL(file);
     });
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({})) as Record<string, unknown>;
-      const msg = body.detail ?? body.message ?? body.error ?? 'فشل رفع الشعار';
-      throw new Error(String(msg));
-    }
-    const data = await res.json().catch(() => ({})) as Record<string, unknown>;
-    // Backend may return { logo_url, url, logo, file_url, ... }
-    const url = data.logo_url ?? data.url ?? data.logo ?? data.file_url ?? '';
-    return String(url);
   },
 
   suspend: (officeId: string, suspended: boolean) =>
