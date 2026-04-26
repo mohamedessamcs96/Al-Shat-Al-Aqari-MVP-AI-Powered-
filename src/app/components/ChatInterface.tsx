@@ -510,28 +510,79 @@ export function ChatInterface() {
 
                   {/* Property cards */}
                   {message.listings && message.listings.length > 0 && (
-                    <div className="mt-3 w-full space-y-2" dir="rtl">
-                      {message.listings.map((listing: any, idx: number) => {
-                        // Backend shape: { license, short_title, summary, description }
-                        const title  = listing.short_title ?? listing.title ?? listing.property_type ?? 'عقار';
-                        const detail = listing.summary ?? listing.description ?? '';
-                        const key    = listing.license ?? listing.id ?? idx;
-                        return (
-                          <div
-                            key={key}
-                            className="bg-white rounded-xl border border-slate-100 shadow-sm px-4 py-3 flex items-start gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-default"
-                          >
-                            <div className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center bg-indigo-50">
-                              <Building2 className="w-4 h-4 text-indigo-500" />
+                    <div className="mt-3 w-full" dir="rtl">
+                      <div className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory" style={{ scrollbarWidth: 'none' }}>
+                        {message.listings.map((listing: any, idx: number) => {
+                          // Parse summary: "4 غرف | None حمّامات | 195 م² | 1100000.0"
+                          const parts     = (listing.summary ?? '').split('|').map((s: string) => s.trim());
+                          const bedrooms  = parts[0]?.replace(/[^0-9]/g, '') || null;
+                          const bathrooms = (parts[1] ?? '').includes('None') ? null : parts[1]?.replace(/[^0-9]/g, '') || null;
+                          const area      = parts[2]?.replace(/[^0-9.]/g, '') || null;
+                          const rawPrice  = parseFloat(parts[3] ?? '') || null;
+                          // Parse short_title: "فيلا الرياض 195م 1100000.0"
+                          const titleWords = (listing.short_title ?? '').split(' ');
+                          const propType   = titleWords[0] ?? 'عقار';
+                          const city       = titleWords[1] ?? '';
+                          const CARD_COLORS: Record<string, string> = {
+                            'فيلا': 'linear-gradient(135deg,#0e2057 0%,#312e81 100%)',
+                            'شقة':  'linear-gradient(135deg,#065f46 0%,#0284c7 100%)',
+                            'أرض':  'linear-gradient(135deg,#78350f 0%,#b45309 100%)',
+                            'مكتب': 'linear-gradient(135deg,#1e3a5f 0%,#374151 100%)',
+                          };
+                          const cardBg = CARD_COLORS[propType] ?? 'linear-gradient(135deg,#0e2057 0%,#312e81 100%)';
+                          return (
+                            <div
+                              key={listing.license ?? listing.id ?? idx}
+                              className="flex-shrink-0 w-48 snap-start rounded-2xl overflow-hidden bg-white flex flex-col"
+                              style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.13)' }}
+                            >
+                              {/* Coloured header */}
+                              <div className="h-24 flex flex-col justify-between p-3" style={{ background: cardBg }}>
+                                <div className="flex items-start justify-between">
+                                  <span className="text-[10px] font-bold text-white/90 bg-white/20 px-2 py-0.5 rounded-full">{propType}</span>
+                                  <Building2 className="w-3.5 h-3.5 text-white/30" />
+                                </div>
+                                <div>
+                                  {rawPrice && <p className="text-white font-extrabold text-sm leading-tight">{formatPrice(rawPrice)}</p>}
+                                  {city && <p className="text-white/65 text-[10px] mt-0.5">{city}</p>}
+                                </div>
+                              </div>
+                              {/* Stats row */}
+                              <div className="flex items-center justify-around px-2 py-2 border-b border-slate-100">
+                                {bedrooms && (
+                                  <div className="text-center">
+                                    <p className="text-xs font-bold text-slate-800">{bedrooms}</p>
+                                    <p className="text-[9px] text-slate-400">غرف</p>
+                                  </div>
+                                )}
+                                {bedrooms && area && <div className="w-px h-5 bg-slate-100" />}
+                                {area && (
+                                  <div className="text-center">
+                                    <p className="text-xs font-bold text-slate-800">{area}</p>
+                                    <p className="text-[9px] text-slate-400">م²</p>
+                                  </div>
+                                )}
+                                {bathrooms && area && <div className="w-px h-5 bg-slate-100" />}
+                                {bathrooms && (
+                                  <div className="text-center">
+                                    <p className="text-xs font-bold text-slate-800">{bathrooms}</p>
+                                    <p className="text-[9px] text-slate-400">حمام</p>
+                                  </div>
+                                )}
+                              </div>
+                              {/* License */}
+                              {listing.license && (
+                                <div className="px-3 py-1.5">
+                                  <p className="text-[9px] text-slate-300 truncate">رقم الترخيص: {listing.license}</p>
+                                </div>
+                              )}
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-semibold text-slate-800 leading-snug">{title}</p>
-                              {detail && <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{detail}</p>}
-                              {listing.license && <p className="text-xs text-slate-300 mt-1">رقم الترخيص: {listing.license}</p>}
-                            </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
+                      {message.listings.length > 2 && (
+                        <p className="text-[10px] text-slate-400 mt-1.5 text-center">← اسحب لرؤية المزيد ({message.listings.length} عقار)</p>
+                      )}
                     </div>
                   )}
 
