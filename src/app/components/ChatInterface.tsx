@@ -506,7 +506,44 @@ export function ChatInterface() {
                     style={message.role === 'user' ? { background: 'linear-gradient(135deg,#0e2057,#1a1060)' } : {}}
                     dir="rtl"
                   >
-                    {message.content}
+                    {message.listings && message.listings.length > 0
+                      // When cards follow, show only a short plain-text intro (strip markdown)
+                      ? (() => {
+                          const plain = message.content
+                            .replace(/\*\*?([^*]+)\*\*?/g, '$1')
+                            .replace(/^[•*#>\-]+\s*/gm, '')
+                            .split('\n')
+                            .map(l => l.trim())
+                            .filter(Boolean)
+                            .slice(0, 2)
+                            .join(' ');
+                          return <span>{plain}</span>;
+                        })()
+                      // Normal message: render markdown-like formatting
+                      : message.content
+                          .split('\n')
+                          .map((line, li) => {
+                            const trimmed = line.trim();
+                            if (!trimmed) return <br key={li} />;
+                            // Bold: **text** or *text*
+                            const parts = trimmed.split(/(\*{1,2}[^*]+\*{1,2})/g);
+                            const rendered = parts.map((p, pi) =>
+                              /^\*{1,2}([^*]+)\*{1,2}$/.test(p)
+                                ? <strong key={pi}>{p.replace(/\*/g, '')}</strong>
+                                : p
+                            );
+                            // Bullet line
+                            if (/^[•·*\-]/.test(trimmed)) {
+                              return (
+                                <div key={li} className="flex gap-2 my-0.5">
+                                  <span className="text-indigo-400 mt-0.5 flex-shrink-0">•</span>
+                                  <span>{rendered}</span>
+                                </div>
+                              );
+                            }
+                            return <p key={li} className="my-0.5">{rendered}</p>;
+                          })
+                    }
                   </div>
 
                   {/* Property cards */}
@@ -528,14 +565,45 @@ export function ChatInterface() {
                           const propType   = titleWords[0] ?? 'عقار';
                           const city       = titleWords[1] ?? '';
 
-                          const TYPE_META: Record<string, { bg: string; accent: string }> = {
-                            'فيلا':  { bg: 'linear-gradient(150deg,#1e3a8a 0%,#3730a3 100%)', accent: '#6366f1' },
-                            'شقة':   { bg: 'linear-gradient(150deg,#065f46 0%,#0369a1 100%)', accent: '#10b981' },
-                            'أرض':   { bg: 'linear-gradient(150deg,#92400e 0%,#b45309 100%)', accent: '#f59e0b' },
-                            'مكتب':  { bg: 'linear-gradient(150deg,#1e3a5f 0%,#1f2937 100%)', accent: '#64748b' },
-                            'عمارة': { bg: 'linear-gradient(150deg,#134e4a 0%,#155e75 100%)', accent: '#06b6d4' },
-                            'استراحة': { bg: 'linear-gradient(150deg,#581c87 0%,#831843 100%)', accent: '#a855f7' },
+                          const TYPE_IMAGES: Record<string, string[]> = {
+                            'فيلا':    [
+                              'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=400&q=80',
+                              'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&q=80',
+                              'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400&q=80',
+                              'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&q=80',
+                            ],
+                            'شقة':    [
+                              'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80',
+                              'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400&q=80',
+                              'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=400&q=80',
+                            ],
+                            'أرض':    [
+                              'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&q=80',
+                              'https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?w=400&q=80',
+                            ],
+                            'مكتب':   [
+                              'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80',
+                              'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=400&q=80',
+                            ],
+                            'عمارة':  [
+                              'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=400&q=80',
+                              'https://images.unsplash.com/photo-1460317442991-0ec209397118?w=400&q=80',
+                            ],
+                            'استراحة':[
+                              'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&q=80',
+                              'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&q=80',
+                            ],
                           };
+                          const TYPE_META: Record<string, { bg: string }> = {
+                            'فيلا':    { bg: 'linear-gradient(135deg,#1e3a8a,#3730a3)' },
+                            'شقة':     { bg: 'linear-gradient(135deg,#065f46,#0369a1)' },
+                            'أرض':     { bg: 'linear-gradient(135deg,#92400e,#b45309)' },
+                            'مكتب':    { bg: 'linear-gradient(135deg,#1e3a5f,#1f2937)' },
+                            'عمارة':   { bg: 'linear-gradient(135deg,#134e4a,#155e75)' },
+                            'استراحة': { bg: 'linear-gradient(135deg,#581c87,#831843)' },
+                          };
+                          const imgList = TYPE_IMAGES[propType] ?? TYPE_IMAGES['فيلا'];
+                          const imgUrl  = imgList[idx % imgList.length];
                           const meta  = TYPE_META[propType] ?? TYPE_META['فيلا'];
                           const isRent = rawPrice !== null && rawPrice < 300000;
 
@@ -545,34 +613,42 @@ export function ChatInterface() {
                               className="flex-shrink-0 w-56 snap-start rounded-2xl overflow-hidden bg-white flex flex-col"
                               style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.1)' }}
                             >
-                              {/* Header gradient */}
-                              <div className="relative h-28 flex flex-col justify-between p-4" style={{ background: meta.bg }}>
-                                {/* Decorative circle */}
-                                <div className="absolute -top-6 -left-6 w-24 h-24 rounded-full opacity-10" style={{ background: meta.accent }} />
-                                <div className="relative flex items-start justify-between">
+                              {/* Photo header */}
+                              <div className="relative h-36 overflow-hidden">
+                                <img
+                                  src={imgUrl}
+                                  alt={propType}
+                                  className="w-full h-full object-cover"
+                                  loading="lazy"
+                                />
+                                {/* dark gradient overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+                                {/* badges top */}
+                                <div className="absolute top-2.5 right-2.5 left-2.5 flex items-start justify-between">
                                   <span
-                                    className="text-[10px] font-black tracking-wide text-white px-2.5 py-1 rounded-full"
-                                    style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(4px)' }}
+                                    className="text-[10px] font-black text-white px-2.5 py-1 rounded-full"
+                                    style={{ background: meta.bg, backdropFilter: 'blur(4px)' }}
                                   >
                                     {propType}
                                   </span>
                                   {isRent && (
-                                    <span className="text-[9px] font-bold text-white/80 bg-white/15 px-2 py-0.5 rounded-full">إيجار</span>
+                                    <span className="text-[9px] font-bold text-white bg-emerald-500/90 px-2 py-1 rounded-full">إيجار</span>
                                   )}
                                 </div>
-                                <div className="relative">
+                                {/* price + city pinned to bottom */}
+                                <div className="absolute bottom-2.5 right-3 left-3">
                                   {rawPrice && (
-                                    <p className="text-white font-black text-lg leading-none">
+                                    <p className="text-white font-black text-base leading-none drop-shadow">
                                       {isRent
-                                        ? `${new Intl.NumberFormat('ar-SA').format(rawPrice)} ر.س/سنوي`
+                                        ? `${new Intl.NumberFormat('ar-SA').format(rawPrice)} ر.س/سنوي`
                                         : formatPrice(rawPrice)
                                       }
                                     </p>
                                   )}
                                   {city && (
-                                    <div className="flex items-center gap-1 mt-1.5">
-                                      <MapPin className="w-3 h-3 text-white/50" />
-                                      <p className="text-white/70 text-[11px] font-medium">{city}</p>
+                                    <div className="flex items-center gap-1 mt-1">
+                                      <MapPin className="w-3 h-3 text-white/70" />
+                                      <p className="text-white/80 text-[11px] font-medium">{city}</p>
                                     </div>
                                   )}
                                 </div>
