@@ -54,7 +54,9 @@ export interface ChatMessage {
   content: string;
   timestamp: string;
   suggestions?: string[];
-  listings?: Listing[];
+  // listings use a flexible shape — backend returns { license, short_title, summary, description }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  listings?: any[];
   hasNoDemandCTA?: boolean;
 }
 

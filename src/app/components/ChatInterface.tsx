@@ -510,42 +510,28 @@ export function ChatInterface() {
 
                   {/* Property cards */}
                   {message.listings && message.listings.length > 0 && (
-                    <div className="mt-3 w-full space-y-2.5">
-                      {message.listings.map((listing) => (
-                        <div
-                          key={listing.id}
-                          className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer border border-slate-100"
-                          onClick={() => navigate(`/listings/${listing.id}`)}
-                        >
-                          <div className="relative">
-                            <img src={listing.images[0]} alt="" className="w-full h-40 object-cover" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                            <span
-                              className="absolute top-2 right-2 text-white text-xs font-bold px-2.5 py-1 rounded-full"
-                              style={{ background: 'linear-gradient(135deg,#0e2057,#1a1060)' }}
-                            >
-                              {formatPrice(listing.price)}
-                            </span>
-                            {listing.quality_score >= 90 && (
-                              <span className="absolute top-2 left-2 bg-amber-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">مميز</span>
-                            )}
-                            <div className="absolute bottom-2 right-3" dir="rtl">
-                              <p className="text-white font-bold text-sm drop-shadow">{listing.property_type}</p>
-                              <p className="text-white/80 text-xs">{listing.address}</p>
+                    <div className="mt-3 w-full space-y-2" dir="rtl">
+                      {message.listings.map((listing: any, idx: number) => {
+                        // Backend shape: { license, short_title, summary, description }
+                        const title  = listing.short_title ?? listing.title ?? listing.property_type ?? 'عقار';
+                        const detail = listing.summary ?? listing.description ?? '';
+                        const key    = listing.license ?? listing.id ?? idx;
+                        return (
+                          <div
+                            key={key}
+                            className="bg-white rounded-xl border border-slate-100 shadow-sm px-4 py-3 flex items-start gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-default"
+                          >
+                            <div className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center bg-indigo-50">
+                              <Building2 className="w-4 h-4 text-indigo-500" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-slate-800 leading-snug">{title}</p>
+                              {detail && <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{detail}</p>}
+                              {listing.license && <p className="text-xs text-slate-300 mt-1">رقم الترخيص: {listing.license}</p>}
                             </div>
                           </div>
-                          <div className="px-4 py-2.5 flex items-center justify-between" dir="rtl">
-                            <div className="flex gap-3 text-xs text-slate-500">
-                              <span><b className="text-slate-800">{listing.bedrooms}</b> غرف</span>
-                              <span className="text-slate-300">·</span>
-                              <span><b className="text-slate-800">{listing.area}</b> م²</span>
-                              <span className="text-slate-300">·</span>
-                              <span>{getCityName(listing.city_id)}</span>
-                            </div>
-                            <ChevronRight className="w-4 h-4 text-indigo-400" />
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
 
