@@ -90,39 +90,14 @@ export function LoginPage() {
     const normalized = buyerPhone.startsWith('+') ? buyerPhone : `+966${buyerPhone.replace(/^0/, '')}`;
     setLoading(true);
     try {
-      const res = await apiAuth.buyerRegister(buyerName, normalized);
-      const raw = res as any;
-      const tok = raw.tokens?.accessToken || raw.tokens?.access || raw.tokens?.token || raw.tokens?.key || raw.token || raw.access || '';
-      const refreshTok = raw.tokens?.refreshToken || raw.tokens?.refresh || raw.refresh || '';
-      if (!tok) {
-        // Register requires OTP — try verifying with static 0000
-        try {
-          await apiAuth.sendOtp(normalized);
-          const vRes = await apiAuth.verifyOtp(normalized, '0000');
-          const vRaw = vRes as any;
-          const vTok = vRaw.tokens?.accessToken || vRaw.tokens?.access || vRaw.token || vRaw.access || '';
-          if (vTok) {
-            setToken(vTok);
-            setRole('buyer');
-            const vId = vRaw.data?.user?.id || vRaw.id || '';
-            if (vId) setUser({ id: vId, name: buyerName, phone: normalized });
-            toast.success('تم إنشاء حسابك بنجاح! مرحباً بك');
-            navigate('/chat');
-          } else {
-            toast.error('تم إنشاء الحساب — الرجاء تسجيل الدخول');
-          }
-        } catch {
-          toast.error('تم إنشاء الحساب — الرجاء تسجيل الدخول');
-        }
-        return;
-      }
-      if (refreshTok) setRefreshToken(refreshTok);
-      setToken(tok);
-      setRole('buyer');
-      const buyerRegId = raw.data?.user?.id || raw.buyer_id || raw.id || '';
-      if (buyerRegId) setUser({ id: buyerRegId, name: buyerName, phone: normalized });
-      toast.success('تم إنشاء حسابك بنجاح! مرحباً بك');
-      navigate('/chat');
+      // Attempt registration — ignore if user already exists
+      try { await apiAuth.buyerRegister(buyerName, normalized); } catch {}
+      // Send OTP then let user enter it manually
+      await apiAuth.sendOtp(normalized);
+      setOtpPhone(normalized);
+      setOtpCode('');
+      setOtpStep('otp');
+      toast.success('تم إرسال رمز التحقق');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'حدث خطأ');
     } finally {
@@ -551,38 +526,79 @@ export function LoginPage() {
                 </TabsContent>
 
                 <TabsContent value="register" className="space-y-3">
-                  <FieldWithIcon icon={<User className="w-4 h-4 text-slate-400" />}>
-                    <Input
-                      type="text"
-                      autoComplete="name"
-                      value={buyerName}
-                      onChange={(e) => setBuyerName(e.target.value)}
-                      placeholder="الاسم الكامل"
-                      className="pr-10 text-right rounded-xl h-12 text-base"
-                      dir="rtl"
-                    />
-                  </FieldWithIcon>
-                  <FieldWithIcon icon={<Phone className="w-4 h-4 text-slate-400" />}>
-                    <Input
-                      type="tel"
-                      inputMode="tel"
-                      autoComplete="tel"
-                      value={buyerPhone}
-                      onChange={(e) => setBuyerPhone(e.target.value)}
-                      placeholder="05xxxxxxxx"
-                      className="pr-10 text-right rounded-xl h-12 text-base"
-                      dir="rtl"
-                    />
-                  </FieldWithIcon>
-                  <Button
-                    onClick={handleBuyerRegister}
-                    disabled={loading}
-                    className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl h-12 font-semibold shadow-md shadow-blue-500/20 gap-2 text-base disabled:opacity-60"
-                  >
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
-                    إنشاء حساب
-                  </Button>
-                  <p className="text-xs text-center text-slate-400">بالتسجيل، أنت توافق على شروط الخدمة</p>
+                  {otpStep === 'otp' ? (
+                    // After registration, show same OTP step
+                    <>
+                      <div className="rounded-xl bg-blue-50 border border-blue-100 px-4 py-3 text-center" dir="rtl">
+                        <p className="text-xs text-slate-500">تم إرسال رمز التحقق إلى</p>
+                        <p className="font-bold text-slate-900">{otpPhone}</p>
+                      </div>
+                      <FieldWithIcon icon={<ShieldCheck className="w-4 h-4 text-slate-400" />}>
+                        <Input
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={6}
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                          onKeyDown={(e) => e.key === 'Enter' && handleVerifyOtp()}
+                          placeholder="أدخل رمز التحقق"
+                          className="pr-10 text-center rounded-xl h-12 text-2xl font-bold tracking-widest"
+                          dir="ltr"
+                          autoFocus
+                        />
+                      </FieldWithIcon>
+                      <Button
+                        onClick={handleVerifyOtp}
+                        disabled={loading || otpCode.length < 4}
+                        className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl h-12 font-semibold shadow-md shadow-blue-500/20 gap-2 text-base disabled:opacity-60"
+                      >
+                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
+                        تأكيد وإنشاء الحساب
+                      </Button>
+                      <button
+                        onClick={() => { setOtpStep('phone'); setOtpCode(''); }}
+                        className="w-full text-sm text-slate-400 hover:text-blue-600 transition-colors py-1"
+                      >
+                        ← تغيير رقم الهاتف
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <FieldWithIcon icon={<User className="w-4 h-4 text-slate-400" />}>
+                        <Input
+                          type="text"
+                          autoComplete="name"
+                          value={buyerName}
+                          onChange={(e) => setBuyerName(e.target.value)}
+                          placeholder="الاسم الكامل"
+                          className="pr-10 text-right rounded-xl h-12 text-base"
+                          dir="rtl"
+                        />
+                      </FieldWithIcon>
+                      <FieldWithIcon icon={<Phone className="w-4 h-4 text-slate-400" />}>
+                        <Input
+                          type="tel"
+                          inputMode="tel"
+                          autoComplete="tel"
+                          value={buyerPhone}
+                          onChange={(e) => setBuyerPhone(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleBuyerRegister()}
+                          placeholder="05xxxxxxxx"
+                          className="pr-10 text-right rounded-xl h-12 text-base"
+                          dir="rtl"
+                        />
+                      </FieldWithIcon>
+                      <Button
+                        onClick={handleBuyerRegister}
+                        disabled={loading}
+                        className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl h-12 font-semibold shadow-md shadow-blue-500/20 gap-2 text-base disabled:opacity-60"
+                      >
+                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                        إنشاء حساب
+                      </Button>
+                      <p className="text-xs text-center text-slate-400">بالتسجيل، أنت توافق على شروط الخدمة</p>
+                    </>
+                  )}
                 </TabsContent>
               </Tabs>
             </FormCard>

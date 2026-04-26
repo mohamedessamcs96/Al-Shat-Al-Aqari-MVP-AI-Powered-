@@ -164,7 +164,7 @@ export const auth = {
     }),
 
   verifyOtp: (phone: string, code: string) =>
-    apiFetch<{ ok: boolean }>('/auth/otp/verify', {
+    apiFetch<AuthResponse>('/auth/otp/verify', {
       method: 'POST',
       body: JSON.stringify({ phone, code }),
     }),
