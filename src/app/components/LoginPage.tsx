@@ -481,7 +481,7 @@ export function LoginPage() {
                     <>
                       <div className="rounded-xl bg-blue-50 border border-blue-100 px-4 py-3 text-center" dir="rtl">
                         <p className="text-xs text-slate-500">تم إرسال رمز التحقق إلى</p>
-                        <p className="font-bold text-slate-900">{otpPhone}</p>
+                        <p className="font-bold text-slate-900">{otpPhone.startsWith('+966') ? '0' + otpPhone.slice(4) : otpPhone}</p>
                       </div>
                       <FieldWithIcon icon={<ShieldCheck className="w-4 h-4 text-slate-400" />}>
                         <Input
@@ -529,7 +529,7 @@ export function LoginPage() {
                     <>
                       <div className="rounded-xl bg-blue-50 border border-blue-100 px-4 py-3 text-center" dir="rtl">
                         <p className="text-xs text-slate-500">تم إرسال رمز التحقق إلى</p>
-                        <p className="font-bold text-slate-900">{otpPhone}</p>
+                        <p className="font-bold text-slate-900">{otpPhone.startsWith('+966') ? '0' + otpPhone.slice(4) : otpPhone}</p>
                       </div>
                       <FieldWithIcon icon={<ShieldCheck className="w-4 h-4 text-slate-400" />}>
                         <Input
