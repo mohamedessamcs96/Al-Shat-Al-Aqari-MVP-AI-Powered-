@@ -169,17 +169,21 @@ export const auth = {
       body: JSON.stringify({ phone, code }),
     }),
 
-  buyerRegister: (name: string, phone: string) =>
-    apiFetch<AuthResponse>('/auth/buyer/register', {
+  buyerRegister: (name: string, phone: string) => {
+    const normalizedPhone = phone.startsWith('+') ? phone : `+966${phone.replace(/^0/, '')}`;
+    return apiFetch<AuthResponse>('/auth/buyer/register', {
       method: 'POST',
-      body: JSON.stringify({ name, phone }),
-    }),
+      body: JSON.stringify({ name, phone: normalizedPhone }),
+    });
+  },
 
-  buyerLogin: (phone: string) =>
-    apiFetch<AuthResponse>('/auth/buyer/login', {
+  buyerLogin: (phone: string) => {
+    const normalizedPhone = phone.startsWith('+') ? phone : `+966${phone.replace(/^0/, '')}`;
+    return apiFetch<AuthResponse>('/auth/buyer/login', {
       method: 'POST',
-      body: JSON.stringify({ phone }),
-    }),
+      body: JSON.stringify({ phone: normalizedPhone }),
+    });
+  },
 
   officeRegister: (name: string, email: string, phone: string, password: string) =>
     apiFetch<AuthResponse>('/auth/office/register', {
@@ -527,22 +531,22 @@ export const subscriptions = {
 
 export const chat = {
   listConversations: () =>
-    apiFetch<unknown[]>('/chat/conversations'),
+    apiFetch<unknown[]>('/chat/conversations/'),
 
   startConversation: () =>
-    apiFetch<Record<string, unknown>>('/chat/conversations', { method: 'POST' }),
+    apiFetch<Record<string, unknown>>('/chat/conversations/', { method: 'POST' }),
 
   getMessages: (conversationId: string) =>
-    apiFetch<Record<string, unknown>>(`/chat/conversations/${conversationId}`),
+    apiFetch<Record<string, unknown>>(`/chat/conversations/${conversationId}/`),
 
   sendMessage: (conversationId: string, content: string) =>
-    apiFetch<Record<string, unknown>>(`/chat/conversations/${conversationId}/messages`, {
+    apiFetch<Record<string, unknown>>(`/chat/conversations/${conversationId}/messages/`, {
       method: 'POST',
       body: JSON.stringify({ content }),
     }),
 
   deleteConversation: (conversationId: string) =>
-    apiFetch<void>(`/chat/conversations/${conversationId}`, { method: 'DELETE' }),
+    apiFetch<void>(`/chat/conversations/${conversationId}/`, { method: 'DELETE' }),
 };
 
 // ── 10. Admin ─────────────────────────────────────────────────────────────────

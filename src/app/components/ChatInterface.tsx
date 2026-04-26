@@ -154,7 +154,14 @@ export function ChatInterface() {
   const loadMessages = (convId: string, convList: Conversation[]) => {
     chatApi.getMessages(convId).then((data) => {
       const raw = data as Record<string, unknown>;
-      const msgs: ChatMessage[] = ((raw.messages ?? []) as Array<Record<string, unknown>>).map((m) => ({
+      // Backend may return: { messages: [...] } | { data: { messages: [...] } } | { data: [...] } | [...]
+      const msgArray: Array<Record<string, unknown>> =
+        Array.isArray(raw) ? (raw as Array<Record<string, unknown>>) :
+        Array.isArray((raw as any)?.messages) ? (raw as any).messages :
+        Array.isArray((raw as any)?.data?.messages) ? (raw as any).data.messages :
+        Array.isArray((raw as any)?.data) ? (raw as any).data :
+        [];
+      const msgs: ChatMessage[] = (msgArray as Array<Record<string, unknown>>).map((m) => ({
         id: String(m.id ?? Date.now()),
         role: m.role === 'user' ? 'user' : 'assistant',
         content: String(m.content ?? ''),
