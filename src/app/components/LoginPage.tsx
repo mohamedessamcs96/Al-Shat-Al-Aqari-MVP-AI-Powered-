@@ -67,13 +67,19 @@ export function LoginPage() {
     try {
       const res = await apiAuth.verifyOtp(otpPhone, otpCode);
       const raw = res as any;
-      const tok = raw.tokens?.accessToken || raw.tokens?.access || raw.token || raw.access || '';
-      const refreshTok = raw.tokens?.refreshToken || raw.tokens?.refresh || raw.refresh || '';
+      // Backend may return flat { tokens, user } or wrapped { success, data: { tokens, user } }
+      const payload = raw.data ?? raw;
+      const tok =
+        payload.tokens?.accessToken || payload.tokens?.access ||
+        payload.token || payload.access || '';
+      const refreshTok =
+        payload.tokens?.refreshToken || payload.tokens?.refresh ||
+        payload.refresh || '';
       if (!tok) { toast.error('رمز التحقق غير صحيح'); return; }
       if (refreshTok) setRefreshToken(refreshTok);
       setToken(tok);
       setRole('buyer');
-      const buyerId = raw.user?.id || raw.data?.user?.id || raw.buyer_id || raw.id || '';
+      const buyerId = payload.user?.id || payload.buyer_id || payload.id || '';
       if (buyerId) setUser({ id: buyerId, phone: otpPhone });
       toast.success('تم تسجيل الدخول بنجاح!');
       navigate('/chat');

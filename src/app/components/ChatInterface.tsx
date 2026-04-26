@@ -6,6 +6,7 @@ import {
   Heart, BellRing, LifeBuoy, SlidersHorizontal,
   BedDouble, Bath, Maximize2, MapPin,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Input } from './ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from './ui/sheet';
 import { useNavigate } from 'react-router';
@@ -177,8 +178,13 @@ export function ChatInterface() {
   const createNewConversation = async () => {
     try {
       const res = await chatApi.startConversation();
-      const raw = res as Record<string, unknown>;
-      const id = String(raw.id ?? raw._id ?? `local_${Date.now()}`);
+      const raw = res as any;
+      // Backend may return { id } directly or wrapped { success, data: { id } }
+      const id = String(
+        raw.id ?? raw._id ?? raw.conversation_id ??
+        raw.data?.id ?? raw.data?.conversation_id ??
+        `local_${Date.now()}`
+      );
       const greeting = makeSaraGreeting(`${id}_g`);
       const newConv: Conversation = { id, title: 'محادثة جديدة', createdAt: Date.now(), messages: [greeting] };
       setConversations(prev => [newConv, ...prev]);
@@ -272,15 +278,11 @@ export function ChatInterface() {
       console.error('[chat] sendMessage error:', err);
       const errMsg = err instanceof Error && err.message !== 'local'
         ? err.message
-        : 'حدث خطأ في إرسال الرسالة';
-      const errAiMsg: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: errMsg,
-        timestamp: new Date().toISOString(),
-      };
+        : 'تعذّر إرسال الرسالة. تحقق من تسجيل الدخول غ';
+      toast.error(errMsg);
+      // Remove the optimistic user message on failure
       setConversations(prev => prev.map(c =>
-        c.id !== convId ? c : { ...c, messages: [...c.messages, errAiMsg] }
+        c.id !== convId ? c : { ...c, messages: c.messages.filter(m => m.id !== userMsg.id) }
       ));
     } finally {
       setIsTyping(false);
