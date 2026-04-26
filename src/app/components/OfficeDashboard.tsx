@@ -6,7 +6,7 @@ import {
   Mail, CheckCircle2, Bell, LogOut, ChevronRight, Home, Megaphone,
   QrCode, Download, Copy, Check, ExternalLink,
   Search, Filter, Clock, Play, Pause, Target, X,
-  ArrowUpRight, Activity, Zap, Link2,
+  ArrowUpRight, Activity, Zap, Link2, Upload,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { PageAnalyticsDashboard } from './PageAnalyticsDashboard';
@@ -79,6 +79,8 @@ export function OfficeDashboard() {
   const [profileLogoUrl, setProfileLogoUrl] = useState('');
   const [logoImgError, setLogoImgError] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const logoUploadRef = useRef<HTMLInputElement>(null);
 
   const officeId = (() => {
     const stored = getUser()?.id;
@@ -1362,24 +1364,53 @@ export function OfficeDashboard() {
                   />
                 </div>
                 <div>
-                  <Label className="block mb-1 text-sm font-medium text-gray-700">رابط شعار المكتب</Label>
-                  <div className="flex items-center gap-3">
-                    {profileLogoUrl && !logoImgError && (
-                      <img
-                        src={profileLogoUrl}
-                        alt="شعار المكتب"
-                        className="w-14 h-14 rounded-xl object-cover border border-gray-200 flex-shrink-0"
-                        onError={() => setLogoImgError(true)}
-                      />
-                    )}
-                    <Input
-                      value={profileLogoUrl}
-                      onChange={e => { setProfileLogoUrl(e.target.value); setLogoImgError(false); }}
-                      placeholder="https://example.com/logo.png"
-                      dir="ltr"
-                      className="flex-1"
-                    />
+                  <Label className="block mb-1 text-sm font-medium text-gray-700">شعار المكتب</Label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0 bg-gray-50">
+                      {profileLogoUrl && !logoImgError
+                        ? <img src={profileLogoUrl} alt="شعار المكتب" className="w-full h-full object-contain" onError={() => setLogoImgError(true)} />
+                        : <Building2 className="w-7 h-7 text-gray-300" />
+                      }
+                    </div>
+                    <div className="flex flex-col gap-2 flex-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={isUploadingLogo || !officeId}
+                        onClick={() => logoUploadRef.current?.click()}
+                        className="gap-2 w-fit"
+                      >
+                        <Upload className="w-4 h-4" />
+                        {isUploadingLogo ? 'جاري الرفع...' : 'رفع شعار'}
+                      </Button>
+                      {profileLogoUrl && (
+                        <p className="text-xs text-gray-400 break-all" dir="ltr">{profileLogoUrl.split('/').pop()}</p>
+                      )}
+                    </div>
                   </div>
+                  <input
+                    ref={logoUploadRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={async e => {
+                      const file = e.target.files?.[0];
+                      if (!file || !officeId) return;
+                      setIsUploadingLogo(true);
+                      try {
+                        const url = await officesApi.uploadLogo(officeId, file);
+                        setProfileLogoUrl(url);
+                        setLogoImgError(false);
+                        toast.success('تم رفع الشعار بنجاح');
+                      } catch (err: any) {
+                        toast.error(err?.message ?? 'فشل رفع الشعار');
+                      } finally {
+                        setIsUploadingLogo(false);
+                        e.target.value = '';
+                      }
+                    }}
+                  />
                 </div>
                 <div className="pt-2">
                   <Button

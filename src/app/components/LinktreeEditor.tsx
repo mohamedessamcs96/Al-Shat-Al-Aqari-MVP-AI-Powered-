@@ -4,7 +4,7 @@ import {
   ArrowLeft, Save, Eye, Plus, Trash2, GripVertical,
   Link2, Instagram, Twitter, Youtube, Facebook,
   Phone, Globe, MessageCircle, Linkedin,
-  Check, Palette, User, X as XIcon,
+  Check, Palette, User, X as XIcon, Upload,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useDrag, useDrop, DndProvider } from 'react-dnd';
@@ -246,6 +246,8 @@ export function LinktreeEditor() {
   const [isDirty, setIsDirty] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [officeSlug, setOfficeSlug] = useState<string>(getUser()?.slug || '');
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const avatarUploadRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!officeId) return;
@@ -340,7 +342,7 @@ export function LinktreeEditor() {
               <Button variant="outline" size="sm" className="gap-1.5" onClick={() => {
                 const slug = officeSlug || officeId;
                 if (slug) {
-                  window.open(`https://al-shat-al-aqari-mvp.vercel.app/office/${slug}`, '_blank');
+                  window.open(`https://al-shat-al-aqari-mvp.vercel.app/office/${slug}?preview=1`, '_blank');
                 }
               }}>
                 <Eye className="w-3.5 h-3.5" />
@@ -489,17 +491,58 @@ export function LinktreeEditor() {
             {leftTab === 'profile' && (
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 <div>
-                  <Label className="text-xs font-semibold text-gray-600">رابط الصورة</Label>
-                  <Input
-                    className="mt-1 text-sm"
-                    value={profile.avatar}
-                    onChange={e => setProf({ avatar: e.target.value })}
-                    placeholder="https://... أو اتركه فارغاً"
-                    dir="ltr"
+                  <Label className="text-xs font-semibold text-gray-600">صورة المكتب</Label>
+                  <div className="mt-2 flex items-center gap-3">
+                    <div className="w-14 h-14 rounded-full border-2 border-dashed border-indigo-200 flex items-center justify-center overflow-hidden flex-shrink-0 bg-indigo-50">
+                      {profile.avatar
+                        ? <img src={profile.avatar} alt="" className="w-full h-full object-cover" />
+                        : <User className="w-6 h-6 text-indigo-300" />
+                      }
+                    </div>
+                    <div className="flex flex-col gap-1.5 flex-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={isUploadingAvatar || !officeId}
+                        onClick={() => avatarUploadRef.current?.click()}
+                        className="gap-2 text-xs h-8"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        {isUploadingAvatar ? 'جاري الرفع...' : 'رفع صورة'}
+                      </Button>
+                      {profile.avatar && (
+                        <button
+                          type="button"
+                          onClick={() => setProf({ avatar: '' })}
+                          className="text-xs text-red-400 hover:text-red-600 text-right"
+                        >
+                          حذف الصورة
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <input
+                    ref={avatarUploadRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={async e => {
+                      const file = e.target.files?.[0];
+                      if (!file || !officeId) return;
+                      setIsUploadingAvatar(true);
+                      try {
+                        const url = await officesApi.uploadLinktreeAvatar(officeId, file);
+                        setProf({ avatar: url });
+                        toast.success('تم رفع الصورة بنجاح');
+                      } catch (err: any) {
+                        toast.error(err?.message ?? 'فشل رفع الصورة');
+                      } finally {
+                        setIsUploadingAvatar(false);
+                        e.target.value = '';
+                      }
+                    }}
                   />
-                  {profile.avatar && (
-                    <img src={profile.avatar} alt="" className="mt-2 w-16 h-16 rounded-full object-cover border-2 border-indigo-200" />
-                  )}
                 </div>
                 <div>
                   <Label className="text-xs font-semibold text-gray-600">اسم المكتب</Label>

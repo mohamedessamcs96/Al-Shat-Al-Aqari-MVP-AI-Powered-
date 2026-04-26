@@ -445,6 +445,30 @@ export const offices = {
       method: 'POST',
       body: JSON.stringify(config),
     }),
+
+  uploadLinktreeAvatar: async (officeId: string, file: File): Promise<string> => {
+    const token = getToken();
+    const lang = getLang();
+    const form = new FormData();
+    form.append('avatar', file);
+    const res = await fetch(`${BASE_URL}${API_PREFIX}/offices/${officeId}/linktree/avatar`, {
+      method: 'POST',
+      headers: {
+        'Accept-Language': lang,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: form,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({})) as Record<string, unknown>;
+      const msg = body.detail ?? body.message ?? body.error ?? 'فشل رفع الصورة';
+      throw new Error(String(msg));
+    }
+    const data = await res.json().catch(() => ({})) as Record<string, unknown>;
+    // Backend may return { avatar_url, url, avatar, file_url, ... }
+    const url = data.avatar_url ?? data.url ?? data.avatar ?? data.file_url ?? '';
+    return String(url);
+  },
 };
 
 // ── 5. Demands ────────────────────────────────────────────────────────────────

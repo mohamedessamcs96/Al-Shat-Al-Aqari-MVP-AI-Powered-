@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router';
+import { useParams, useNavigate, useSearchParams } from 'react-router';
 import {
   QrCode, Download, Copy, Check, Edit3,
   Link2, Instagram, Twitter, Youtube, Facebook,
@@ -108,6 +108,8 @@ function QRDialog({ open, onClose, url, officeName, logoUrl }: {
 export function PublicOfficePage() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isPreviewMode = searchParams.get('preview') === '1';
   const [qrOpen, setQrOpen] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [office, setOffice] = useState<any>(null);
@@ -169,9 +171,9 @@ export function PublicOfficePage() {
   const PRODUCTION_URL = 'https://al-shat-al-aqari-mvp.vercel.app';
   const pageUrl = `${PRODUCTION_URL}/office/${slug}`;
 
-  // Show edit controls only to the office owner
+  // Show edit controls only to the office owner (never in preview mode)
   const storedUser = getUser();
-  const isOwner = storedUser?.slug === slug || storedUser?.id === (office as any)?.id;
+  const isOwner = !isPreviewMode && (storedUser?.slug === slug || storedUser?.id === (office as any)?.id);
 
   if (loading) {
     return (
@@ -226,8 +228,20 @@ export function PublicOfficePage() {
 
   const activeLinks = links.filter(l => l.active);
 
+  const iconBg = isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.07)';
+
   return (
-    <div className="min-h-screen" style={{ ...bgStyle, fontFamily }} dir="rtl">
+    <div className="min-h-screen relative overflow-hidden" style={{ ...bgStyle, fontFamily }} dir="rtl">
+
+      {/* ── Decorative background orbs ── */}
+      <div
+        className="absolute top-0 left-0 w-[500px] h-[500px] rounded-full pointer-events-none"
+        style={{ background: appearance.btnColor, opacity: 0.18, filter: 'blur(130px)', transform: 'translate(-40%, -40%)' }}
+      />
+      <div
+        className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full pointer-events-none"
+        style={{ background: appearance.btnColor, opacity: 0.14, filter: 'blur(110px)', transform: 'translate(40%, 40%)' }}
+      />
 
       {/* ── Floating action bar — owner only ── */}
       {isOwner && (
@@ -252,57 +266,88 @@ export function PublicOfficePage() {
       )}
 
       {/* ── Linktree content ── */}
-      <div className="flex flex-col items-center py-16 px-5 min-h-screen">
+      <div className="relative flex flex-col items-center py-16 px-5 min-h-screen">
+
         {/* Avatar */}
-        <div
-          className="w-24 h-24 rounded-full overflow-hidden border-4 shadow-xl mb-4 flex-shrink-0 flex items-center justify-center"
-          style={{ borderColor: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.2)' }}
-        >
-          {profile.avatar
-            ? <img src={profile.avatar} alt={profile.name} className="w-full h-full object-cover" />
-            : <span className="text-3xl font-bold" style={{ color: textColor }}>{profile.name?.[0] || '؟'}</span>
-          }
+        <div className="mb-5" style={{ filter: `drop-shadow(0 8px 32px ${appearance.btnColor}66)` }}>
+          <div
+            className="w-28 h-28 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center"
+            style={{
+              border: '3px solid rgba(255,255,255,0.35)',
+              background: 'rgba(255,255,255,0.15)',
+              boxShadow: `0 0 0 6px ${appearance.btnColor}40, 0 16px 48px rgba(0,0,0,0.35)`,
+            }}
+          >
+            {profile.avatar
+              ? <img src={profile.avatar} alt={profile.name} className="w-full h-full object-cover" />
+              : <span className="text-4xl font-bold" style={{ color: textColor }}>{profile.name?.[0] || '؟'}</span>
+            }
+          </div>
         </div>
 
         {/* Name */}
-        <h1 className="text-xl font-extrabold mb-1" style={{ color: textColor }}>
+        <h1 className="text-2xl font-extrabold mb-1 tracking-tight" style={{ color: textColor }}>
           {profile.name || office.name || 'اسم المكتب'}
         </h1>
 
         {/* Bio */}
         {profile.bio && (
-          <p className="text-sm text-center max-w-xs mb-6" style={{ color: subColor }}>
+          <p className="text-sm text-center max-w-sm mb-8 leading-relaxed" style={{ color: subColor }}>
             {profile.bio}
           </p>
         )}
-        {!profile.bio && <div className="mb-6" />}
+        {!profile.bio && <div className="mb-8" />}
 
         {/* Links */}
-        <div className="w-full max-w-xs space-y-3">
-          {activeLinks.map(link => (
+        <div className="w-full max-w-sm space-y-3">
+          {activeLinks.map((link, i) => (
             <a
               key={link.id}
               href={link.url || '#'}
               target={link.url ? '_blank' : undefined}
               rel="noopener noreferrer"
-              className="w-full flex items-center gap-3 px-4 py-3.5 font-semibold text-sm transition-all hover:opacity-90 hover:scale-[1.02]"
-              style={getBtnStyle()}
+              className="w-full flex items-center gap-3 px-4 py-4 font-semibold text-sm"
+              style={{
+                ...getBtnStyle(),
+                transition: 'transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease',
+                animationDelay: `${i * 55}ms`,
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-3px)';
+                e.currentTarget.style.boxShadow = `0 8px 24px ${appearance.btnColor}55`;
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = (getBtnStyle() as any).boxShadow ?? '';
+              }}
             >
-              <LinkIcon iconKey={link.icon} className="w-4 h-4 flex-shrink-0" />
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ background: iconBg }}
+              >
+                <LinkIcon iconKey={link.icon} className="w-4 h-4" />
+              </div>
               <span className="flex-1 text-center">{link.title}</span>
+              {/* Invisible spacer to keep text centred over the icon */}
+              <div className="w-8 flex-shrink-0" />
             </a>
           ))}
           {activeLinks.length === 0 && (
-            <p className="text-center text-sm py-6" style={{ color: subColor, opacity: 0.6 }}>
+            <p className="text-center text-sm py-12" style={{ color: subColor, opacity: 0.55 }}>
               لم يتم إضافة روابط بعد
             </p>
           )}
         </div>
 
         {/* Footer */}
-        <p className="mt-auto pt-12 text-xs" style={{ color: subColor, opacity: 0.4 }}>
-          مدعوم بـ الشات العقاري
-        </p>
+        <div className="mt-auto pt-14">
+          <div
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs"
+            style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(6px)', color: subColor, opacity: 0.55, border: '1px solid rgba(255,255,255,0.12)' }}
+          >
+            مدعوم بـ الشات العقاري
+          </div>
+        </div>
       </div>
 
       {/* QR Dialog — owner only */}
