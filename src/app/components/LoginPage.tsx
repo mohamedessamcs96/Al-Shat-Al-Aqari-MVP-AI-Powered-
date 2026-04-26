@@ -29,9 +29,7 @@ export function LoginPage() {
   const [otpStep, setOtpStep] = useState<'phone' | 'otp'>('phone');
   const [otpCode, setOtpCode] = useState('');
   const [otpPhone, setOtpPhone] = useState('');
-  const [pendingToken, setPendingToken] = useState('');
-  const [pendingRefresh, setPendingRefresh] = useState('');
-  const [pendingBuyerId, setPendingBuyerId] = useState('');
+
   // Office
   const [officeEmail, setOfficeEmail] = useState('');
   const [officePassword, setOfficePassword] = useState('');
@@ -46,22 +44,12 @@ export function LoginPage() {
   const [adminPassword, setAdminPassword] = useState('');
   const [showAdminPass, setShowAdminPass] = useState(false);
 
-  // Step 1: call buyer/login → backend sends OTP and returns token
+  // Step 1: call buyer/login { phone } → backend sends OTP
   const handleSendOtp = async () => {
     if (!buyerPhone) { toast.error('الرجاء إدخال رقم الهاتف'); return; }
     setLoading(true);
     try {
-      const res = await apiAuth.buyerLogin(buyerPhone);
-      const raw = res as any;
-      const payload = raw.data ?? raw;
-      // Store token now — will be used after OTP verify confirms
-      const tok = payload.tokens?.accessToken || payload.tokens?.access ||
-        payload.session_token || payload.auth_token || payload.token || payload.access || raw.token || '';
-      const ref = payload.tokens?.refreshToken || payload.tokens?.refresh || payload.refresh || raw.refresh || '';
-      const bid = payload.user?.id || payload.buyer?.id || payload.buyer_id || raw.buyer_id || payload.id || '';
-      setPendingToken(tok);
-      setPendingRefresh(ref);
-      setPendingBuyerId(bid);
+      await apiAuth.buyerLogin(buyerPhone);
       setOtpPhone(buyerPhone);
       setOtpCode('');
       setOtpStep('otp');
@@ -73,19 +61,23 @@ export function LoginPage() {
     }
   };
 
-  // Step 2: verify OTP → use the token already returned in step 1
+  // Step 2: call buyer/login { phone, otp } → backend returns token
   const handleVerifyOtp = async () => {
     if (!otpCode) { toast.error('الرجاء إدخال رمز التحقق'); return; }
     setLoading(true);
     try {
-      await apiAuth.verifyOtp(otpPhone, otpCode);
-      // otp/verify returns { verified: true } — token came from buyer/login (step 1)
-      const tok = pendingToken;
+      const res = await apiAuth.buyerLogin(otpPhone, otpCode);
+      const raw = res as any;
+      const payload = raw.data ?? raw;
+      const tok = payload.tokens?.accessToken || payload.tokens?.access ||
+        payload.session_token || payload.auth_token || payload.token || payload.access || raw.token || '';
+      const ref = payload.tokens?.refreshToken || payload.tokens?.refresh || payload.refresh || raw.refresh || '';
       if (!tok) { toast.error('رمز التحقق غير صحيح'); return; }
-      if (pendingRefresh) setRefreshToken(pendingRefresh);
+      if (ref) setRefreshToken(ref);
       setToken(tok);
       setRole('buyer');
-      if (pendingBuyerId) setUser({ id: pendingBuyerId, phone: otpPhone });
+      const bid = payload.user?.id || payload.buyer?.id || payload.buyer_id || raw.buyer_id || payload.id || '';
+      if (bid) setUser({ id: bid, phone: otpPhone });
       toast.success('تم تسجيل الدخول بنجاح!');
       navigate('/chat');
     } catch (err) {
@@ -99,25 +91,40 @@ export function LoginPage() {
     if (!buyerName || !buyerPhone) { toast.error('الرجاء ملء جميع الحقول'); return; }
     setLoading(true);
     try {
-      // Attempt registration — ignore if user already exists (400)
-      try { await apiAuth.buyerRegister(buyerName, buyerPhone); } catch {}
-      // buyer/login triggers OTP and returns token
-      const res = await apiAuth.buyerLogin(buyerPhone);
-      const raw = res as any;
-      const payload = raw.data ?? raw;
-      const tok = payload.tokens?.accessToken || payload.tokens?.access ||
-        payload.session_token || payload.auth_token || payload.token || payload.access || raw.token || '';
-      const ref = payload.tokens?.refreshToken || payload.tokens?.refresh || payload.refresh || raw.refresh || '';
-      const bid = payload.user?.id || payload.buyer?.id || payload.buyer_id || raw.buyer_id || payload.id || '';
-      setPendingToken(tok);
-      setPendingRefresh(ref);
-      setPendingBuyerId(bid);
+      // Step 1: register without otp → sends OTP
+      await apiAuth.buyerRegister(buyerName, buyerPhone);
       setOtpPhone(buyerPhone);
       setOtpCode('');
       setOtpStep('otp');
       toast.success('تم إرسال رمز التحقق');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'حدث خطأ');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 2 for register: call buyer/register again with otp → get token
+  const handleVerifyRegisterOtp = async () => {
+    if (!otpCode) { toast.error('الرجاء إدخال رمز التحقق'); return; }
+    setLoading(true);
+    try {
+      const res = await apiAuth.buyerRegister(buyerName, otpPhone, otpCode);
+      const raw = res as any;
+      const payload = raw.data ?? raw;
+      const tok = payload.tokens?.accessToken || payload.tokens?.access ||
+        payload.session_token || payload.auth_token || payload.token || payload.access || raw.token || '';
+      const ref = payload.tokens?.refreshToken || payload.tokens?.refresh || payload.refresh || raw.refresh || '';
+      if (!tok) { toast.error('رمز التحقق غير صحيح'); return; }
+      if (ref) setRefreshToken(ref);
+      setToken(tok);
+      setRole('buyer');
+      const buyerId = payload.user?.id || payload.buyer?.id || payload.buyer_id || raw.buyer_id || payload.id || '';
+      if (buyerId) setUser({ id: buyerId, name: buyerName, phone: otpPhone });
+      toast.success('تم إنشاء حسابك بنجاح! مرحباً بك');
+      navigate('/chat');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'رمز التحقق غير صحيح');
     } finally {
       setLoading(false);
     }
@@ -558,7 +565,7 @@ export function LoginPage() {
                           maxLength={6}
                           value={otpCode}
                           onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                          onKeyDown={(e) => e.key === 'Enter' && handleVerifyOtp()}
+                          onKeyDown={(e) => e.key === 'Enter' && handleVerifyRegisterOtp()}
                           placeholder="أدخل رمز التحقق"
                           className="pr-10 text-center rounded-xl h-12 text-2xl font-bold tracking-widest"
                           dir="ltr"
@@ -566,7 +573,7 @@ export function LoginPage() {
                         />
                       </FieldWithIcon>
                       <Button
-                        onClick={handleVerifyOtp}
+                        onClick={handleVerifyRegisterOtp}
                         disabled={loading || otpCode.length < 4}
                         className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl h-12 font-semibold shadow-md shadow-blue-500/20 gap-2 text-base disabled:opacity-60"
                       >

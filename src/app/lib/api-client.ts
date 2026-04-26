@@ -169,16 +169,22 @@ export const auth = {
       body: JSON.stringify({ phone, code }),
     }),
 
-  buyerRegister: (name: string, phone: string) =>
+  buyerRegister: (name: string, phone: string, otp?: string) =>
     apiFetch<AuthResponse>('/auth/buyer/register', {
       method: 'POST',
-      body: JSON.stringify({ name, phone }),
+      body: JSON.stringify(otp ? { name, phone, otp } : { name, phone }),
     }),
 
-  buyerLogin: (phone: string) =>
+  buyerLogin: (phone: string, otp?: string) =>
     apiFetch<AuthResponse>('/auth/buyer/login', {
       method: 'POST',
-      body: JSON.stringify({ phone }),
+      body: JSON.stringify(otp ? { phone, otp } : { phone }),
+    }),
+
+  buyerLoginWithCode: (phone: string, code: string) =>
+    apiFetch<AuthResponse>('/auth/buyer/login', {
+      method: 'POST',
+      body: JSON.stringify({ phone, otp: code, code }),
     }),
 
   officeRegister: (name: string, email: string, phone: string, password: string) =>
