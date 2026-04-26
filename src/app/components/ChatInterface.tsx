@@ -4,6 +4,7 @@ import {
   Plus, Star, Bell, Settings, HelpCircle,
   Building2, Scale, Wallet, Trash2,
   Heart, BellRing, LifeBuoy, SlidersHorizontal,
+  BedDouble, Bath, Maximize2, MapPin,
 } from 'lucide-react';
 import { Input } from './ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from './ui/sheet';
@@ -511,69 +512,110 @@ export function ChatInterface() {
                   {/* Property cards */}
                   {message.listings && message.listings.length > 0 && (
                     <div className="mt-3 w-full" dir="rtl">
-                      <div className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory" style={{ scrollbarWidth: 'none' }}>
+                      <div
+                        className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory"
+                        style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+                      >
                         {message.listings.map((listing: any, idx: number) => {
                           // Parse summary: "4 غرف | None حمّامات | 195 م² | 1100000.0"
                           const parts     = (listing.summary ?? '').split('|').map((s: string) => s.trim());
-                          const bedrooms  = parts[0]?.replace(/[^0-9]/g, '') || null;
-                          const bathrooms = (parts[1] ?? '').includes('None') ? null : parts[1]?.replace(/[^0-9]/g, '') || null;
-                          const area      = parts[2]?.replace(/[^0-9.]/g, '') || null;
+                          const bedrooms  = parseInt(parts[0] ?? '') || null;
+                          const bathrooms = (parts[1] ?? '').includes('None') ? null : (parseInt(parts[1] ?? '') || null);
+                          const area      = parseFloat(parts[2] ?? '') || null;
                           const rawPrice  = parseFloat(parts[3] ?? '') || null;
                           // Parse short_title: "فيلا الرياض 195م 1100000.0"
                           const titleWords = (listing.short_title ?? '').split(' ');
                           const propType   = titleWords[0] ?? 'عقار';
                           const city       = titleWords[1] ?? '';
-                          const CARD_COLORS: Record<string, string> = {
-                            'فيلا': 'linear-gradient(135deg,#0e2057 0%,#312e81 100%)',
-                            'شقة':  'linear-gradient(135deg,#065f46 0%,#0284c7 100%)',
-                            'أرض':  'linear-gradient(135deg,#78350f 0%,#b45309 100%)',
-                            'مكتب': 'linear-gradient(135deg,#1e3a5f 0%,#374151 100%)',
+
+                          const TYPE_META: Record<string, { bg: string; accent: string }> = {
+                            'فيلا':  { bg: 'linear-gradient(150deg,#1e3a8a 0%,#3730a3 100%)', accent: '#6366f1' },
+                            'شقة':   { bg: 'linear-gradient(150deg,#065f46 0%,#0369a1 100%)', accent: '#10b981' },
+                            'أرض':   { bg: 'linear-gradient(150deg,#92400e 0%,#b45309 100%)', accent: '#f59e0b' },
+                            'مكتب':  { bg: 'linear-gradient(150deg,#1e3a5f 0%,#1f2937 100%)', accent: '#64748b' },
+                            'عمارة': { bg: 'linear-gradient(150deg,#134e4a 0%,#155e75 100%)', accent: '#06b6d4' },
+                            'استراحة': { bg: 'linear-gradient(150deg,#581c87 0%,#831843 100%)', accent: '#a855f7' },
                           };
-                          const cardBg = CARD_COLORS[propType] ?? 'linear-gradient(135deg,#0e2057 0%,#312e81 100%)';
+                          const meta  = TYPE_META[propType] ?? TYPE_META['فيلا'];
+                          const isRent = rawPrice !== null && rawPrice < 300000;
+
                           return (
                             <div
                               key={listing.license ?? listing.id ?? idx}
-                              className="flex-shrink-0 w-48 snap-start rounded-2xl overflow-hidden bg-white flex flex-col"
-                              style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.13)' }}
+                              className="flex-shrink-0 w-56 snap-start rounded-2xl overflow-hidden bg-white flex flex-col"
+                              style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.1)' }}
                             >
-                              {/* Coloured header */}
-                              <div className="h-24 flex flex-col justify-between p-3" style={{ background: cardBg }}>
-                                <div className="flex items-start justify-between">
-                                  <span className="text-[10px] font-bold text-white/90 bg-white/20 px-2 py-0.5 rounded-full">{propType}</span>
-                                  <Building2 className="w-3.5 h-3.5 text-white/30" />
+                              {/* Header gradient */}
+                              <div className="relative h-28 flex flex-col justify-between p-4" style={{ background: meta.bg }}>
+                                {/* Decorative circle */}
+                                <div className="absolute -top-6 -left-6 w-24 h-24 rounded-full opacity-10" style={{ background: meta.accent }} />
+                                <div className="relative flex items-start justify-between">
+                                  <span
+                                    className="text-[10px] font-black tracking-wide text-white px-2.5 py-1 rounded-full"
+                                    style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(4px)' }}
+                                  >
+                                    {propType}
+                                  </span>
+                                  {isRent && (
+                                    <span className="text-[9px] font-bold text-white/80 bg-white/15 px-2 py-0.5 rounded-full">إيجار</span>
+                                  )}
                                 </div>
-                                <div>
-                                  {rawPrice && <p className="text-white font-extrabold text-sm leading-tight">{formatPrice(rawPrice)}</p>}
-                                  {city && <p className="text-white/65 text-[10px] mt-0.5">{city}</p>}
+                                <div className="relative">
+                                  {rawPrice && (
+                                    <p className="text-white font-black text-lg leading-none">
+                                      {isRent
+                                        ? `${new Intl.NumberFormat('ar-SA').format(rawPrice)} ر.س/سنوي`
+                                        : formatPrice(rawPrice)
+                                      }
+                                    </p>
+                                  )}
+                                  {city && (
+                                    <div className="flex items-center gap-1 mt-1.5">
+                                      <MapPin className="w-3 h-3 text-white/50" />
+                                      <p className="text-white/70 text-[11px] font-medium">{city}</p>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
-                              {/* Stats row */}
-                              <div className="flex items-center justify-around px-2 py-2 border-b border-slate-100">
-                                {bedrooms && (
-                                  <div className="text-center">
-                                    <p className="text-xs font-bold text-slate-800">{bedrooms}</p>
-                                    <p className="text-[9px] text-slate-400">غرف</p>
+
+                              {/* Stats */}
+                              <div className="flex items-center justify-around px-3 py-3 bg-slate-50 border-b border-slate-100">
+                                {bedrooms !== null && (
+                                  <div className="flex flex-col items-center gap-1">
+                                    <div className="flex items-center gap-1">
+                                      <BedDouble className="w-3.5 h-3.5 text-indigo-400" />
+                                      <span className="text-sm font-bold text-slate-800">{bedrooms}</span>
+                                    </div>
+                                    <span className="text-[9px] text-slate-400 font-medium">غرف</span>
                                   </div>
                                 )}
-                                {bedrooms && area && <div className="w-px h-5 bg-slate-100" />}
-                                {area && (
-                                  <div className="text-center">
-                                    <p className="text-xs font-bold text-slate-800">{area}</p>
-                                    <p className="text-[9px] text-slate-400">م²</p>
+                                {bedrooms !== null && area !== null && <div className="w-px h-7 bg-slate-200" />}
+                                {area !== null && (
+                                  <div className="flex flex-col items-center gap-1">
+                                    <div className="flex items-center gap-1">
+                                      <Maximize2 className="w-3 h-3 text-emerald-400" />
+                                      <span className="text-sm font-bold text-slate-800">{area}</span>
+                                    </div>
+                                    <span className="text-[9px] text-slate-400 font-medium">م²</span>
                                   </div>
                                 )}
-                                {bathrooms && area && <div className="w-px h-5 bg-slate-100" />}
-                                {bathrooms && (
-                                  <div className="text-center">
-                                    <p className="text-xs font-bold text-slate-800">{bathrooms}</p>
-                                    <p className="text-[9px] text-slate-400">حمام</p>
+                                {bathrooms !== null && area !== null && <div className="w-px h-7 bg-slate-200" />}
+                                {bathrooms !== null && (
+                                  <div className="flex flex-col items-center gap-1">
+                                    <div className="flex items-center gap-1">
+                                      <Bath className="w-3 h-3 text-sky-400" />
+                                      <span className="text-sm font-bold text-slate-800">{bathrooms}</span>
+                                    </div>
+                                    <span className="text-[9px] text-slate-400 font-medium">حمام</span>
                                   </div>
                                 )}
                               </div>
-                              {/* License */}
+
+                              {/* License footer */}
                               {listing.license && (
-                                <div className="px-3 py-1.5">
-                                  <p className="text-[9px] text-slate-300 truncate">رقم الترخيص: {listing.license}</p>
+                                <div className="px-4 py-2 flex items-center justify-between">
+                                  <p className="text-[9px] text-slate-300 truncate">{listing.license}</p>
+                                  <Building2 className="w-3 h-3 text-slate-200 flex-shrink-0" />
                                 </div>
                               )}
                             </div>
@@ -581,7 +623,9 @@ export function ChatInterface() {
                         })}
                       </div>
                       {message.listings.length > 2 && (
-                        <p className="text-[10px] text-slate-400 mt-1.5 text-center">← اسحب لرؤية المزيد ({message.listings.length} عقار)</p>
+                        <p className="text-[10px] text-slate-400 mt-2 text-center">
+                          ← اسحب لرؤية المزيد &nbsp;·&nbsp; {message.listings.length} عقار
+                        </p>
                       )}
                     </div>
                   )}
