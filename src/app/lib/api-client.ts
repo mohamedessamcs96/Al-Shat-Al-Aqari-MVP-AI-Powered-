@@ -74,7 +74,9 @@ async function apiFetch<T>(path: string, options: RequestInit & { _retry?: boole
   });
 
   // 401 → try token refresh once, then retry
-  if (res.status === 401 && !options._retry) {
+  // Skip session-expiry logic for auth endpoints (login returns 401 on bad credentials)
+  const isAuthPath = path.startsWith('/auth/');
+  if (res.status === 401 && !options._retry && !isAuthPath) {
     const hadToken = !!getToken(); // was the user previously authenticated?
     const newToken = await tryRefreshToken();
     if (newToken) {
