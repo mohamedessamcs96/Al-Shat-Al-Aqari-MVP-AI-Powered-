@@ -44,12 +44,12 @@ export function LoginPage() {
   const [adminPassword, setAdminPassword] = useState('');
   const [showAdminPass, setShowAdminPass] = useState(false);
 
-  // Step 1: call buyer/login { phone } → backend sends OTP
+  // Step 1: send OTP to phone
   const handleSendOtp = async () => {
     if (!buyerPhone) { toast.error('الرجاء إدخال رقم الهاتف'); return; }
     setLoading(true);
     try {
-      await apiAuth.buyerLogin(buyerPhone);
+      await apiAuth.sendOtp(buyerPhone);
       setOtpPhone(buyerPhone);
       setOtpCode('');
       setOtpStep('otp');
@@ -61,12 +61,12 @@ export function LoginPage() {
     }
   };
 
-  // Step 2: call buyer/login { phone, otp } → backend returns token
+  // Step 2: verify OTP → get tokens
   const handleVerifyOtp = async () => {
     if (!otpCode) { toast.error('الرجاء إدخال رمز التحقق'); return; }
     setLoading(true);
     try {
-      const res = await apiAuth.buyerLogin(otpPhone, otpCode);
+      const res = await apiAuth.verifyOtp(otpPhone, otpCode);
       const raw = res as any;
       const payload = raw.data ?? raw;
       const tok = payload.tokens?.accessToken || payload.tokens?.access ||
@@ -77,7 +77,7 @@ export function LoginPage() {
       setToken(tok);
       setRole('buyer');
       const bid = payload.user?.id || payload.buyer?.id || payload.buyer_id || raw.buyer_id || payload.id || '';
-      if (bid) setUser({ id: bid, phone: otpPhone });
+      if (bid) setUser({ id: bid, phone: otpPhone, name: payload.user?.name || payload.buyer?.name || '' });
       toast.success('تم تسجيل الدخول بنجاح!');
       navigate('/chat');
     } catch (err) {
@@ -104,12 +104,12 @@ export function LoginPage() {
     }
   };
 
-  // Step 2 for register: call buyer/register again with otp → get token
+  // Step 2 for register: verify OTP (same endpoint as login verify)
   const handleVerifyRegisterOtp = async () => {
     if (!otpCode) { toast.error('الرجاء إدخال رمز التحقق'); return; }
     setLoading(true);
     try {
-      const res = await apiAuth.buyerRegister(buyerName, otpPhone, otpCode);
+      const res = await apiAuth.verifyOtp(otpPhone, otpCode);
       const raw = res as any;
       const payload = raw.data ?? raw;
       const tok = payload.tokens?.accessToken || payload.tokens?.access ||
