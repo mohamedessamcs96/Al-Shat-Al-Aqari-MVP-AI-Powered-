@@ -29,6 +29,9 @@ export function LoginPage() {
   const [otpStep, setOtpStep] = useState<'phone' | 'otp'>('phone');
   const [otpCode, setOtpCode] = useState('');
   const [otpPhone, setOtpPhone] = useState('');
+  const [pendingToken, setPendingToken] = useState('');
+  const [pendingRefresh, setPendingRefresh] = useState('');
+  const [pendingBuyerId, setPendingBuyerId] = useState('');
   // Office
   const [officeEmail, setOfficeEmail] = useState('');
   const [officePassword, setOfficePassword] = useState('');
@@ -43,13 +46,23 @@ export function LoginPage() {
   const [adminPassword, setAdminPassword] = useState('');
   const [showAdminPass, setShowAdminPass] = useState(false);
 
-  // Step 1: call buyer/login → backend sends OTP
+  // Step 1: call buyer/login → backend sends OTP and returns token
   const handleSendOtp = async () => {
     if (!buyerPhone) { toast.error('الرجاء إدخال رقم الهاتف'); return; }
     setLoading(true);
     try {
-      await apiAuth.buyerLogin(buyerPhone);
-      setOtpPhone(buyerPhone); // keep exactly what the user typed
+      const res = await apiAuth.buyerLogin(buyerPhone);
+      const raw = res as any;
+      const payload = raw.data ?? raw;
+      // Store token now — will be used after OTP verify confirms
+      const tok = payload.tokens?.accessToken || payload.tokens?.access ||
+        payload.session_token || payload.auth_token || payload.token || payload.access || raw.token || '';
+      const ref = payload.tokens?.refreshToken || payload.tokens?.refresh || payload.refresh || raw.refresh || '';
+      const bid = payload.user?.id || payload.buyer?.id || payload.buyer_id || raw.buyer_id || payload.id || '';
+      setPendingToken(tok);
+      setPendingRefresh(ref);
+      setPendingBuyerId(bid);
+      setOtpPhone(buyerPhone);
       setOtpCode('');
       setOtpStep('otp');
       toast.success('تم إرسال رمز التحقق');
@@ -60,28 +73,19 @@ export function LoginPage() {
     }
   };
 
-  // Step 2: verify OTP → get token
+  // Step 2: verify OTP → use the token already returned in step 1
   const handleVerifyOtp = async () => {
     if (!otpCode) { toast.error('الرجاء إدخال رمز التحقق'); return; }
     setLoading(true);
     try {
-      const res = await apiAuth.verifyOtp(otpPhone, otpCode);
-      const raw = res as any;
-      // Backend may return flat { tokens, user } or wrapped { success, data: { tokens, user } }
-      const payload = raw.data ?? raw;
-      const tok =
-        payload.tokens?.accessToken || payload.tokens?.access ||
-        payload.session_token || payload.auth_token ||
-        payload.token || payload.access || '';
-      const refreshTok =
-        payload.tokens?.refreshToken || payload.tokens?.refresh ||
-        payload.refresh || '';
+      await apiAuth.verifyOtp(otpPhone, otpCode);
+      // otp/verify returns { verified: true } — token came from buyer/login (step 1)
+      const tok = pendingToken;
       if (!tok) { toast.error('رمز التحقق غير صحيح'); return; }
-      if (refreshTok) setRefreshToken(refreshTok);
+      if (pendingRefresh) setRefreshToken(pendingRefresh);
       setToken(tok);
       setRole('buyer');
-      const buyerId = payload.user?.id || payload.buyer?.id || payload.buyer_id || payload.id || '';
-      if (buyerId) setUser({ id: buyerId, phone: otpPhone });
+      if (pendingBuyerId) setUser({ id: pendingBuyerId, phone: otpPhone });
       toast.success('تم تسجيل الدخول بنجاح!');
       navigate('/chat');
     } catch (err) {
@@ -97,8 +101,17 @@ export function LoginPage() {
     try {
       // Attempt registration — ignore if user already exists (400)
       try { await apiAuth.buyerRegister(buyerName, buyerPhone); } catch {}
-      // buyer/login triggers OTP send
-      await apiAuth.buyerLogin(buyerPhone);
+      // buyer/login triggers OTP and returns token
+      const res = await apiAuth.buyerLogin(buyerPhone);
+      const raw = res as any;
+      const payload = raw.data ?? raw;
+      const tok = payload.tokens?.accessToken || payload.tokens?.access ||
+        payload.session_token || payload.auth_token || payload.token || payload.access || raw.token || '';
+      const ref = payload.tokens?.refreshToken || payload.tokens?.refresh || payload.refresh || raw.refresh || '';
+      const bid = payload.user?.id || payload.buyer?.id || payload.buyer_id || raw.buyer_id || payload.id || '';
+      setPendingToken(tok);
+      setPendingRefresh(ref);
+      setPendingBuyerId(bid);
       setOtpPhone(buyerPhone);
       setOtpCode('');
       setOtpStep('otp');
