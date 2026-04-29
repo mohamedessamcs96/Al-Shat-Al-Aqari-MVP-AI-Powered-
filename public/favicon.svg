@@ -1,26 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
   <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#4f46e5;stop-opacity:1" />
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0e2057"/>
+      <stop offset="100%" style="stop-color:#6d28d9"/>
     </linearGradient>
+    <linearGradient id="bubble" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.22"/>
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.08"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
   </defs>
-  <rect width="256" height="256" rx="60" fill="url(#grad)"/>
-  <g transform="translate(128, 128)">
-    <!-- Building/Property Icon -->
-    <rect x="-35" y="-45" width="70" height="90" rx="4" fill="none" stroke="white" stroke-width="4"/>
-    <!-- Windows -->
-    <rect x="-25" y="-35" width="12" height="12" fill="white"/>
-    <rect x="-5" y="-35" width="12" height="12" fill="white"/>
-    <rect x="15" y="-35" width="12" height="12" fill="white"/>
-    <rect x="-25" y="-15" width="12" height="12" fill="white"/>
-    <rect x="-5" y="-15" width="12" height="12" fill="white"/>
-    <rect x="15" y="-15" width="12" height="12" fill="white"/>
-    <rect x="-25" y="5" width="12" height="12" fill="white"/>
-    <rect x="-5" y="5" width="12" height="12" fill="white"/>
-    <rect x="15" y="5" width="12" height="12" fill="white"/>
-    <!-- Door -->
-    <rect x="-10" y="25" width="20" height="20" fill="none" stroke="white" stroke-width="3"/>
-    <circle cx="-2" cy="35" r="2" fill="white"/>
-  </g>
+
+  <!-- App icon background -->
+  <rect width="256" height="256" rx="58" fill="url(#bg)"/>
+
+  <!-- Subtle noise-like texture ring -->
+  <circle cx="128" cy="128" r="108" fill="none" stroke="white" stroke-opacity="0.06" stroke-width="1"/>
+
+  <!-- Main chat bubble -->
+  <rect x="44" y="60" width="168" height="116" rx="28" fill="url(#bubble)" stroke="white" stroke-opacity="0.25" stroke-width="2.5"/>
+
+  <!-- Bubble tail pointing down-left -->
+  <path d="M 72 176 L 56 208 L 102 176 Z" fill="url(#bubble)" stroke="white" stroke-opacity="0.2" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- Three dots (typing indicator / chat) -->
+  <circle cx="94"  cy="118" r="11" fill="white" fill-opacity="0.95"/>
+  <circle cx="128" cy="118" r="11" fill="white" fill-opacity="0.75"/>
+  <circle cx="162" cy="118" r="11" fill="white" fill-opacity="0.5"/>
+
+  <!-- Small house/property mark above dots -->
+  <path d="M 116 80 L 128 68 L 140 80 L 140 94 L 116 94 Z" fill="white" fill-opacity="0.9" stroke="none"/>
+  <rect x="123" y="83" width="10" height="11" fill="#0e2057" fill-opacity="0.7"/>
 </svg>

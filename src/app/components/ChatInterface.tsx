@@ -622,10 +622,10 @@ export function ChatInterface() {
             {messages.length === 1 && messages[0].role === 'assistant' && (
               <div className="text-center pt-8 pb-2">
                 <div
-                  className="inline-flex items-center justify-center w-14 h-14 rounded-2xl text-white font-bold text-xl mb-4 shadow-lg shadow-indigo-900/30 ring-1 ring-white/10"
+                  className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 shadow-lg shadow-indigo-900/30 ring-1 ring-white/10 overflow-hidden"
                   style={{ background: 'linear-gradient(135deg,#0e2057,#1a1060)' }}
                 >
-                  س
+                  <img src="/favicon.svg" alt="سارة" className="w-full h-full object-cover" />
                 </div>
                 <h2 className="text-2xl font-extrabold text-slate-900 mb-1">أنا سارة، مساعدتك العقارية الذكية</h2>
                 <p className="text-slate-400 text-sm">كيف يمكنني مساعدتك اليوم؟</p>
@@ -653,10 +653,10 @@ export function ChatInterface() {
                 {/* Sara avatar */}
                 {message.role === 'assistant' && (
                   <div
-                    className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md shadow-indigo-900/30 mt-0.5 text-white font-bold text-sm ring-1 ring-white/10"
+                    className="w-8 h-8 rounded-xl flex-shrink-0 shadow-md shadow-indigo-900/30 mt-0.5 ring-1 ring-white/10 overflow-hidden"
                     style={{ background: 'linear-gradient(135deg,#0e2057,#1a1060)' }}
                   >
-                    س
+                    <img src="/favicon.svg" alt="سارة" className="w-full h-full object-cover" />
                   </div>
                 )}
 
