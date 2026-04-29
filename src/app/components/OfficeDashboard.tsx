@@ -357,11 +357,8 @@ export function OfficeDashboard() {
       {/* ─── Top Nav ─── */}
       <header className="bg-white border-b sticky top-0 z-20 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#17254B] to-[#36DAC8] flex items-center justify-center">
-              <Building2 className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-gray-900 hidden sm:block">الشات العقاري</span>
+          <div className="flex items-center gap-2">
+            <img src="/logo.png" alt="عقار شات" className="h-10 w-auto object-contain" />
           </div>
           <div className="flex items-center gap-2">
             <button
