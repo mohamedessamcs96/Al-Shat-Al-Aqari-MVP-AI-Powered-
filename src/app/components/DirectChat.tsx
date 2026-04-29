@@ -197,15 +197,16 @@ export function DirectChat() {
 
     ws.onopen = () => {
       setWsConnected(true);
+      // Join the currently-selected room if WS connected after room was chosen
+      const roomId = selectedRoomIdRef.current;
+      if (roomId && !joinedRooms.current.has(roomId)) {
+        ws.send(JSON.stringify({ type: 'join_room', room_id: roomId }));
+        joinedRooms.current.add(roomId);
+      }
     };
 
-    ws.onclose = () => {
-      setWsConnected(false);
-    };
-
-    ws.onerror = () => {
-      setWsConnected(false);
-    };
+    ws.onclose = () => { setWsConnected(false); };
+    ws.onerror = () => { setWsConnected(false); };
 
     ws.onmessage = (ev) => {
       let event: WsEvent;
@@ -218,14 +219,12 @@ export function DirectChat() {
       if (event.type === 'new_message' || event.type === 'message_sent') {
         const e = event as WsNewMessageEvent;
         const msg = e.message;
-        // Use functional update so we always read the latest selectedRoomId via a ref
+        const currentRoomId = selectedRoomIdRef.current;
         setMessages(prev => {
           if (prev.some(m => m.id === msg.id)) return prev;
-          // selectedRoomIdRef is kept in sync below
-          if (e.room_id !== selectedRoomIdRef.current) return prev;
+          if (e.room_id !== currentRoomId) return prev;
           return [...prev, msg];
         });
-        // Update last message preview in room list
         setRooms(prev =>
           prev.map(r =>
             r.id === e.room_id
@@ -236,18 +235,14 @@ export function DirectChat() {
                     sender_role: msg.sender_role,
                     created_at: msg.created_at,
                   },
-                  unread_count:
-                    e.room_id === selectedRoomId
-                      ? 0
-                      : (r.unread_count ?? 0) + 1,
+                  unread_count: e.room_id === currentRoomId ? 0 : (r.unread_count ?? 0) + 1,
                   updated_at: msg.created_at,
                 }
               : r
           )
         );
-        // Auto mark-read via WS if chat is open
-        if (e.room_id === selectedRoomId && wsRef.current?.readyState === WebSocket.OPEN) {
-          wsRef.current.send(JSON.stringify({ type: 'mark_read', room_id: e.room_id }));
+        if (e.room_id === currentRoomId && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: 'mark_read', room_id: e.room_id }));
         }
       }
 
@@ -269,9 +264,7 @@ export function DirectChat() {
       }
     };
 
-    return () => {
-      ws.close();
-    };
+    return () => { ws.close(); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
@@ -286,6 +279,28 @@ export function DirectChat() {
       joinedRooms.current.add(selectedRoomId);
     }
   }, [selectedRoomId, loadMessages]);
+
+  // ── Polling fallback (runs when WS is down or messages sent via HTTP/Postman) ──
+  useEffect(() => {
+    if (!selectedRoomId) return;
+    const interval = setInterval(() => {
+      // Only poll silently if WS is not connected
+      if (wsRef.current?.readyState !== WebSocket.OPEN) {
+        directChat.listMessages(selectedRoomId)
+          .then(raw => {
+            const msgs = extractMessages(raw);
+            setMessages(prev => {
+              // Only update if something actually changed (new ids)
+              const prevIds = new Set(prev.map(m => m.id));
+              const hasNew = msgs.some(m => !prevIds.has(m.id));
+              return hasNew ? msgs : prev;
+            });
+          })
+          .catch(() => {});
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [selectedRoomId]);
 
   // ── Send message ─────────────────────────────────────────────────────────────
   const sendMessage = useCallback(async () => {
@@ -495,15 +510,25 @@ export function DirectChat() {
                 {!typingUsers[selectedRoom.id] && (
                   <p className="text-xs text-gray-400 flex items-center gap-1">
                     <Circle className={cn('w-2 h-2 fill-current', wsConnected ? 'text-green-500' : 'text-gray-300')} />
-                    {wsConnected ? 'متصل الآن' : 'غير متصل'}
+                    {wsConnected ? 'متصل الآن' : 'غير متصل — يتحدّث كل 5 ث'}
                   </p>
                 )}
               </div>
-              {selectedRoom.listing_id && (
-                <Badge variant="outline" className="mr-auto text-xs">
-                  مرتبط بعقار
-                </Badge>
-              )}
+              <div className="mr-auto flex items-center gap-2">
+                {selectedRoom.listing_id && (
+                  <Badge variant="outline" className="text-xs">
+                    مرتبط بعقار
+                  </Badge>
+                )}
+                <button
+                  title="تحديث الرسائل"
+                  disabled={isLoadingMessages}
+                  onClick={() => selectedRoomId && loadMessages(selectedRoomId)}
+                  className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-blue-600 transition-colors disabled:opacity-40"
+                >
+                  <Loader2 className={cn('w-4 h-4', isLoadingMessages && 'animate-spin')} />
+                </button>
+              </div>
             </div>
 
             {/* Messages */}

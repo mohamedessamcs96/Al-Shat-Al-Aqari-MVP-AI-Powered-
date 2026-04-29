@@ -551,8 +551,21 @@ export interface DirectChatRoom {
   } | null;
   unread_count: number;
   updated_at: string;
+  // Other participant – name variants the backend may use
   other_name?: string;
+  other_user_name?: string;
+  other_display_name?: string;
+  buyer_name?: string;
+  office_name?: string;
+  // Avatar / logo variants
   other_avatar?: string;
+  other_logo?: string;
+  other_photo?: string;
+  buyer_avatar?: string;
+  buyer_photo?: string;
+  office_logo?: string;
+  office_avatar?: string;
+  office_photo?: string;
 }
 
 export interface DirectChatMessage {
