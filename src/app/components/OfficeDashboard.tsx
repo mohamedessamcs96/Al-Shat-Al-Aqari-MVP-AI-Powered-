@@ -22,7 +22,7 @@ import { Textarea } from './ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { formatPrice, getCityName } from '../lib/formatters';
-import { offices as officesApi } from '../lib/api-client';
+import { offices as officesApi, directChat as directChatApi } from '../lib/api-client';
 import { getUser, getOfficeIdFromToken, getOfficeIdFromRawResponse, setUser, logout as authLogout } from '../lib/auth';
 import { toast } from 'sonner';
 
@@ -52,6 +52,21 @@ export function OfficeDashboard() {
   });
   const [qrCopied, setQrCopied] = useState(false);
   const qrRef = useRef<SVGSVGElement>(null);
+
+  // Unread direct chat badge
+  const [unreadDirectCount, setUnreadDirectCount] = useState(0);
+  useEffect(() => {
+    const fetchUnread = async () => {
+      try {
+        const raw = await directChatApi.getUnreadCount() as Record<string, unknown>;
+        const n = Number((raw as any)?.unread_count ?? (raw as any)?.count ?? (raw as any)?.total ?? 0);
+        setUnreadDirectCount(Number.isFinite(n) ? n : 0);
+      } catch { /* ignore */ }
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30_000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Leads state
   const [leadsSearch, setLeadsSearch] = useState('');
@@ -352,9 +367,14 @@ export function OfficeDashboard() {
             <button
               title="المحادثات المباشرة"
               onClick={() => navigate('/office/direct-chat')}
-              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-50 transition-colors text-blue-600"
+              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-50 transition-colors text-blue-600 relative"
             >
               <MessageSquare className="w-4 h-4" />
+              {unreadDirectCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">
+                  {unreadDirectCount > 9 ? '9+' : unreadDirectCount}
+                </span>
+              )}
             </button>
             <button className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors relative">
               <Bell className="w-4 h-4 text-gray-600" />

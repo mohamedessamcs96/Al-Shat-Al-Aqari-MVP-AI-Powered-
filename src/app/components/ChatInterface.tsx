@@ -12,7 +12,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from './ui/sheet';
 import { useNavigate } from 'react-router';
 import { type ChatMessage, mockListings } from '../lib/mock-data';
 import { formatPrice, getCityName } from '../lib/formatters';
-import { chat as chatApi, buyers as buyersApi } from '../lib/api-client';
+import { chat as chatApi, buyers as buyersApi, directChat as directChatApi } from '../lib/api-client';
 import { getUser, getToken, getRole, logout as authLogout } from '../lib/auth';
 
 // ── Guest local search ────────────────────────────────────────────────────────
@@ -160,6 +160,21 @@ export function ChatInterface() {
   const [notifNew, setNotifNew] = useState(true);
   const [notifPrice, setNotifPrice] = useState(true);
   const [notifMessages, setNotifMessages] = useState(false);
+  const [unreadDirectCount, setUnreadDirectCount] = useState(0);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    const fetchUnread = async () => {
+      try {
+        const raw = await directChatApi.getUnreadCount() as Record<string, unknown>;
+        const n = Number((raw as any)?.unread_count ?? (raw as any)?.count ?? (raw as any)?.total ?? 0);
+        setUnreadDirectCount(Number.isFinite(n) ? n : 0);
+      } catch { /* ignore */ }
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30_000);
+    return () => clearInterval(interval);
+  }, [isLoggedIn]);
 
   // Load buyer profile from API when settings panel opens (only once)
   useEffect(() => {
@@ -563,6 +578,11 @@ export function ChatInterface() {
                   <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"/>
                   <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/>
                 </svg>
+                {unreadDirectCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">
+                    {unreadDirectCount > 9 ? '9+' : unreadDirectCount}
+                  </span>
+                )}
               </button>
             )}
             {isLoggedIn ? (
