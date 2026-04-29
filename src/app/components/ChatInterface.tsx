@@ -466,8 +466,11 @@ export function ChatInterface() {
         <div className="relative z-10 flex items-center gap-3 px-4 py-4 border-b border-white/10 flex-shrink-0">
           {isLoggedIn ? (
             <>
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-lg shadow-blue-900/40 ring-1 ring-white/20">
-                {(user?.name ?? 'م')[0]}
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-lg shadow-blue-900/40 ring-1 ring-white/20 overflow-hidden">
+                {buyerProfile?.logo_url
+                  ? <img src={buyerProfile.logo_url} alt={user?.name ?? ''} className="w-full h-full object-cover" />
+                  : (user?.name ?? 'م')[0]
+                }
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-white font-semibold text-sm truncate">{user?.name ?? 'مستخدم'}</p>
@@ -901,8 +904,11 @@ export function ChatInterface() {
 
                 {/* User avatar */}
                 {message.role === 'user' && (
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 mt-0.5 text-white font-bold text-sm shadow-md shadow-indigo-900/30 ring-1 ring-white/20">
-                    أ
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 mt-0.5 text-white font-bold text-sm shadow-md shadow-indigo-900/30 ring-1 ring-white/20 overflow-hidden">
+                    {buyerProfile?.logo_url
+                      ? <img src={buyerProfile.logo_url} alt={user?.name ?? ''} className="w-full h-full object-cover" />
+                      : (buyerProfile?.name ?? user?.name ?? 'م')[0]
+                    }
                   </div>
                 )}
               </div>
