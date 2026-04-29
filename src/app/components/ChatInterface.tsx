@@ -4,7 +4,7 @@ import {
   Plus, Star, Bell, Settings, HelpCircle,
   Building2, Scale, Wallet, Trash2,
   Heart, BellRing, LifeBuoy, SlidersHorizontal,
-  BedDouble, Bath, Maximize2, MapPin,
+  BedDouble, Bath, Maximize2, MapPin, UserPen, Check, X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Input } from './ui/input';
@@ -155,8 +155,20 @@ export function ChatInterface() {
   const isLoggedIn = !!getToken();
 
   // Settings panel – real buyer profile
-  const [buyerProfile, setBuyerProfile] = useState<{ name?: string; phone?: string; email?: string } | null>(null);
+  const [buyerProfile, setBuyerProfile] = useState<{
+    name?: string; phone?: string; email?: string;
+    bio?: string; whatsapp?: string; address?: string; website?: string; logo_url?: string;
+  } | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editBio, setEditBio] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editWhatsapp, setEditWhatsapp] = useState('');
+  const [editAddress, setEditAddress] = useState('');
+  const [editWebsite, setEditWebsite] = useState('');
+  const [editLogoUrl, setEditLogoUrl] = useState('');
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [notifNew, setNotifNew] = useState(true);
   const [notifPrice, setNotifPrice] = useState(true);
   const [notifMessages, setNotifMessages] = useState(false);
@@ -186,6 +198,11 @@ export function ChatInterface() {
             name: d?.name ?? user?.name,
             phone: d?.phone ?? user?.phone,
             email: d?.email ?? user?.email,
+            bio: d?.bio ?? '',
+            whatsapp: d?.whatsapp ?? '',
+            address: d?.address ?? '',
+            website: d?.website ?? '',
+            logo_url: d?.logo_url ?? '',
           });
         })
         .catch(() => {
@@ -1015,15 +1032,32 @@ export function ChatInterface() {
                 >
                   <div className="absolute top-0 left-0 w-32 h-32 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
                   <div className="flex items-center gap-3 relative z-10">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-300 to-indigo-400 flex items-center justify-center text-white font-extrabold text-lg shadow-lg ring-2 ring-white/20 flex-shrink-0">
-                      {((buyerProfile?.name ?? user?.name) ?? 'م')[0]}
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-300 to-indigo-400 flex items-center justify-center text-white font-extrabold text-lg shadow-lg ring-2 ring-white/20 flex-shrink-0 overflow-hidden">
+                      {buyerProfile?.logo_url ? (
+                        <img src={buyerProfile.logo_url} alt="" className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}/>
+                      ) : (
+                        ((buyerProfile?.name ?? user?.name) ?? 'م')[0]
+                      )}
                     </div>
                     <div>
                       <p className="text-white font-bold text-sm">{buyerProfile?.name ?? user?.name ?? 'مستخدم'}</p>
                       <p className="text-blue-200 text-xs mt-0.5">{buyerProfile?.email ?? user?.email ?? buyerProfile?.phone ?? user?.phone ?? ''}</p>
                     </div>
-                    <button className="mr-auto text-blue-200 hover:text-white transition-colors" onClick={() => { setSidebarPanel(null); navigate('/chat'); }}>
-                      <ChevronRight className="w-4 h-4 rotate-180" />
+                    <button
+                      className="mr-auto text-blue-200 hover:text-white transition-colors"
+                      title="تعديل الملف الشخصي"
+                      onClick={() => {
+                        setEditName(buyerProfile?.name ?? user?.name ?? '');
+                        setEditBio(buyerProfile?.bio ?? '');
+                        setEditPhone(buyerProfile?.phone ?? user?.phone ?? '');
+                        setEditWhatsapp(buyerProfile?.whatsapp ?? '');
+                        setEditAddress(buyerProfile?.address ?? '');
+                        setEditWebsite(buyerProfile?.website ?? '');
+                        setEditLogoUrl(buyerProfile?.logo_url ?? '');
+                        setEditingProfile(true);
+                      }}
+                    >
+                      <UserPen className="w-4 h-4" />
                     </button>
                   </div>
                   <div className="flex gap-3 mt-3 relative z-10">
@@ -1089,19 +1123,104 @@ export function ChatInterface() {
                   </div>
                 </div>
 
+                {/* Edit profile inline form */}
+                {editingProfile && (
+                  <div className="rounded-2xl border border-indigo-100 bg-white p-4 space-y-3">
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">تعديل الملف الشخصي</p>
+                    {[
+                      { label: 'الاسم', value: editName, set: setEditName, placeholder: 'اسمك الكامل', type: 'text' },
+                      { label: 'نبذة قصيرة', value: editBio, set: setEditBio, placeholder: 'نبذة عنك', type: 'text' },
+                      { label: 'الجوال', value: editPhone, set: setEditPhone, placeholder: '+966500000000', type: 'tel' },
+                      { label: 'واتساب', value: editWhatsapp, set: setEditWhatsapp, placeholder: '+966500000000', type: 'tel' },
+                      { label: 'العنوان', value: editAddress, set: setEditAddress, placeholder: 'المدينة، الحي', type: 'text' },
+                      { label: 'الموقع الإلكتروني', value: editWebsite, set: setEditWebsite, placeholder: 'https://example.com', type: 'url' },
+                      { label: 'رابط الصورة الشخصية', value: editLogoUrl, set: setEditLogoUrl, placeholder: 'https://...', type: 'url' },
+                    ].map((f) => (
+                      <div key={f.label}>
+                        <label className="block text-xs text-slate-500 mb-1">{f.label}</label>
+                        <Input
+                          type={f.type}
+                          value={f.value}
+                          onChange={(e) => f.set(e.target.value)}
+                          placeholder={f.placeholder}
+                          className="h-9 text-sm"
+                          dir="ltr"
+                        />
+                      </div>
+                    ))}
+                    <div className="flex gap-2 pt-1">
+                      <button
+                        disabled={isSavingProfile}
+                        onClick={async () => {
+                          if (!user?.id) return;
+                          setIsSavingProfile(true);
+                          try {
+                            await buyersApi.updateProfile(user.id, {
+                              name: editName,
+                              bio: editBio,
+                              phone: editPhone,
+                              whatsapp: editWhatsapp,
+                              address: editAddress,
+                              website: editWebsite,
+                              logo_url: editLogoUrl,
+                            });
+                            setBuyerProfile(prev => ({
+                              ...prev,
+                              name: editName, bio: editBio, phone: editPhone,
+                              whatsapp: editWhatsapp, address: editAddress,
+                              website: editWebsite, logo_url: editLogoUrl,
+                            }));
+                            toast.success('تم حفظ الملف الشخصي');
+                            setEditingProfile(false);
+                          } catch {
+                            toast.error('فشل الحفظ، حاول مجدداً');
+                          } finally {
+                            setIsSavingProfile(false);
+                          }
+                        }}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-60 transition-colors"
+                      >
+                        <Check className="w-4 h-4" />
+                        {isSavingProfile ? 'جاري الحفظ…' : 'حفظ'}
+                      </button>
+                      <button
+                        onClick={() => setEditingProfile(false)}
+                        className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors flex items-center gap-1"
+                      >
+                        <X className="w-4 h-4" />
+                        إلغاء
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Account actions */}
+                {!editingProfile && (
                 <div>
                   <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">الحساب</p>
                   <div className="rounded-2xl border border-slate-100 divide-y divide-slate-100 overflow-hidden bg-white">
                     <button
-                      onClick={() => { setSidebarPanel(null); setSidebarOpen(false); }}
+                      onClick={() => {
+                        setEditName(buyerProfile?.name ?? user?.name ?? '');
+                        setEditBio(buyerProfile?.bio ?? '');
+                        setEditPhone(buyerProfile?.phone ?? user?.phone ?? '');
+                        setEditWhatsapp(buyerProfile?.whatsapp ?? '');
+                        setEditAddress(buyerProfile?.address ?? '');
+                        setEditWebsite(buyerProfile?.website ?? '');
+                        setEditLogoUrl(buyerProfile?.logo_url ?? '');
+                        setEditingProfile(true);
+                      }}
                       className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-slate-50 transition-colors text-right group"
                     >
-                      <span className="text-sm text-slate-700 font-medium">تعديل الملف الشخصي</span>
+                      <div className="flex items-center gap-2">
+                        <UserPen className="w-4 h-4 text-indigo-500" />
+                        <span className="text-sm text-slate-700 font-medium">تعديل الملف الشخصي</span>
+                      </div>
                       <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 transition-colors rotate-180" />
                     </button>
                   </div>
                 </div>
+                )}
 
                 {/* Logout */}
                 <button

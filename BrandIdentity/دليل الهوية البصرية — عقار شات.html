@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>دليل الهوية البصرية — عقار شات</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="styles.css?v=2">
+<style>
+  body{ margin:0; background: var(--paper); color: var(--ink); font-family: var(--font-ar); direction:rtl; -webkit-font-smoothing: antialiased; }
+  .container{ max-width: 1240px; margin: 0 auto; padding: 0 48px; }
+
+  /* Sticky nav */
+  .topbar{
+    position: sticky; top:0; z-index: 50;
+    background: rgba(247,248,251,0.92);
+    backdrop-filter: saturate(140%) blur(12px);
+    border-bottom: 1px solid var(--slate-300);
+  }
+  .topbar-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 16px 0;
+  }
+  .topbar .brand{ display:flex; align-items:center; gap:12px; font-weight:700; font-size:18px; }
+  .topbar .brand svg{ width:36px; height:36px; color: var(--teal-700); }
+  .topbar nav{ display:flex; gap: 28px; }
+  .topbar nav a{ color: var(--slate-700); text-decoration:none; font-size:15px; font-weight:500; }
+  .topbar nav a:hover{ color: var(--teal-700); }
+  .topbar .meta{ font-family: var(--font-en); font-size:13px; color: var(--slate-500); letter-spacing:.1em; }
+
+  /* Hero */
+  .hero{
+    background: var(--navy); color:#fff;
+    padding: 120px 0 140px;
+    position:relative; overflow:hidden;
+    margin-bottom: 96px;
+  }
+  .hero::before{
+    content:''; position:absolute; inset:0;
+    background:
+      radial-gradient(circle at 90% 10%, rgba(54,218,200,0.25), transparent 45%),
+      radial-gradient(circle at 5% 90%, rgba(54,218,200,0.15), transparent 50%);
+  }
+  .hero-grid{
+    display:grid; grid-template-columns: 1.3fr 1fr; gap: 80px;
+    align-items: center; position:relative;
+  }
+  .hero .eyebrow{ color: var(--teal); }
+  .hero h1{
+    font-size: 88px; font-weight:800; line-height:1; letter-spacing:-.025em;
+    margin: 24px 0 24px;
+  }
+  .hero .lead{ color: rgba(255,255,255,0.75); max-width: 600px; font-size:22px; }
+  .hero .stats{ display:flex; gap:48px; margin-top: 56px; }
+  .hero .stat .label{ font-family: var(--font-en); font-size:12px; color: rgba(255,255,255,0.5); letter-spacing:.2em; text-transform:uppercase; }
+  .hero .stat .val{ font-size:24px; font-weight:600; margin-top:6px; }
+  .hero-mark{
+    aspect-ratio: 1/1; border-radius: 32px;
+    background: linear-gradient(140deg, var(--teal), var(--teal-700));
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 60px 120px rgba(54,218,200,0.3);
+    position:relative; overflow:hidden;
+  }
+  .hero-mark svg{ width:55%; height:55%; color:#fff; }
+
+  /* Section */
+  section.block{ padding: 96px 0; border-top: 1px solid var(--slate-300); }
+  section.block:first-of-type{ border-top: none; padding-top:0; }
+  .sec-head{
+    display: grid; grid-template-columns: 240px 1fr; gap: 48px;
+    margin-bottom: 56px;
+  }
+  .sec-num{
+    font-family: var(--font-en); font-size: 14px; letter-spacing:.25em;
+    color: var(--teal-700); font-weight:600;
+  }
+  .sec-num span{ display:block; font-size:80px; color: var(--navy); margin-top:8px; font-weight:800; letter-spacing:-.02em; line-height:.9; }
+  .sec-title{ font-size: 56px; font-weight:800; line-height:1.05; letter-spacing:-.02em; margin: 0 0 16px; color: var(--navy); }
+  .sec-desc{ font-size: 20px; line-height:1.7; color: var(--slate-700); max-width: 720px; }
+
+  /* Story */
+  .story{
+    background:#fff; border:1px solid var(--slate-300); border-radius: 24px;
+    padding: 56px;
+  }
+  .story p{ font-size: 22px; line-height:1.8; color: var(--slate-700); margin: 0 0 16px; }
+  .story p strong{ color: var(--navy); }
+  .pillars{ display:grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-top: 32px; }
+  .pillar{ background: var(--paper); padding: 28px; border-radius: 18px; border:1px solid var(--slate-300); }
+  .pillar .n{ width:40px; height:40px; border-radius:12px; background: var(--teal-50); color: var(--teal-700); display:flex; align-items:center; justify-content:center; font-family: var(--font-en); font-weight:700; }
+  .pillar h4{ margin: 14px 0 6px; font-size:22px; font-weight:700; color: var(--navy); }
+  .pillar p{ font-size:16px; color: var(--slate-700); line-height:1.6; margin:0; }
+
+  /* Logo */
+  .logo-stage{
+    background:#fff; border:1px solid var(--slate-300); border-radius:24px;
+    aspect-ratio: 1/1; display:flex; align-items:center; justify-content:center;
+    padding: 48px;
+  }
+  .logo-stage svg{ width:65%; color: var(--navy); }
+  .logo-grid{ display:grid; grid-template-columns: 1fr 1.2fr; gap:48px; }
+  .anatomy-rows{ display:grid; gap: 20px; align-content:center; }
+  .anatomy-row{ display:flex; gap:20px; align-items:flex-start; padding: 18px 0; border-bottom: 1px solid var(--slate-300); }
+  .anatomy-row:last-child{ border:none; }
+  .anatomy-row .badge{ background: var(--teal-50); color: var(--teal-700); font-family: var(--font-en); font-weight:700; font-size:14px; padding: 6px 12px; border-radius: 8px; flex-shrink:0; min-width:48px; text-align:center; }
+  .anatomy-row h4{ margin:0 0 4px; font-size:20px; font-weight:700; color: var(--navy); }
+  .anatomy-row p{ margin:0; font-size:16px; color: var(--slate-700); line-height:1.6; }
+
+  .lockup-grid{ display:grid; grid-template-columns: repeat(4,1fr); gap:16px; margin-top: 32px; }
+  .lockup{ aspect-ratio: 1/1; border-radius:18px; padding: 32px; display:flex; flex-direction: column; align-items:center; justify-content:center; gap:12px; position:relative; }
+  .lockup svg{ width:55%; height:auto; }
+  .lockup .lbl{ font-size:11px; letter-spacing:.2em; font-family: var(--font-en); font-weight:600; opacity:.6; text-transform:uppercase; position:absolute; top:14px; right:14px; }
+  .lockup--w{ background:#fff; border:1px solid var(--slate-300); color: var(--navy); }
+  .lockup--w svg{ color: var(--navy); }
+  .lockup--n{ background: var(--navy); color:#fff; }
+  .lockup--n svg{ color: var(--teal); }
+  .lockup--t{ background: var(--teal); color: var(--navy); }
+  .lockup--t svg{ color: var(--navy); }
+  .lockup--g{ background: var(--slate-100); color: var(--ink); border:1px solid var(--slate-300); }
+  .lockup--g svg{ color: var(--ink); }
+
+  .donts-row{ display:grid; grid-template-columns: repeat(3,1fr); gap:16px; margin-top:24px; }
+  .dont-cell{ background:#fff; border:1px solid var(--slate-300); border-radius:16px; padding:24px; }
+  .dont-cell .stage{ background: var(--paper); border-radius:10px; aspect-ratio: 16/10; display:flex; align-items:center; justify-content:center; margin-bottom:14px; position:relative; overflow:hidden; }
+  .dont-cell .stage svg{ width:50%; color: var(--navy); }
+  .dont-cell .x{ position:absolute; top:8px; right:8px; width:32px; height:32px; border-radius:50%; background: var(--danger); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; }
+  .dont-cell h5{ margin:0 0 4px; font-size:16px; color: var(--ink); font-weight:700; }
+  .dont-cell p{ margin:0; font-size:14px; color: var(--slate-700); line-height:1.5; }
+
+  /* Color */
+  .color-pair{ display:grid; grid-template-columns: 1fr 1fr; gap:20px; }
+  .color-big{ border-radius: 24px; padding: 40px; aspect-ratio: 4/3; display:flex; flex-direction:column; justify-content:space-between; position:relative; overflow:hidden; }
+  .color-big .role{ font-family: var(--font-en); font-size:12px; letter-spacing:.2em; text-transform:uppercase; opacity:.65; font-weight:600; }
+  .color-big .name{ font-size:48px; font-weight:800; margin-top:8px; letter-spacing:-.01em; }
+  .color-big .name-en{ font-family: var(--font-en); font-size:18px; opacity:.7; margin-top:4px; }
+  .color-big .specs{ display:grid; grid-template-columns: 1fr 1fr; gap:12px 24px; font-family: var(--font-en); font-size:14px; }
+  .color-big .specs .l{ opacity:.55; font-size:11px; letter-spacing:.15em; text-transform:uppercase; }
+  .color-big .specs .v{ font-weight:600; font-size:16px; margin-top:2px; }
+  .color-big.t{ background: var(--teal); color: var(--navy); }
+  .color-big.n{ background: var(--navy); color:#fff; }
+
+  .scale{ display:grid; grid-template-columns: 160px repeat(9, 1fr); gap: 6px; align-items:stretch; margin-top:16px; }
+  .scale .lab{ display:flex; flex-direction:column; justify-content:center; }
+  .scale .lab b{ font-size:18px; }
+  .scale .lab small{ font-family: var(--font-en); font-size:11px; letter-spacing:.15em; color: var(--slate-500); text-transform:uppercase; margin-top:2px; }
+  .swatch{ aspect-ratio: 1/1.4; border-radius:10px; padding:10px; display:flex; flex-direction:column; justify-content:flex-end; font-family: var(--font-en); border:1px solid rgba(0,0,0,0.04); }
+  .swatch .step{ font-size:11px; opacity:.7; }
+  .swatch .hex{ font-size:11px; font-weight:600; }
+
+  .neutral-row{ display:grid; grid-template-columns: repeat(5,1fr); gap:16px; margin-top:32px; }
+  .neutral{ background:#fff; border:1px solid var(--slate-300); border-radius:14px; padding:18px; }
+  .neutral .sw{ height:64px; border-radius:8px; margin-bottom:12px; }
+  .neutral .nm{ font-size:15px; font-weight:700; color: var(--navy); }
+  .neutral .hx{ font-family: var(--font-en); font-size:13px; color: var(--slate-500); margin-top:2px; }
+
+  .semantic-row{ display:grid; grid-template-columns: repeat(4,1fr); gap:16px; margin-top:24px; }
+  .sem{ border-radius:14px; padding: 20px; color:#fff; min-height:120px; display:flex; flex-direction:column; justify-content:space-between; }
+  .sem .role{ font-family: var(--font-en); font-size:11px; letter-spacing:.2em; text-transform:uppercase; opacity:.85; }
+  .sem .nm{ font-size:22px; font-weight:700; margin-top:4px; }
+  .sem .hx{ font-family: var(--font-en); font-size:14px; opacity:.85; }
+
+  /* Type */
+  .type-display{
+    background:#fff; border:1px solid var(--slate-300); border-radius:24px;
+    padding: 64px 48px; text-align: center;
+  }
+  .type-display .label{ font-family: var(--font-en); font-size:12px; letter-spacing:.2em; color: var(--teal-700); font-weight:600; text-transform:uppercase; }
+  .type-display .nm{ font-size: 28px; color: var(--slate-500); margin-top:6px; font-weight:500; }
+  .type-display .sample{ font-size: 140px; font-weight:800; color: var(--navy); line-height:1; letter-spacing:-.025em; margin-top: 16px; }
+  .type-display .weights{ display:flex; gap: 32px; justify-content:center; margin-top: 32px; flex-wrap:wrap; }
+  .type-display .w{ font-size:32px; color: var(--navy); }
+  .type-display .w small{ display:block; font-family: var(--font-en); font-size:11px; color: var(--slate-500); letter-spacing:.15em; text-transform:uppercase; margin-top:4px; font-weight:500; }
+
+  .type-scale-tbl{ background:#fff; border:1px solid var(--slate-300); border-radius:18px; overflow:hidden; margin-top:24px; }
+  .type-scale-tbl .row{ display:grid; grid-template-columns: 140px 100px 1fr; gap: 24px; align-items:baseline; padding: 24px 32px; border-bottom: 1px solid var(--slate-100); }
+  .type-scale-tbl .row:last-child{ border:none; }
+  .type-scale-tbl .role{ font-family: var(--font-en); font-size:13px; color: var(--slate-500); letter-spacing:.1em; text-transform:uppercase; font-weight:600; }
+  .type-scale-tbl .meta{ font-family: var(--font-en); font-size:13px; color: var(--slate-700); font-variant-numeric: tabular-nums; }
+
+  /* Icons */
+  .icon-grid-web{ display:grid; grid-template-columns: repeat(8,1fr); gap:12px; margin-top:24px; }
+  .icon-cell-web{ background:#fff; border:1px solid var(--slate-300); border-radius:14px; aspect-ratio:1/1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:14px; }
+  .icon-cell-web svg{ width:32px; height:32px; color: var(--navy); }
+  .icon-cell-web span{ font-size:12px; color: var(--slate-700); font-weight:500; text-align:center; }
+
+  .icon-rules-web{ display:grid; grid-template-columns: repeat(4,1fr); gap:12px; margin-top:20px; }
+  .icon-rule-web{ background: var(--teal-50); border-radius:12px; padding:16px 20px; }
+  .icon-rule-web .k{ font-family: var(--font-en); font-size:11px; letter-spacing:.2em; color: var(--teal-700); font-weight:700; text-transform:uppercase; }
+  .icon-rule-web .v{ font-size:18px; font-weight:700; color: var(--navy); margin-top:4px; }
+  .icon-rule-web .v small{ display:block; font-size:12px; color: var(--slate-700); font-weight:400; margin-top:2px; }
+
+  /* Components */
+  .comp-block{ background:#fff; border:1px solid var(--slate-300); border-radius:18px; padding: 28px; }
+  .comp-block .ttl{ font-family: var(--font-en); font-size:11px; letter-spacing:.2em; color: var(--slate-500); font-weight:700; text-transform:uppercase; margin-bottom:16px; }
+  .comp-stage-w{ background: var(--paper); border-radius: 12px; padding: 24px; min-height:140px; display:flex; flex-direction:column; gap:12px; }
+
+  .btn-w{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding: 12px 22px; border-radius: 10px; font-weight:600; font-size:15px; font-family: var(--font-ar); white-space:nowrap; line-height:1.2; }
+  .btn-w.p{ background: var(--navy); color:#fff; }
+  .btn-w.a{ background: var(--teal); color: var(--navy); }
+  .btn-w.s{ background:#fff; color: var(--navy); border:1.5px solid var(--navy); }
+  .btn-w.g{ background:transparent; color: var(--navy); }
+
+  .chip-w{ display:inline-flex; align-items:center; gap:6px; padding: 4px 12px; border-radius:999px; font-size:12px; font-weight:600; }
+  .chip-w.t{ background: var(--teal-50); color: var(--teal-700); }
+  .chip-w.n{ background: var(--navy-100); color: var(--navy); }
+  .chip-w.s{ background: var(--slate-100); color: var(--slate-700); }
+  .chip-w.warn{ background:#FFF4DD; color:#A16207; }
+  .chip-w.ok{ background:#DCFCE7; color:#15803D; }
+
+  .input-w{ background:#fff; border:1.5px solid var(--slate-300); border-radius:10px; padding: 12px 16px; font-size:15px; display:flex; align-items:center; gap:10px; }
+  .input-w svg{ width:18px; color: var(--slate-500); }
+  .input-w input{ border:none; background:transparent; outline:none; flex:1; font-family: inherit; font-size:15px; direction:rtl; }
+
+  .bubble-w{ max-width: 75%; padding:10px 14px; border-radius:14px; font-size:14px; line-height:1.5; }
+  .bubble-w.bot{ background:#fff; border:1px solid var(--slate-300); border-bottom-right-radius: 4px; align-self:flex-end; }
+  .bubble-w.user{ background: var(--teal); color: var(--navy); border-bottom-left-radius: 4px; align-self:flex-start; font-weight:500; }
+
+  .prop-w{ background:#fff; border:1px solid var(--slate-300); border-radius:14px; overflow:hidden; }
+  .prop-w .img{ height: 120px; background: linear-gradient(135deg, rgba(23,37,75,0.6), rgba(23,37,75,0.1)), repeating-linear-gradient(45deg, var(--slate-300) 0 8px, var(--slate-100) 8px 16px); position:relative; }
+  .prop-w .price{ position:absolute; bottom:8px; right:8px; background: var(--teal); color: var(--navy); font-family: var(--font-en); font-weight:700; padding: 3px 8px; border-radius: 6px; font-size:11px; }
+  .prop-w .info{ padding: 12px 14px; }
+  .prop-w h6{ margin:0; font-size:14px; font-weight:700; color: var(--navy); }
+  .prop-w p{ margin:4px 0 0; color: var(--slate-500); font-size:12px; }
+
+  .comp-row-3{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px; margin-top:24px; }
+  .comp-row-2{ display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:24px; }
+
+  /* Usage rules */
+  .usage-w{ display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:24px; }
+  .usage-w .card{ background:#fff; border:1px solid var(--slate-300); border-radius:18px; padding:28px; }
+  .usage-w h4{ margin:0 0 16px; font-size:20px; font-weight:700; display:flex; align-items:center; gap:10px; }
+  .usage-w .badge{ width:26px; height:26px; border-radius:8px; color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+  .usage-w .ok .badge{ background: var(--success); }
+  .usage-w .no .badge{ background: var(--danger); }
+  .usage-w .bar{ display:flex; height:36px; border-radius:8px; overflow:hidden; margin-bottom:14px; border:1px solid var(--slate-300); }
+  .usage-w .bar span{ display:flex; align-items:center; justify-content:center; font-family: var(--font-en); font-size:12px; font-weight:600; }
+  .usage-w ul{ margin:0; padding-right:20px; font-size:15px; line-height:1.7; color: var(--slate-700); }
+
+  /* Footer */
+  footer.foot{
+    background: var(--navy); color:#fff;
+    padding: 80px 0; margin-top: 120px;
+    text-align:center;
+  }
+  footer.foot svg{ width:80px; height:80px; color: var(--teal); }
+  footer.foot h3{ font-size:48px; font-weight:800; margin: 24px 0 12px; }
+  footer.foot p{ color: rgba(255,255,255,0.6); font-size:18px; max-width:600px; margin: 0 auto; }
+  footer.foot .sig{ margin-top: 48px; font-family: var(--font-en); font-size:12px; letter-spacing:.3em; color: rgba(255,255,255,0.4); text-transform:uppercase; }
+
+  @media (max-width: 1024px){
+    .hero-grid, .logo-grid, .color-pair, .usage-w{ grid-template-columns: 1fr; }
+    .sec-head{ grid-template-columns: 1fr; gap:16px; }
+    .scale{ grid-template-columns: 1fr; gap: 6px; }
+    .scale .swatch{ aspect-ratio: 4/1; }
+    .icon-grid-web{ grid-template-columns: repeat(4,1fr); }
+    .icon-rules-web, .neutral-row, .semantic-row{ grid-template-columns: repeat(2,1fr); }
+    .lockup-grid, .donts-row, .pillars, .comp-row-3, .comp-row-2{ grid-template-columns: 1fr 1fr; }
+    .hero h1{ font-size: 56px; }
+    .sec-title{ font-size: 36px; }
+    .type-display .sample{ font-size: 80px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SVG defs (logo + icons) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="logo-mark" viewBox="0 0 200 220">
+      <path d="M100 8 L182 54 V146 L142 169 L142 200 L108 175 L100 175 L18 146 V54 Z" fill="currentColor"/>
+      <path d="M100 28 L162 64 V134 L130 152 L130 178 L108 162 L100 162 L38 134 V64 Z" fill="#fff"/>
+      <g fill="currentColor">
+        <path d="M73 95 l8 -5 l8 5 v10 l-8 5 l-8 -5 z"/>
+        <path d="M92 95 l8 -5 l8 5 v10 l-8 5 l-8 -5 z"/>
+        <path d="M111 95 l8 -5 l8 5 v10 l-8 5 l-8 -5 z"/>
+      </g>
+    </symbol>
+    <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 L12 4 L21 11 V20 a1 1 0 0 1 -1 1 H4 a1 1 0 0 1 -1 -1 Z"/><path d="M9 21 V14 H15 V21"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20 L16 16"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5 h16 a1 1 0 0 1 1 1 v10 a1 1 0 0 1 -1 1 H8 L4 21 Z"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22 S5 14 5 9 a7 7 0 0 1 14 0 c0 5 -7 13 -7 13 Z"/><circle cx="12" cy="9" r="2.5"/></symbol>
+    <symbol id="i-bed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18 V8"/><path d="M21 18 V12 a3 3 0 0 0 -3 -3 H9"/><path d="M3 14 H21"/><circle cx="7" cy="12" r="2"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M11 13 L21 3"/><path d="M17 7 L19 9"/><path d="M14 10 L16 12"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21 S3 14.5 3 8.5 a5 5 0 0 1 9 -3 a5 5 0 0 1 9 3 c0 6 -9 12.5 -9 12.5 Z"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8 a6 6 0 0 1 12 0 c0 7 3 9 3 9 H3 s3 -2 3 -9 Z"/><path d="M10 21 a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21 a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5 H21 L14 13 V20 L10 18 V13 L3 5 Z"/></symbol>
+    <symbol id="i-ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L14 9 L20 11 L14 13 L12 19 L10 13 L4 11 L10 9 Z"/><circle cx="19" cy="5" r="1.5" fill="currentColor"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10 H21"/><path d="M8 3 V7"/><path d="M16 3 V7"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8 H7 L9 5 H15 L17 8 H21 V19 H3 Z"/><circle cx="12" cy="13" r="4"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L20 6 V12 c0 5 -4 8 -8 9 c-4 -1 -8 -4 -8 -9 V6 Z"/><path d="M9 12 L11 14 L15 10"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3 H14 L19 8 V21 H6 Z"/><path d="M14 3 V8 H19"/><path d="M9 13 H16"/><path d="M9 17 H14"/></symbol>
+    <symbol id="i-money" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="12" cy="12.5" r="3"/></symbol>
+    <symbol id="i-stats" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20 V12"/><path d="M10 20 V4"/><path d="M16 20 V8"/><path d="M22 20 V14"/></symbol>
+  </defs>
+</svg>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="container topbar-inner">
+    <div class="brand"><img src="assets/logo-on-white.png" alt="" style="width:36px;height:36px;object-fit:contain;"> <span>عقار شات</span><span style="color:var(--slate-300);">|</span><span style="font-weight:500; color:var(--slate-700);">دليل الهوية</span></div>
+    <nav>
+      <a href="#story">القصة</a>
+      <a href="#logo">الشعار</a>
+      <a href="#colors">الألوان</a>
+      <a href="#type">الخطوط</a>
+      <a href="#icons">الأيقونات</a>
+      <a href="#components">المكونات</a>
+    </nav>
+    <div class="meta">v1.0 · 2026</div>
+  </div>
+</div>
+
+<!-- Hero -->
+<header class="hero">
+  <div class="container hero-grid">
+    <div>
+      <div class="eyebrow">BRAND GUIDELINES · v1.0</div>
+      <h1>دليل الهوية<br>البصرية</h1>
+      <p class="lead">المرجع الرسمي لمصممي تطبيق ومنصة عقار شات. كل ما تحتاجه — الشعار، الألوان، الخطوط، الأيقونات، والمكونات — في مكان واحد.</p>
+      <div class="stats">
+        <div class="stat"><div class="label">CLIENT</div><div class="val">عقار شات</div></div>
+        <div class="stat"><div class="label">MARKET</div><div class="val">السعودية</div></div>
+        <div class="stat"><div class="label">YEAR</div><div class="val" style="font-family:var(--font-en);">2026</div></div>
+      </div>
+    </div>
+    <div class="hero-mark" style="overflow:hidden;background:transparent;box-shadow:none;"><img src="assets/logo-on-teal.png" alt="عقار شات" style="width:100%;height:100%;object-fit:cover;border-radius:32px;"></div>
+  </div>
+</header>
+
+<main class="container">
+
+<!-- 01 — Story -->
+<section class="block" id="story">
+  <div class="sec-head">
+    <div class="sec-num">SECTION<span>01</span></div>
+    <div>
+      <h2 class="sec-title">عن العلامة</h2>
+      <p class="sec-desc">عقار شات منصة عقارية تعتمد على المحادثة والذكاء الاصطناعي لربط الباحثين عن العقار بالعروض المناسبة. بدل البحث اليدوي، يكفي أن تكتب احتياجك — والنظام يفهم، يبحث، ويقترح.</p>
+    </div>
+  </div>
+  <div class="story">
+    <p><strong>الفكرة ببساطة:</strong> بدل ما المستخدم يبحث يدوياً في عشرات المواقع، هو فقط يتكلم ويطلب احتياجه. والنظام يفهم، يبحث في السوق، يقترح خيارات مناسبة، ويساعده يتواصل مع المعلن.</p>
+    <p><strong>الهدف:</strong> حل مشكلة تشتت العروض العقارية وصعوبة الوصول للعقار المناسب، عن طريق تحويل البحث العقاري إلى تجربة ذكية وسهلة عبر الشات.</p>
+    <div class="pillars">
+      <div class="pillar"><div class="n">01</div><h4>قريبة وودودة</h4><p>نخاطب المستخدم بنبرة سعودية بسيطة وقريبة، خالية من التعقيد العقاري التقليدي.</p></div>
+      <div class="pillar"><div class="n">02</div><h4>بسيطة وعملية</h4><p>كل عنصر في الواجهة يخدم هدفًا واضحًا. لا حشو، لا أزرار زائدة، لا خطوات لا داعي لها.</p></div>
+      <div class="pillar"><div class="n">03</div><h4>حديثة وتقنية</h4><p>الذكاء الاصطناعي في صلب التجربة، يظهر بوضوح في المحادثة والاقتراحات والمطابقة الفورية.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 — Logo -->
+<section class="block" id="logo">
+  <div class="sec-head">
+    <div class="sec-num">SECTION<span>02</span></div>
+    <div>
+      <h2 class="sec-title">الشعار</h2>
+      <p class="sec-desc">شعار عقار شات يدمج بين الشكل السداسي (يرمز للعقار والثبات) وفقاعة المحادثة (تعكس جوهر التجربة)، مع ثلاث نقاط ترمز لكتابة الذكاء الاصطناعي.</p>
+    </div>
+  </div>
+
+  <div class="logo-grid">
+    <div class="logo-stage" style="padding:0;overflow:hidden;"><img src="assets/logo-on-white.png" alt="عقار شات" style="width:100%;height:100%;object-fit:cover;"></div>
+    <div class="anatomy-rows">
+      <div class="anatomy-row"><div class="badge">01</div><div><h4>الإطار السداسي</h4><p>يرمز للبناء والثبات والعقار، ويعكس صلابة المنصة وموثوقيتها.</p></div></div>
+      <div class="anatomy-row"><div class="badge">02</div><div><h4>فقاعة المحادثة</h4><p>تلميح في الزاوية السفلية يحوّل الشكل إلى محادثة — جوهر التجربة.</p></div></div>
+      <div class="anatomy-row"><div class="badge">03</div><div><h4>النقاط الثلاث</h4><p>دلالة على "يكتب الآن…" والذكاء الاصطناعي الذي يفكر ويستجيب.</p></div></div>
+      <div class="anatomy-row"><div class="badge">04</div><div><h4>المسافات والنسب</h4><p>كل علاقة بين العناصر مدروسة. لا تعدّل النسب الداخلية أو حشوة العناصر.</p></div></div>
+    </div>
+  </div>
+
+  <h3 style="font-size:24px; margin: 56px 0 0; color: var(--navy);">النسخ المعتمدة</h3>
+  <div class="lockup-grid">
+    <div class="lockup lockup--w" style="padding:0;overflow:hidden;"><span class="lbl" style="z-index:2;">PRIMARY</span><img src="assets/logo-on-white.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
+    <div class="lockup lockup--n" style="padding:0;overflow:hidden;"><span class="lbl" style="z-index:2;color:#fff;">DARK</span><img src="assets/logo-on-navy.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
+    <div class="lockup lockup--t" style="padding:0;overflow:hidden;"><span class="lbl" style="z-index:2;color:var(--navy);">BRAND</span><img src="assets/logo-on-teal.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
+    <div class="lockup lockup--g" style="padding:0;overflow:hidden;"><span class="lbl" style="z-index:2;">MONO</span><img src="assets/logo-on-white.png" alt="" style="width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05);"></div>
+  </div>
+
+  <div style="display:grid; grid-template-columns: repeat(3,1fr); gap:16px; margin-top:24px;">
+    <div style="background:#fff;border:1px solid var(--slate-300);border-radius:14px;padding:20px;"><div style="font-family:var(--font-en);font-size:11px;letter-spacing:.2em;color:var(--teal-700);font-weight:700;">CLEAR SPACE</div><div style="font-size:18px;font-weight:700;color:var(--navy);margin-top:6px;">مسافة الحماية = X</div><div style="font-size:14px;color:var(--slate-700);margin-top:4px;line-height:1.5;">حيث X = ارتفاع نقطة من الشعار.</div></div>
+    <div style="background:#fff;border:1px solid var(--slate-300);border-radius:14px;padding:20px;"><div style="font-family:var(--font-en);font-size:11px;letter-spacing:.2em;color:var(--teal-700);font-weight:700;">MIN · DIGITAL</div><div style="font-size:18px;font-weight:700;color:var(--navy);margin-top:6px;">32 px</div><div style="font-size:14px;color:var(--slate-700);margin-top:4px;line-height:1.5;">للرمز فقط (favicon: 16px).</div></div>
+    <div style="background:#fff;border:1px solid var(--slate-300);border-radius:14px;padding:20px;"><div style="font-family:var(--font-en);font-size:11px;letter-spacing:.2em;color:var(--teal-700);font-weight:700;">MIN · PRINT</div><div style="font-size:18px;font-weight:700;color:var(--navy);margin-top:6px;">12 mm</div><div style="font-size:14px;color:var(--slate-700);margin-top:4px;line-height:1.5;">للمطبوعات الورقية.</div></div>
+  </div>
+
+  <h3 style="font-size:24px; margin: 56px 0 0; color: var(--navy);">استخدامات ممنوعة</h3>
+  <div class="donts-row">
+    <div class="dont-cell"><div class="stage" style="--s:1;"><img src="assets/logo-on-white.png" alt="" style="width:60%;transform:skewX(-15deg);"><div class="x">✕</div></div><h5>لا تشوّه الشعار</h5><p>لا ميل ولا إمالة (skew).</p></div>
+    <div class="dont-cell"><div class="stage"><img src="assets/logo-on-white.png" alt="" style="width:75%;transform:scaleX(1.5);"><div class="x">✕</div></div><h5>لا تمدد الشعار</h5><p>حافظ على النسب الأصلية.</p></div>
+    <div class="dont-cell"><div class="stage"><img src="assets/logo-on-white.png" alt="" style="width:60%;transform:rotate(20deg);"><div class="x">✕</div></div><h5>لا تدوّر الشعار</h5><p>الوضع الأصلي فقط.</p></div>
+    <div class="dont-cell"><div class="stage"><img src="assets/logo-on-white.png" alt="" style="width:60%;filter:hue-rotate(280deg) saturate(2);"><div class="x">✕</div></div><h5>لا تغيّر اللون</h5><p>الألوان المعتمدة فقط.</p></div>
+    <div class="dont-cell"><div class="stage"><img src="assets/logo-on-white.png" alt="" style="width:60%;filter:drop-shadow(0 6px 0 rgba(255,0,0,.6));"><div class="x">✕</div></div><h5>لا تأثيرات</h5><p>لا ظلال ولا توهج.</p></div>
+    <div class="dont-cell"><div class="stage" style="background:var(--teal-50);"><img src="assets/logo-on-teal.png" alt="" style="width:60%;opacity:.4;"><div class="x">✕</div></div><h5>لا تباين منخفض</h5><p>تأكد من التباين الكافي.</p></div>
+  </div>
+</section>
+
+<!-- 03 — Colors -->
+<section class="block" id="colors">
+  <div class="sec-head">
+    <div class="sec-num">SECTION<span>03</span></div>
+    <div>
+      <h2 class="sec-title">الألوان</h2>
+      <p class="sec-desc">لونان أساسيان (تيل وكحلي) يشكلان قلب الهوية، مدعومان بسلالم تدرج من ٩ درجات لكل لون، مع ألوان دلالية للحالات وألوان محايدة للنصوص.</p>
+    </div>
+  </div>
+
+  <div class="color-pair">
+    <div class="color-big t">
+      <div><div class="role">PRIMARY · 60%</div><div class="name">تيل عقار</div><div class="name-en">Aqar Teal</div></div>
+      <div class="specs">
+        <div><div class="l">HEX</div><div class="v">#36DAC8</div></div>
+        <div><div class="l">RGB</div><div class="v">54 · 218 · 200</div></div>
+        <div><div class="l">CMYK</div><div class="v">62 · 0 · 27 · 0</div></div>
+        <div><div class="l">PANTONE</div><div class="v">3265 C</div></div>
+      </div>
+    </div>
+    <div class="color-big n">
+      <div><div class="role">SECONDARY · 30%</div><div class="name">كحلي عقار</div><div class="name-en">Aqar Navy</div></div>
+      <div class="specs">
+        <div><div class="l">HEX</div><div class="v">#17254B</div></div>
+        <div><div class="l">RGB</div><div class="v">23 · 37 · 75</div></div>
+        <div><div class="l">CMYK</div><div class="v">95 · 85 · 35 · 35</div></div>
+        <div><div class="l">PANTONE</div><div class="v">282 C</div></div>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="font-size:24px; margin: 56px 0 16px; color: var(--navy);">سلالم الألوان</h3>
+  <div class="scale">
+    <div class="lab"><b>Aqar Teal</b><small>PRIMARY</small></div>
+    <div class="swatch" style="background:#E8FBF8;color:#0F1A38;"><div class="step">100</div><div class="hex">E8FBF8</div></div>
+    <div class="swatch" style="background:#C9F4ED;color:#0F1A38;"><div class="step">200</div><div class="hex">C9F4ED</div></div>
+    <div class="swatch" style="background:#9CE9DC;color:#0F1A38;"><div class="step">300</div><div class="hex">9CE9DC</div></div>
+    <div class="swatch" style="background:#6EDDCD;color:#0F1A38;"><div class="step">400</div><div class="hex">6EDDCD</div></div>
+    <div class="swatch" style="background:#36DAC8;color:#0F1A38;"><div class="step">500★</div><div class="hex">36DAC8</div></div>
+    <div class="swatch" style="background:#1FB7A6;color:#fff;"><div class="step">600</div><div class="hex">1FB7A6</div></div>
+    <div class="swatch" style="background:#168E80;color:#fff;"><div class="step">700</div><div class="hex">168E80</div></div>
+    <div class="swatch" style="background:#0F6A60;color:#fff;"><div class="step">800</div><div class="hex">0F6A60</div></div>
+    <div class="swatch" style="background:#0A4842;color:#fff;"><div class="step">900</div><div class="hex">0A4842</div></div>
+  </div>
+  <div class="scale" style="margin-top:8px;">
+    <div class="lab"><b>Aqar Navy</b><small>SECONDARY</small></div>
+    <div class="swatch" style="background:#EEF1F8;color:#0F1A38;"><div class="step">100</div><div class="hex">EEF1F8</div></div>
+    <div class="swatch" style="background:#DDE3F0;color:#0F1A38;"><div class="step">200</div><div class="hex">DDE3F0</div></div>
+    <div class="swatch" style="background:#A9B3CE;color:#0F1A38;"><div class="step">300</div><div class="hex">A9B3CE</div></div>
+    <div class="swatch" style="background:#6F7CA3;color:#fff;"><div class="step">400</div><div class="hex">6F7CA3</div></div>
+    <div class="swatch" style="background:#3D4D7C;color:#fff;"><div class="step">500</div><div class="hex">3D4D7C</div></div>
+    <div class="swatch" style="background:#2A3A6B;color:#fff;"><div class="step">600</div><div class="hex">2A3A6B</div></div>
+    <div class="swatch" style="background:#17254B;color:#fff;"><div class="step">700★</div><div class="hex">17254B</div></div>
+    <div class="swatch" style="background:#0F1A38;color:#fff;"><div class="step">800</div><div class="hex">0F1A38</div></div>
+    <div class="swatch" style="background:#070D22;color:#fff;"><div class="step">900</div><div class="hex">070D22</div></div>
+  </div>
+  <p style="margin-top:16px; font-size:14px; color:var(--slate-500); font-family:var(--font-en);">★ The original brand value. Other steps are derived for extended usage.</p>
+
+  <h3 style="font-size:24px; margin: 56px 0 0; color: var(--navy);">الألوان الدلالية</h3>
+  <div class="semantic-row">
+    <div class="sem" style="background:#22C58B;"><div><div class="role">SUCCESS</div><div class="nm">نجاح</div></div><div class="hx">#22C58B</div></div>
+    <div class="sem" style="background:#F4B740; color:var(--navy);"><div><div class="role" style="opacity:.7;">WARNING</div><div class="nm">تنبيه</div></div><div class="hx" style="opacity:.7;">#F4B740</div></div>
+    <div class="sem" style="background:#EF5B5B;"><div><div class="role">DANGER</div><div class="nm">خطأ</div></div><div class="hx">#EF5B5B</div></div>
+    <div class="sem" style="background:#36DAC8; color:var(--navy);"><div><div class="role" style="opacity:.7;">INFO / AI</div><div class="nm">ذكاء</div></div><div class="hx" style="opacity:.7;">#36DAC8</div></div>
+  </div>
+
+  <h3 style="font-size:24px; margin: 56px 0 0; color: var(--navy);">المحايدة</h3>
+  <div class="neutral-row">
+    <div class="neutral"><div class="sw" style="background:#0B1226;"></div><div class="nm">Ink</div><div class="hx">#0B1226 · نص أساسي</div></div>
+    <div class="neutral"><div class="sw" style="background:#3B4660;"></div><div class="nm">Slate 700</div><div class="hx">#3B4660 · نص ثانوي</div></div>
+    <div class="neutral"><div class="sw" style="background:#6B7390;"></div><div class="nm">Slate 500</div><div class="hx">#6B7390 · placeholder</div></div>
+    <div class="neutral"><div class="sw" style="background:#ECEEF5;border:1px solid var(--slate-300);"></div><div class="nm">Slate 100</div><div class="hx">#ECEEF5 · فواصل</div></div>
+    <div class="neutral"><div class="sw" style="background:#F7F8FB;border:1px solid var(--slate-300);"></div><div class="nm">Paper</div><div class="hx">#F7F8FB · خلفية</div></div>
+  </div>
+
+  <h3 style="font-size:24px; margin: 56px 0 0; color: var(--navy);">قاعدة التوزيع · 60 / 30 / 10</h3>
+  <p style="font-size:16px; color:var(--slate-700); margin-top:8px;">للحفاظ على هوية متوازنة، التزم بنسب التوزيع التالية في الواجهات.</p>
+  <div class="usage-w">
+    <div class="card ok">
+      <h4><span class="badge">✓</span> الاستخدام الصحيح</h4>
+      <div class="bar">
+        <span style="background:var(--paper);color:var(--ink); width:60%;">60% محايد</span>
+        <span style="background:var(--navy);color:#fff; width:30%;">30% كحلي</span>
+        <span style="background:var(--teal);color:var(--navy); width:10%;">10% تيل</span>
+      </div>
+      <ul>
+        <li>الخلفيات والمساحات الفارغة باللون المحايد (Paper).</li>
+        <li>الكحلي للنصوص والعناوين والأزرار الأساسية.</li>
+        <li>التيل للتأكيد فقط: CTA، الحالات الإيجابية، رسائل الذكاء.</li>
+      </ul>
+    </div>
+    <div class="card no">
+      <h4><span class="badge">✕</span> الاستخدام الخاطئ</h4>
+      <div class="bar">
+        <span style="background:var(--teal);color:var(--navy); width:60%;">60% تيل</span>
+        <span style="background:var(--navy);color:#fff; width:25%;">25% كحلي</span>
+        <span style="background:var(--paper);color:var(--ink); width:15%;">15%</span>
+      </div>
+      <ul>
+        <li>إغراق الواجهة باللون التيل يفقده قيمته.</li>
+        <li>عدم وجود مساحات فارغة كافية يخلق ضوضاء.</li>
+        <li>استخدام التيل للنصوص الطويلة أو الفقرات.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 04 — Type -->
+<section class="block" id="type">
+  <div class="sec-head">
+    <div class="sec-num">SECTION<span>04</span></div>
+    <div>
+      <h2 class="sec-title">الخطوط</h2>
+      <p class="sec-desc">عائلة Noto Kufi Arabic لكافة النصوص العربية، و Inter للأرقام والمحتوى الإنجليزي. تسلسل من ستة مستويات يغطي العناوين والنصوص.</p>
+    </div>
+  </div>
+
+  <div class="type-display">
+    <div class="label">PRIMARY · ARABIC</div>
+    <div class="nm">Noto Kufi Arabic</div>
+    <div class="sample">عقار شات</div>
+    <div class="weights">
+      <div class="w" style="font-weight:300;">عقار<small>Light · 300</small></div>
+      <div class="w" style="font-weight:400;">عقار<small>Regular · 400</small></div>
+      <div class="w" style="font-weight:500;">عقار<small>Medium · 500</small></div>
+      <div class="w" style="font-weight:600;">عقار<small>SemiBold · 600</small></div>
+      <div class="w" style="font-weight:700;">عقار<small>Bold · 700</small></div>
+      <div class="w" style="font-weight:800;">عقار<small>ExtraBold · 800</small></div>
+    </div>
+  </div>
+
+  <div style="background:#fff; border:1px solid var(--slate-300); border-radius:18px; padding: 32px; margin-top: 24px; display:flex; gap:32px; align-items:center; justify-content:space-between; flex-wrap:wrap;">
+    <div>
+      <div style="font-family:var(--font-en); font-size:12px; letter-spacing:.2em; color: var(--teal-700); font-weight:600;">SECONDARY · LATIN / NUMBERS</div>
+      <div style="font-family: 'Inter', sans-serif; font-size:48px; font-weight:700; color:var(--navy); margin-top:4px;">Inter — 1234567890</div>
+    </div>
+    <div style="font-size:15px; color: var(--slate-700); max-width: 320px;">للأرقام اللاتينية، العملات، URLs، والمحتوى الإنجليزي.</div>
+  </div>
+
+  <h3 style="font-size:24px; margin: 56px 0 0; color: var(--navy);">السلم الطباعي</h3>
+  <div class="type-scale-tbl">
+    <div class="row"><span class="role">Display / H1</span><span class="meta">64 / 800</span><span style="font-size:48px; font-weight:800; line-height:1;">ابحث عن بيتك</span></div>
+    <div class="row"><span class="role">H2</span><span class="meta">48 / 700</span><span style="font-size:36px; font-weight:700; line-height:1.05;">عروض مقترحة لك</span></div>
+    <div class="row"><span class="role">H3</span><span class="meta">36 / 700</span><span style="font-size:28px; font-weight:700; line-height:1.1;">شقة فاخرة في الرياض</span></div>
+    <div class="row"><span class="role">H4 · Subhead</span><span class="meta">28 / 600</span><span style="font-size:22px; font-weight:600; line-height:1.2;">تفاصيل العقار والموقع</span></div>
+    <div class="row"><span class="role">Body</span><span class="meta">22 / 400</span><span style="font-size:18px; line-height:1.6;">كل ما تحتاجه للبحث عن العقار المناسب في مكان واحد، مع اقتراحات ذكية.</span></div>
+    <div class="row"><span class="role">Caption · Meta</span><span class="meta">16 / 500</span><span style="font-size:14px; font-weight:500; color: var(--slate-700);">منذ ٣ أيام · الرياض · العليا</span></div>
+  </div>
+</section>
+
+<!-- 05 — Icons -->
+<section class="block" id="icons">
+  <div class="sec-head">
+    <div class="sec-num">SECTION<span>05</span></div>
+    <div>
+      <h2 class="sec-title">الأيقونات</h2>
+      <p class="sec-desc">أيقونات خطية (line) موحدة بسماكة 1.8px وزوايا دائرية، تستخدم باللون الكحلي على الفاتح أو الأبيض على الداكن.</p>
+    </div>
+  </div>
+
+  <div class="icon-grid-web">
+    <div class="icon-cell-web"><svg><use href="#i-home"/></svg><span>الرئيسية</span></div>
+    <div class="icon-cell-web"><svg><use href="#i-search"/></svg><span>بحث</span></div>
+    <div class="icon-cell-web"><svg><use href="#i-chat"/></svg><span>محادثة</span></div>
+    <div class="icon-cell-web"><svg><use href="#i-pin"/></svg><span>الموقع</span></div>
+    <div class="icon-cell-web"><svg><use href="#i-bed"/></svg><span>الغرف</span></div>
+    <div class="icon-cell-web"><svg><use href="#i-key"/></svg><span>الإيجار</span></div>
+    <div class="icon-cell-web"><svg><use href="#i-heart"/></svg><span>المفضلة</span></div>
+    <div class="icon-cell-web"><svg><use href="#i-bell"/></svg><span>التنبيهات</span></div>
+    <div class="icon-cell-web"><svg><use href="#i-user"/></svg><span>الحساب</span></div>
+    <div class="icon-cell-web"><svg><use href="#i-filter"/></svg><span>تصفية</span></div>
+    <div class="icon-cell-web"><svg><use href="#i-ai"/></svg><span>الذكاء</span></div>
+    <div class="icon-cell-web"><svg><use href="#i-calendar"/></svg><span>الموعد</span></div>
+    <div class="icon-cell-web"><svg><use href="#i-camera"/></svg><span>الصور</span></div>
+    <div class="icon-cell-web"><svg><use href="#i-shield"/></svg><span>موثّق</span></div>
+    <div class="icon-cell-web"><svg><use href="#i-doc"/></svg><span>الوثائق</span></div>
+    <div class="icon-cell-web"><svg><use href="#i-stats"/></svg><span>الإحصاءات</span></div>
+  </div>
+
+  <div class="icon-rules-web">
+    <div class="icon-rule-web"><div class="k">GRID</div><div class="v">24 × 24<small>صندوق التصميم</small></div></div>
+    <div class="icon-rule-web"><div class="k">STROKE</div><div class="v">1.8 px<small>سماكة موحدة</small></div></div>
+    <div class="icon-rule-web"><div class="k">CORNERS</div><div class="v">Round<small>زوايا دائرية</small></div></div>
+    <div class="icon-rule-web"><div class="k">STYLE</div><div class="v">Outline<small>خطية فقط</small></div></div>
+  </div>
+</section>
+
+<!-- 06 — Components -->
+<section class="block" id="components">
+  <div class="sec-head">
+    <div class="sec-num">SECTION<span>06</span></div>
+    <div>
+      <h2 class="sec-title">مكونات الواجهة</h2>
+      <p class="sec-desc">مكتبة المكونات الأساسية للتطبيق والمنصة — أزرار، حقول، شيبس، فقاعات محادثة، وكروت العقار.</p>
+    </div>
+  </div>
+
+  <div class="comp-row-2">
+    <div class="comp-block">
+      <div class="ttl">BUTTONS</div>
+      <div class="comp-stage-w">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          <span class="btn-w p">ابحث الآن</span>
+          <span class="btn-w a">ابدأ المحادثة</span>
+          <span class="btn-w s">عرض المزيد</span>
+          <span class="btn-w g">إلغاء</span>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          <span class="btn-w p" style="padding:8px 16px; font-size:13px; border-radius:8px;">صغير</span>
+          <span class="btn-w a" style="padding:14px 26px; font-size:17px; border-radius:12px;">كبير</span>
+        </div>
+        <div style="font-family:var(--font-en); font-size:12px; color:var(--slate-500); margin-top:auto;">Radius 10 · Padding 12×22 · Weight 600</div>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <div class="ttl">INPUTS · SEARCH</div>
+      <div class="comp-stage-w">
+        <div class="input-w"><svg><use href="#i-search"/></svg><input type="text" placeholder="ابحث عن: شقة في الرياض بسعر ٢ مليون..."></div>
+        <div class="input-w"><input type="text" placeholder="رقم الجوال" style="text-align:right;"></div>
+        <div style="font-family:var(--font-en); font-size:12px; color:var(--slate-500); margin-top:auto;">Border 1.5 · Radius 10 · Focus: teal ring</div>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <div class="ttl">CHIPS · TAGS</div>
+      <div class="comp-stage-w">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="chip-w t"><svg width="12" height="12"><use href="#i-ai"/></svg> اقتراح ذكي</span>
+          <span class="chip-w n">شقة · 3 غرف</span>
+          <span class="chip-w s">منذ ٣ أيام</span>
+          <span class="chip-w warn">قيد التفاوض</span>
+          <span class="chip-w ok">متاح</span>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="chip-w s">الرياض</span>
+          <span class="chip-w s">العليا</span>
+          <span class="chip-w s">للإيجار</span>
+        </div>
+        <div style="font-family:var(--font-en); font-size:12px; color:var(--slate-500); margin-top:auto;">Radius 999 · Padding 4×12 · Weight 600</div>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <div class="ttl">CHAT BUBBLES</div>
+      <div class="comp-stage-w">
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div class="bubble-w bot">أهلاً! وش نوع العقار اللي تدور عليه؟</div>
+          <div class="bubble-w user">شقة بالرياض، ٣ غرف، حد أقصى ٢ مليون</div>
+          <div class="bubble-w bot">تمام، لقيت لك ١٢ عرض. أعرضها لك؟</div>
+        </div>
+        <div style="font-family:var(--font-en); font-size:12px; color:var(--slate-500); margin-top:auto;">Bot: white + slate border · User: teal · Tail 4px</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="comp-block" style="margin-top:20px;">
+    <div class="ttl">PROPERTY CARDS</div>
+    <div style="display:grid; grid-template-columns: repeat(4,1fr); gap:16px;">
+      <div class="prop-w"><div class="img"><div class="price">١٫٩ مليون</div></div><div class="info"><h6>شقة فاخرة — العليا</h6><p>الرياض · العليا · ٣غ ٢ح ١٨٠م²</p></div></div>
+      <div class="prop-w"><div class="img" style="background:linear-gradient(135deg,rgba(54,218,200,.5),rgba(23,37,75,.6)),repeating-linear-gradient(45deg,var(--slate-300) 0 8px,var(--slate-100) 8px 16px);"><div class="price">٧٫٥ آلاف/شهر</div></div><div class="info"><h6>دوبلكس للإيجار</h6><p>جدة · الزهراء · ٤غ ٣ح ٢٢٠م²</p></div></div>
+      <div class="prop-w"><div class="img" style="background:linear-gradient(135deg,rgba(23,37,75,.7),rgba(54,218,200,.3)),repeating-linear-gradient(135deg,var(--slate-300) 0 8px,var(--slate-100) 8px 16px);"><div class="price">٣٫٢ مليون</div></div><div class="info"><h6>فيلا — الياسمين</h6><p>الرياض · ٥غ ٤ح ٣٢٠م²</p></div></div>
+      <div class="prop-w"><div class="img" style="background:linear-gradient(135deg,rgba(54,218,200,.4),rgba(23,37,75,.5)),repeating-linear-gradient(90deg,var(--slate-300) 0 8px,var(--slate-100) 8px 16px);"><div class="price">٤٫٥ آلاف/شهر</div></div><div class="info"><h6>استوديو — الملقا</h6><p>الرياض · ١غ ١ح ٦٥م²</p></div></div>
+    </div>
+    <div style="font-family:var(--font-en); font-size:12px; color:var(--slate-500); margin-top:16px;">Radius 14 · Border 1px · Shadow none · Image ratio 16:10 · Price chip teal top-right</div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <img src="assets/logo-on-navy.png" alt="عقار شات" style="width:120px;height:120px;object-fit:contain;border-radius:24px;">
+  <h3>هذا هو عقار شات.</h3>
+  <p>دليل حي يتطور مع المنتج. أي إضافة جديدة (شاشة، مكوّن، رمز) يجب أن تستند لهذه القواعد.</p>
+  <div class="sig">AQAR CHAT · BRAND GUIDELINES · v1.0 · 2026</div>
+</footer>
+
+</body>
+</html>
