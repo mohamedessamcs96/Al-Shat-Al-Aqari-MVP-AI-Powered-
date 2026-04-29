@@ -92,6 +92,10 @@ function getInitials(name: string): string {
     .map(w => w.charAt(0).toUpperCase())
     .join('');
 }
+
+// ── WebSocket event types ─────────────────────────────────────────────────────
+
+interface WsConnectionEvent {
   type: 'connection_established';
   user_id: string;
   role: string;
