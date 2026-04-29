@@ -17,6 +17,7 @@ import { BuyerDashboard } from "./components/BuyerDashboard";
 import { NegotiationView } from "./components/NegotiationView";
 import { LoginPage } from "./components/LoginPage";
 import { DemandForm } from "./components/DemandForm";
+import { DirectChat } from "./components/DirectChat";
 
 export const router = createBrowserRouter([
   {
@@ -30,6 +31,14 @@ export const router = createBrowserRouter([
   {
     path: "/chat",
     Component: ChatInterface,
+  },
+  {
+    path: "/direct-chat",
+    Component: DirectChat,
+  },
+  {
+    path: "/office/direct-chat",
+    Component: DirectChat,
   },
   {
     path: "/demand",

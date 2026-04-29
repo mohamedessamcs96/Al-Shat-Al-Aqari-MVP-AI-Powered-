@@ -1,0 +1,377 @@
+{
+  "info": {
+    "name": "Direct Chat API",
+    "description": "REST + WebSocket reference for the Buyer ↔ Office real-time chat.\n\nBase URL: {{base_url}}/api/v1\nWebSocket: ws://{{ws_host}}/ws/direct-chat/?token=<access_token>\n\nQuick start:\n1. Run 'Buyer Login' or 'Office Login' — tokens are saved automatically.\n2. Run 'Create Room' to get a room_id (saved automatically).\n3. Explore the rest of the endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "direct-chat-collection-v1"
+  },
+  "variable": [
+    { "key": "base_url",    "value": "http://localhost:8000" },
+    { "key": "ws_host",     "value": "localhost:8000" },
+    { "key": "buyer_token", "value": "" },
+    { "key": "office_token","value": "" },
+    { "key": "room_id",     "value": "" },
+    { "key": "listing_id",  "value": "" },
+    { "key": "buyer_id",    "value": "" },
+    { "key": "office_id",   "value": "" }
+  ],
+  "item": [
+
+    {
+      "name": "0. Auth (get tokens)",
+      "description": "Obtain JWT access tokens to use in chat requests.",
+      "item": [
+        {
+          "name": "Buyer — Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "var token = r.tokens && r.tokens.access || r.token || r.access;",
+                  "if (token) pm.collectionVariables.set('buyer_token', token);",
+                  "var uid = r.data && r.data.id || r.buyer_id;",
+                  "if (uid) pm.collectionVariables.set('buyer_id', uid);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/buyer/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "buyer", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+966501234567\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Office — Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "var token = r.tokens && r.tokens.access || r.token || r.access;",
+                  "if (token) pm.collectionVariables.set('office_token', token);",
+                  "var uid = r.data && r.data.id || r.office_id;",
+                  "if (uid) pm.collectionVariables.set('office_id', uid);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/office/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "office", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"contact@prime.sa\",\n  \"password\": \"Str0ngPass!\"\n}"
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "1. Rooms",
+      "description": "Create and list direct chat rooms between buyers and offices.",
+      "item": [
+        {
+          "name": "Create Room (Buyer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "var id = r.data && r.data.id;",
+                  "if (id) pm.collectionVariables.set('room_id', id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{buyer_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/direct-chat/rooms/create",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "direct-chat", "rooms", "create"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"other_id\": \"{{office_id}}\",\n  \"listing_id\": \"{{listing_id}}\"\n}"
+            },
+            "description": "Buyer creates (or retrieves) a room with an office.\n\n`other_id` = office UUID.\n`listing_id` is optional — links the chat to a specific listing."
+          }
+        },
+        {
+          "name": "Create Room (Office)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "var id = r.data && r.data.id;",
+                  "if (id) pm.collectionVariables.set('room_id', id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{office_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/direct-chat/rooms/create",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "direct-chat", "rooms", "create"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"other_id\": \"{{buyer_id}}\"\n}"
+            },
+            "description": "Office creates (or retrieves) a room with a buyer.\n\n`other_id` = buyer UUID."
+          }
+        },
+        {
+          "name": "List Rooms (Buyer)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{buyer_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/direct-chat/rooms",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "direct-chat", "rooms"]
+            },
+            "description": "Returns all rooms for the authenticated buyer, including last message preview and unread count."
+          }
+        },
+        {
+          "name": "List Rooms (Office)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{office_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/direct-chat/rooms",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "direct-chat", "rooms"]
+            },
+            "description": "Returns all rooms for the authenticated office."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "2. Messages",
+      "description": "Send messages and retrieve message history for a room.",
+      "item": [
+        {
+          "name": "List Messages (Buyer)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{buyer_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/direct-chat/rooms/{{room_id}}/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "direct-chat", "rooms", "{{room_id}}", "messages"]
+            },
+            "description": "Returns full message history for the room.\nAlso marks all incoming messages as read automatically."
+          }
+        },
+        {
+          "name": "List Messages (Office)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{office_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/direct-chat/rooms/{{room_id}}/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "direct-chat", "rooms", "{{room_id}}", "messages"]
+            }
+          }
+        },
+        {
+          "name": "Send Message — Text (Buyer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{buyer_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/direct-chat/rooms/{{room_id}}/messages/send",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "direct-chat", "rooms", "{{room_id}}", "messages", "send"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Hello! I am interested in this property.\",\n  \"message_type\": 1\n}"
+            },
+            "description": "HTTP fallback for sending a text message.\nmessage_type: 1=Text, 2=Image, 3=File\n\nFor real-time delivery prefer the WebSocket `send_message` event."
+          }
+        },
+        {
+          "name": "Send Message — Text (Office)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{office_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/direct-chat/rooms/{{room_id}}/messages/send",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "direct-chat", "rooms", "{{room_id}}", "messages", "send"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Thank you for your interest. When would you like to visit?\",\n  \"message_type\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Send Message — Image (Buyer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{buyer_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/direct-chat/rooms/{{room_id}}/messages/send",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "direct-chat", "rooms", "{{room_id}}", "messages", "send"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Here is a photo of the area I am looking in.\",\n  \"message_type\": 2,\n  \"file_url\": \"https://example.com/images/area.jpg\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Send Message — File (Office)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{office_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/direct-chat/rooms/{{room_id}}/messages/send",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "direct-chat", "rooms", "{{room_id}}", "messages", "send"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Please find the property brochure attached.\",\n  \"message_type\": 3,\n  \"file_url\": \"https://example.com/docs/brochure.pdf\"\n}"
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "3. Read Receipts & Unread",
+      "description": "Mark messages as read and fetch global unread badge count.",
+      "item": [
+        {
+          "name": "Mark Room as Read (Buyer)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{buyer_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/direct-chat/rooms/{{room_id}}/read",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "direct-chat", "rooms", "{{room_id}}", "read"]
+            },
+            "description": "Marks all incoming messages in the room as read.\nReturns `{ marked_read: <count> }`."
+          }
+        },
+        {
+          "name": "Mark Room as Read (Office)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{office_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/direct-chat/rooms/{{room_id}}/read",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "direct-chat", "rooms", "{{room_id}}", "read"]
+            }
+          }
+        },
+        {
+          "name": "Global Unread Count (Buyer)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{buyer_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/direct-chat/unread",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "direct-chat", "unread"]
+            },
+            "description": "Total unread messages across all rooms for the authenticated user.\nUse for notification badge."
+          }
+        },
+        {
+          "name": "Global Unread Count (Office)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{office_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/direct-chat/unread",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "direct-chat", "unread"]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "4. WebSocket — Event Reference",
+      "description": "The WebSocket endpoint is:\n  ws://{{ws_host}}/ws/direct-chat/?token=<access_token>\n\nPostman supports WebSocket requests natively (New → WebSocket Request).\nConnect with the URL above, then send the JSON events below one by one.\n\n──────────────────────────────────────\nCONNECT\n  URL: ws://localhost:8000/ws/direct-chat/?token=<buyer_or_office_access_token>\n  Server replies immediately:\n  { \"type\": \"connection_established\", \"user_id\": \"...\", \"role\": \"buyer\", ... }\n\n──────────────────────────────────────\nEVENTS (Client → Server)\n\n1. join_room\n   { \"type\": \"join_room\", \"room_id\": \"<uuid>\" }\n   → Server: { \"type\": \"room_joined\", \"room_id\": \"...\", \"participants\": { \"buyer_id\": \"...\", \"office_id\": \"...\" } }\n\n2. send_message\n   { \"type\": \"send_message\", \"room_id\": \"<uuid>\", \"content\": \"Hello!\", \"message_type\": 1 }\n   → Sender:  { \"type\": \"message_sent\", \"room_id\": \"...\", \"message\": { ... } }\n   → Others:  { \"type\": \"new_message\",  \"room_id\": \"...\", \"message\": { ... } }\n\n   With file:\n   { \"type\": \"send_message\", \"room_id\": \"<uuid>\", \"content\": \"See attached\", \"message_type\": 3, \"file_url\": \"https://...\" }\n\n3. typing\n   { \"type\": \"typing\", \"room_id\": \"<uuid>\", \"is_typing\": true }\n   → Others: { \"type\": \"user_typing\", \"room_id\": \"...\", \"user_id\": \"...\", \"user_name\": \"...\", \"role\": \"buyer\", \"is_typing\": true }\n\n   Stop typing:\n   { \"type\": \"typing\", \"room_id\": \"<uuid>\", \"is_typing\": false }\n\n4. mark_read\n   { \"type\": \"mark_read\", \"room_id\": \"<uuid>\" }\n   → Server: { \"type\": \"messages_marked_read\", \"room_id\": \"...\", \"marked_count\": 3 }\n\n5. leave_room\n   { \"type\": \"leave_room\", \"room_id\": \"<uuid>\" }\n   → Server: { \"type\": \"room_left\", \"room_id\": \"...\" }\n\n──────────────────────────────────────\nMESSAGE OBJECT (in message_sent / new_message)\n{\n  \"id\": \"<uuid>\",\n  \"room_id\": \"<uuid>\",\n  \"sender_id\": \"<uuid>\",\n  \"sender_role\": \"buyer\" | \"office\",\n  \"message_type\": 1,\n  \"message_type_display\": \"Text\",\n  \"content\": \"Hello!\",\n  \"file_url\": null,\n  \"is_read\": false,\n  \"created_at\": \"2026-04-28T10:00:00.000000\"\n}\n\n──────────────────────────────────────\nERROR RESPONSE\n{ \"type\": \"error\", \"error_code\": \"access_denied\", \"message\": \"...\" }\n\nmessage_type codes: 1=Text  2=Image  3=File",
+      "item": []
+    }
+
+  ]
+}

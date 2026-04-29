@@ -537,7 +537,66 @@ export const chat = {
     apiFetch<void>(`/chat/conversations/${conversationId}/`, { method: 'DELETE' }),
 };
 
-// ── 10. Admin ─────────────────────────────────────────────────────────────────
+// ── 10. Direct Chat ───────────────────────────────────────────────────────────
+
+export interface DirectChatRoom {
+  id: string;
+  buyer_id: string;
+  office_id: string;
+  listing_id?: string | null;
+  last_message?: {
+    content: string;
+    sender_role: 'buyer' | 'office';
+    created_at: string;
+  } | null;
+  unread_count: number;
+  updated_at: string;
+  other_name?: string;
+  other_avatar?: string;
+}
+
+export interface DirectChatMessage {
+  id: string;
+  room_id: string;
+  sender_id: string;
+  sender_role: 'buyer' | 'office';
+  message_type: 1 | 2 | 3; // 1=Text 2=Image 3=File
+  message_type_display?: string;
+  content: string;
+  file_url?: string | null;
+  is_read: boolean;
+  created_at: string;
+}
+
+export const directChat = {
+  createRoom: (otherId: string, listingId?: string) =>
+    apiFetch<{ data: DirectChatRoom }>('/direct-chat/rooms/create', {
+      method: 'POST',
+      body: JSON.stringify(listingId ? { other_id: otherId, listing_id: listingId } : { other_id: otherId }),
+    }),
+
+  listRooms: () =>
+    apiFetch<DirectChatRoom[] | { data: DirectChatRoom[] } | { results: DirectChatRoom[] }>('/direct-chat/rooms'),
+
+  listMessages: (roomId: string) =>
+    apiFetch<DirectChatMessage[] | { data: DirectChatMessage[] } | { results: DirectChatMessage[] }>(`/direct-chat/rooms/${roomId}/messages`),
+
+  sendMessage: (roomId: string, content: string, messageType: 1 | 2 | 3 = 1, fileUrl?: string) =>
+    apiFetch<{ data: DirectChatMessage }>(`/direct-chat/rooms/${roomId}/messages/send`, {
+      method: 'POST',
+      body: JSON.stringify(fileUrl
+        ? { content, message_type: messageType, file_url: fileUrl }
+        : { content, message_type: messageType }),
+    }),
+
+  markRoomAsRead: (roomId: string) =>
+    apiFetch<{ marked_read: number }>(`/direct-chat/rooms/${roomId}/read`, { method: 'PATCH' }),
+
+  getUnreadCount: () =>
+    apiFetch<{ unread_count: number } | { count: number } | { total: number } | Record<string, unknown>>('/direct-chat/unread'),
+};
+
+// ── 11. Admin ─────────────────────────────────────────────────────────────────
 
 export const admin = {
   listOffices: () => apiFetch<unknown[]>('/admin/offices'),
