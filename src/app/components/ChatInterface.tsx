@@ -972,30 +972,30 @@ export function ChatInterface() {
 
       {/* ── Side Panels ── */}
       <Sheet open={sidebarPanel !== null} onOpenChange={(open) => { if (!open) setSidebarPanel(null); }}>
-        <SheetContent side="right" className="w-80 sm:w-96" dir="rtl">
+        <SheetContent side="right" className="w-80 sm:w-96 flex flex-col overflow-hidden p-0" dir="rtl">
           {sidebarPanel === 'favorites' && (
-            <>
-              <SheetHeader className="mb-4">
-                <SheetTitle className="flex items-center gap-2">
-                  <Heart className="w-5 h-5 text-rose-500" />
-                  المفضلة
-                </SheetTitle>
-              </SheetHeader>
-              <div className="space-y-3">
+            <div className="flex flex-col h-full">
+              <div className="px-5 pt-5 pb-3 border-b border-slate-100 flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-rose-500" />
+                  <span className="font-semibold text-slate-800 text-sm">المفضلة</span>
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
                 <p className="text-xs text-slate-400 text-center py-8">احفظ العقارات من الشات لتظهر هنا</p>
               </div>
-            </>
+            </div>
           )}
 
           {sidebarPanel === 'notifications' && (
-            <>
-              <SheetHeader className="mb-4">
-                <SheetTitle className="flex items-center gap-2">
-                  <BellRing className="w-5 h-5 text-amber-500" />
-                  التنبيهات
-                </SheetTitle>
-              </SheetHeader>
-              <div className="space-y-3">
+            <div className="flex flex-col h-full">
+              <div className="px-5 pt-5 pb-3 border-b border-slate-100 flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <BellRing className="w-4 h-4 text-amber-500" />
+                  <span className="font-semibold text-slate-800 text-sm">التنبيهات</span>
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
                 {[
                   { title: 'عقار جديد في الرياض', body: 'فيلا 5 غرف بسعر 1.2 مليون — حي النرجس', time: 'منذ 10 دقائق', dot: 'bg-blue-500' },
                   { title: 'انخفاض سعر عقار محفوظ', body: 'شقة 3 غرف في جدة — انخفض السعر 8%', time: 'منذ ساعة', dot: 'bg-emerald-500' },
@@ -1012,239 +1012,202 @@ export function ChatInterface() {
                   </div>
                 ))}
               </div>
-            </>
-          )}
+            </div>
+          )} 
 
           {sidebarPanel === 'settings' && (
-            <>
-              <SheetHeader className="mb-0">
-                <SheetTitle className="flex items-center gap-2 text-base">
-                  <SlidersHorizontal className="w-4 h-4 text-slate-500" />
-                  الإعدادات
-                </SheetTitle>
-              </SheetHeader>
-
-              <div className="mt-5 space-y-6" dir="rtl">
-                {/* Profile card */}
-                <div
-                  className="relative rounded-2xl p-4 overflow-hidden"
-                  style={{ background: 'linear-gradient(135deg,#0e2057 0%,#312e81 100%)' }}
-                >
-                  <div className="absolute top-0 left-0 w-32 h-32 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-                  <div className="flex items-center gap-3 relative z-10">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-300 to-indigo-400 flex items-center justify-center text-white font-extrabold text-lg shadow-lg ring-2 ring-white/20 flex-shrink-0 overflow-hidden">
-                      {buyerProfile?.logo_url ? (
-                        <img src={buyerProfile.logo_url} alt="" className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}/>
-                      ) : (
-                        ((buyerProfile?.name ?? user?.name) ?? 'م')[0]
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-white font-bold text-sm">{buyerProfile?.name ?? user?.name ?? 'مستخدم'}</p>
-                      <p className="text-blue-200 text-xs mt-0.5">{buyerProfile?.email ?? user?.email ?? buyerProfile?.phone ?? user?.phone ?? ''}</p>
-                    </div>
-                    <button
-                      className="mr-auto text-blue-200 hover:text-white transition-colors"
-                      title="تعديل الملف الشخصي"
-                      onClick={() => {
-                        setEditName(buyerProfile?.name ?? user?.name ?? '');
-                        setEditBio(buyerProfile?.bio ?? '');
-                        setEditPhone(buyerProfile?.phone ?? user?.phone ?? '');
-                        setEditWhatsapp(buyerProfile?.whatsapp ?? '');
-                        setEditAddress(buyerProfile?.address ?? '');
-                        setEditWebsite(buyerProfile?.website ?? '');
-                        setEditLogoUrl(buyerProfile?.logo_url ?? '');
-                        setEditingProfile(true);
-                      }}
-                    >
-                      <UserPen className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <div className="flex gap-3 mt-3 relative z-10">
-                    <span className="text-[11px] bg-white/15 text-blue-100 px-2.5 py-1 rounded-full font-medium">عميل</span>
-                    <span className="text-[11px] bg-emerald-400/20 text-emerald-300 px-2.5 py-1 rounded-full font-medium">✔ حساب موثق</span>
-                  </div>
-                </div>
-
-                {/* Preferences */}
-                <div>
-                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">التفضيلات</p>
-                  <div className="rounded-2xl border border-slate-100 divide-y divide-slate-100 overflow-hidden bg-white">
-                    {[
-                      { label: 'اللغة', value: 'العربية', icon: '🌐' },
-                      { label: 'المدينة الافتراضية', value: 'الرياض', icon: '📍' },
-                      { label: 'عملة العرض', value: 'ر.س (SAR)', icon: '💰' },
-                    ].map((s) => (
-                      <button
-                        key={s.label}
-                        className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-slate-50 transition-colors text-right group"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-base leading-none">{s.icon}</span>
-                          <span className="text-sm text-slate-700 font-medium">{s.label}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-indigo-600">
-                          <span className="text-xs font-semibold">{s.value}</span>
-                          <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 transition-colors rotate-180" />
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Notifications */}
-                <div>
-                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">الإشعارات</p>
-                  <div className="rounded-2xl border border-slate-100 divide-y divide-slate-100 overflow-hidden bg-white">
-                    {([
-                      { label: 'عقارات جديدة', sub: 'إشعار عند توفر عقار مطابق', on: notifNew, set: setNotifNew },
-                      { label: 'تغيرات الأسعار', sub: 'متابعة انخفاض الأسعار', on: notifPrice, set: setNotifPrice },
-                      { label: 'رسائل المكاتب', sub: 'ردود ومحادثات جديدة', on: notifMessages, set: setNotifMessages },
-                    ] as const).map((n) => (
-                      <div key={n.label} className="flex items-center justify-between px-4 py-3.5">
-                        <div>
-                          <p className="text-sm font-medium text-slate-800">{n.label}</p>
-                          <p className="text-xs text-slate-400 mt-0.5">{n.sub}</p>
-                        </div>
-                        <button
-                          onClick={() => n.set((v: boolean) => !v)}
-                          className={`w-10 h-6 rounded-full relative transition-colors flex-shrink-0 ${
-                            n.on ? 'bg-indigo-500' : 'bg-slate-200'
-                          }`}
-                        >
-                          <span
-                            className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${
-                              n.on ? 'right-1' : 'left-1'
-                            }`}
-                          />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Edit profile inline form */}
+            <div className="flex flex-col h-full">
+              {/* ── Header ── */}
+              <div className="flex items-center gap-2 px-5 pt-5 pb-3 border-b border-slate-100 flex-shrink-0">
                 {editingProfile && (
-                  <div className="rounded-2xl border border-indigo-100 bg-white p-4 space-y-3">
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">تعديل الملف الشخصي</p>
+                  <button
+                    onClick={() => setEditingProfile(false)}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 transition-colors"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                )}
+                <SlidersHorizontal className="w-4 h-4 text-slate-500" />
+                <span className="font-semibold text-slate-800 text-sm">
+                  {editingProfile ? 'تعديل الملف الشخصي' : 'الإعدادات'}
+                </span>
+              </div>
+
+              {/* ── Scrollable body ── */}
+              <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5" dir="rtl">
+
+                {editingProfile ? (
+                  /* ─── Edit Profile Screen ─── */
+                  <div className="space-y-4">
+                    {/* Avatar preview */}
+                    <div className="flex justify-center">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-300 to-indigo-400 flex items-center justify-center text-white font-extrabold text-2xl shadow-md ring-2 ring-indigo-100 overflow-hidden">
+                        {editLogoUrl ? (
+                          <img src={editLogoUrl} alt="" className="w-full h-full object-cover"
+                            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                        ) : (
+                          (editName || buyerProfile?.name || user?.name || 'م')[0]
+                        )}
+                      </div>
+                    </div>
+
                     {[
                       { label: 'الاسم', value: editName, set: setEditName, placeholder: 'اسمك الكامل', type: 'text' },
-                      { label: 'نبذة قصيرة', value: editBio, set: setEditBio, placeholder: 'نبذة عنك', type: 'text' },
-                      { label: 'الجوال', value: editPhone, set: setEditPhone, placeholder: '+966500000000', type: 'tel' },
-                      { label: 'واتساب', value: editWhatsapp, set: setEditWhatsapp, placeholder: '+966500000000', type: 'tel' },
+                      { label: 'نبذة قصيرة', value: editBio, set: setEditBio, placeholder: 'اكتب نبذة مختصرة عنك', type: 'text' },
+                      { label: 'رقم الجوال', value: editPhone, set: setEditPhone, placeholder: '+966500000000', type: 'tel' },
+                      { label: 'رقم واتساب', value: editWhatsapp, set: setEditWhatsapp, placeholder: '+966500000000', type: 'tel' },
                       { label: 'العنوان', value: editAddress, set: setEditAddress, placeholder: 'المدينة، الحي', type: 'text' },
                       { label: 'الموقع الإلكتروني', value: editWebsite, set: setEditWebsite, placeholder: 'https://example.com', type: 'url' },
                       { label: 'رابط الصورة الشخصية', value: editLogoUrl, set: setEditLogoUrl, placeholder: 'https://...', type: 'url' },
                     ].map((f) => (
                       <div key={f.label}>
-                        <label className="block text-xs text-slate-500 mb-1">{f.label}</label>
+                        <label className="block text-xs font-medium text-slate-500 mb-1.5">{f.label}</label>
                         <Input
                           type={f.type}
                           value={f.value}
                           onChange={(e) => f.set(e.target.value)}
                           placeholder={f.placeholder}
-                          className="h-9 text-sm"
+                          className="h-10 text-sm bg-slate-50 border-slate-200 focus:bg-white"
                           dir="ltr"
                         />
                       </div>
                     ))}
-                    <div className="flex gap-2 pt-1">
-                      <button
-                        disabled={isSavingProfile}
-                        onClick={async () => {
-                          if (!user?.id) return;
-                          setIsSavingProfile(true);
-                          try {
-                            await buyersApi.updateProfile(user.id, {
-                              name: editName,
-                              bio: editBio,
-                              phone: editPhone,
-                              whatsapp: editWhatsapp,
-                              address: editAddress,
-                              website: editWebsite,
-                              logo_url: editLogoUrl,
-                            });
-                            setBuyerProfile(prev => ({
-                              ...prev,
-                              name: editName, bio: editBio, phone: editPhone,
-                              whatsapp: editWhatsapp, address: editAddress,
-                              website: editWebsite, logo_url: editLogoUrl,
-                            }));
-                            toast.success('تم حفظ الملف الشخصي');
-                            setEditingProfile(false);
-                          } catch {
-                            toast.error('فشل الحفظ، حاول مجدداً');
-                          } finally {
-                            setIsSavingProfile(false);
-                          }
-                        }}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-60 transition-colors"
-                      >
-                        <Check className="w-4 h-4" />
-                        {isSavingProfile ? 'جاري الحفظ…' : 'حفظ'}
-                      </button>
-                      <button
-                        onClick={() => setEditingProfile(false)}
-                        className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors flex items-center gap-1"
-                      >
-                        <X className="w-4 h-4" />
-                        إلغاء
-                      </button>
-                    </div>
-                  </div>
-                )}
 
-                {/* Account actions */}
-                {!editingProfile && (
-                <div>
-                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">الحساب</p>
-                  <div className="rounded-2xl border border-slate-100 divide-y divide-slate-100 overflow-hidden bg-white">
                     <button
-                      onClick={() => {
-                        setEditName(buyerProfile?.name ?? user?.name ?? '');
-                        setEditBio(buyerProfile?.bio ?? '');
-                        setEditPhone(buyerProfile?.phone ?? user?.phone ?? '');
-                        setEditWhatsapp(buyerProfile?.whatsapp ?? '');
-                        setEditAddress(buyerProfile?.address ?? '');
-                        setEditWebsite(buyerProfile?.website ?? '');
-                        setEditLogoUrl(buyerProfile?.logo_url ?? '');
-                        setEditingProfile(true);
+                      disabled={isSavingProfile}
+                      onClick={async () => {
+                        if (!user?.id) return;
+                        setIsSavingProfile(true);
+                        try {
+                          await buyersApi.updateProfile(user.id, {
+                            name: editName,
+                            bio: editBio,
+                            phone: editPhone,
+                            whatsapp: editWhatsapp,
+                            address: editAddress,
+                            website: editWebsite,
+                            logo_url: editLogoUrl,
+                          });
+                          setBuyerProfile(prev => ({
+                            ...prev,
+                            name: editName, bio: editBio, phone: editPhone,
+                            whatsapp: editWhatsapp, address: editAddress,
+                            website: editWebsite, logo_url: editLogoUrl,
+                          }));
+                          toast.success('تم حفظ الملف الشخصي');
+                          setEditingProfile(false);
+                        } catch {
+                          toast.error('فشل الحفظ، حاول مجدداً');
+                        } finally {
+                          setIsSavingProfile(false);
+                        }
                       }}
-                      className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-slate-50 transition-colors text-right group"
+                      className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-60 transition-colors mt-2"
                     >
-                      <div className="flex items-center gap-2">
-                        <UserPen className="w-4 h-4 text-indigo-500" />
-                        <span className="text-sm text-slate-700 font-medium">تعديل الملف الشخصي</span>
-                      </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 transition-colors rotate-180" />
+                      <Check className="w-4 h-4" />
+                      {isSavingProfile ? 'جاري الحفظ…' : 'حفظ التغييرات'}
                     </button>
                   </div>
-                </div>
+                ) : (
+                  /* ─── Main Settings Screen ─── */
+                  <>
+                    {/* Profile card */}
+                    <div
+                      className="relative rounded-2xl p-4 overflow-hidden"
+                      style={{ background: 'linear-gradient(135deg,#0e2057 0%,#312e81 100%)' }}
+                    >
+                      <div className="absolute top-0 left-0 w-32 h-32 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+                      <div className="flex items-center gap-3 relative z-10">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-300 to-indigo-400 flex items-center justify-center text-white font-extrabold text-lg shadow-lg ring-2 ring-white/20 flex-shrink-0 overflow-hidden">
+                          {buyerProfile?.logo_url ? (
+                            <img src={buyerProfile.logo_url} alt="" className="w-full h-full object-cover"
+                              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                          ) : (
+                            ((buyerProfile?.name ?? user?.name) ?? 'م')[0]
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white font-bold text-sm truncate">{buyerProfile?.name ?? user?.name ?? 'مستخدم'}</p>
+                          <p className="text-blue-200 text-xs mt-0.5 truncate">{buyerProfile?.phone ?? user?.phone ?? buyerProfile?.email ?? user?.email ?? ''}</p>
+                          {buyerProfile?.bio && <p className="text-blue-300/80 text-[11px] mt-0.5 truncate">{buyerProfile.bio}</p>}
+                        </div>
+                        <button
+                          className="flex-shrink-0 w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-blue-200 hover:text-white transition-colors flex items-center justify-center"
+                          title="تعديل الملف الشخصي"
+                          onClick={() => {
+                            setEditName(buyerProfile?.name ?? user?.name ?? '');
+                            setEditBio(buyerProfile?.bio ?? '');
+                            setEditPhone(buyerProfile?.phone ?? user?.phone ?? '');
+                            setEditWhatsapp(buyerProfile?.whatsapp ?? '');
+                            setEditAddress(buyerProfile?.address ?? '');
+                            setEditWebsite(buyerProfile?.website ?? '');
+                            setEditLogoUrl(buyerProfile?.logo_url ?? '');
+                            setEditingProfile(true);
+                          }}
+                        >
+                          <UserPen className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <div className="flex gap-2 mt-3 relative z-10">
+                        <span className="text-[11px] bg-white/15 text-blue-100 px-2.5 py-1 rounded-full font-medium">عميل</span>
+                        <span className="text-[11px] bg-emerald-400/20 text-emerald-300 px-2.5 py-1 rounded-full font-medium">✔ حساب موثق</span>
+                      </div>
+                    </div>
+
+                    {/* Notifications */}
+                    <div>
+                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">الإشعارات</p>
+                      <div className="rounded-2xl border border-slate-100 divide-y divide-slate-100 overflow-hidden bg-white">
+                        {([
+                          { label: 'عقارات جديدة', sub: 'إشعار عند توفر عقار مطابق', on: notifNew, set: setNotifNew },
+                          { label: 'تغيرات الأسعار', sub: 'متابعة انخفاض الأسعار', on: notifPrice, set: setNotifPrice },
+                          { label: 'رسائل المكاتب', sub: 'ردود ومحادثات جديدة', on: notifMessages, set: setNotifMessages },
+                        ] as const).map((n) => (
+                          <div key={n.label} className="flex items-center justify-between px-4 py-3.5">
+                            <div>
+                              <p className="text-sm font-medium text-slate-800">{n.label}</p>
+                              <p className="text-xs text-slate-400 mt-0.5">{n.sub}</p>
+                            </div>
+                            <button
+                              onClick={() => n.set((v: boolean) => !v)}
+                              className={`w-10 h-6 rounded-full relative transition-colors flex-shrink-0 ${
+                                n.on ? 'bg-indigo-500' : 'bg-slate-200'
+                              }`}
+                            >
+                              <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${
+                                n.on ? 'right-1' : 'left-1'
+                              }`} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Logout */}
+                    <button
+                      onClick={() => { setSidebarPanel(null); authLogout(); navigate('/'); }}
+                      className="w-full py-3 rounded-2xl bg-red-50 border border-red-100 text-red-500 text-sm font-semibold hover:bg-red-100 active:bg-red-200 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      تسجيل الخروج
+                    </button>
+
+                    <p className="text-center text-[11px] text-slate-300 pb-2">الشات العقاري · الإصدار 1.0.0</p>
+                  </>
                 )}
-
-                {/* Logout */}
-                <button
-                  onClick={() => { setSidebarPanel(null); authLogout(); navigate('/'); }}
-                  className="w-full py-3 rounded-2xl bg-red-50 border border-red-100 text-red-500 text-sm font-semibold hover:bg-red-100 active:bg-red-200 transition-colors flex items-center justify-center gap-2"
-                >
-                  <LogOut className="w-4 h-4" />
-                  تسجيل الخروج
-                </button>
-
-                <p className="text-center text-[11px] text-slate-300 pb-2">الشات العقاري · الإصدار 1.0.0</p>
               </div>
-            </>
+            </div>
           )}
 
           {sidebarPanel === 'help' && (
-            <>
-              <SheetHeader className="mb-4">
-                <SheetTitle className="flex items-center gap-2">
-                  <LifeBuoy className="w-5 h-5 text-indigo-500" />
-                  المساعدة
-                </SheetTitle>
-              </SheetHeader>
-              <div className="space-y-3">
+            <div className="flex flex-col h-full">
+              <div className="px-5 pt-5 pb-3 border-b border-slate-100 flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <LifeBuoy className="w-4 h-4 text-indigo-500" />
+                  <span className="font-semibold text-slate-800 text-sm">المساعدة</span>
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
                 {[
                   { q: 'كيف أبحث عن عقار؟', a: 'اكتب طلبك في مربع النص أسفل الشاشة، مثل: فيلا في الرياض بميزانية مليون ريال.' },
                   { q: 'كيف أحفظ عقاراً في المفضلة؟', a: 'انقر على أيقونة القلب في بطاقة العقار لحفظه في قائمة المفضلة.' },
@@ -1264,7 +1227,7 @@ export function ChatInterface() {
                   <p className="text-xs text-indigo-600">support@alshat-alaqari.com</p>
                 </div>
               </div>
-            </>
+            </div>
           )}
         </SheetContent>
       </Sheet>
