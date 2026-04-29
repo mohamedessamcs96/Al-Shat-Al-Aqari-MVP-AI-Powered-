@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router';
 import { type ChatMessage, mockListings } from '../lib/mock-data';
 import { formatPrice, getCityName } from '../lib/formatters';
 import { chat as chatApi, buyers as buyersApi } from '../lib/api-client';
-import { getUser, getToken, logout as authLogout } from '../lib/auth';
+import { getUser, getToken, getRole, logout as authLogout } from '../lib/auth';
 
 // ── Guest local search ────────────────────────────────────────────────────────
 function guestSearch(text: string): { content: string; listings: any[]; suggestions: string[] } {
@@ -550,9 +550,21 @@ export function ChatInterface() {
             </div>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
-            <button onClick={() => navigate('/demand')} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
+            <button onClick={() => navigate('/demand')} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors" title="طلب عقار">
               <MessageSquare className="w-4 h-4" />
             </button>
+            {isLoggedIn && (
+              <button
+                onClick={() => navigate(getRole() === 'office' ? '/office/direct-chat' : '/direct-chat')}
+                className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-100 text-blue-600 hover:text-blue-700 transition-colors relative"
+                title="المحادثات المباشرة"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"/>
+                  <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/>
+                </svg>
+              </button>
+            )}
             {isLoggedIn ? (
               <button onClick={() => { authLogout(); navigate('/'); }} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors">
                 <LogOut className="w-4 h-4" />
