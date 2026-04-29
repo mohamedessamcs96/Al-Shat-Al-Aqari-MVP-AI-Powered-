@@ -63,17 +63,35 @@ function formatDate(iso: string) {
 }
 
 function getRoomDisplayName(room: DirectChatRoom, myRole: 'buyer' | 'office' | null): string {
-  if (room.other_name) return room.other_name;
-  return myRole === 'buyer' ? 'المكتب العقاري' : 'العميل';
+  // Try every field name the backend might use
+  return (
+    room.other_name ??
+    room.other_user_name ??
+    room.other_display_name ??
+    (myRole === 'buyer' ? room.office_name : room.buyer_name) ??
+    (myRole === 'buyer' ? 'المكتب العقاري' : 'العميل')
+  );
+}
+
+function getRoomAvatar(room: DirectChatRoom, myRole: 'buyer' | 'office' | null): string | undefined {
+  return (
+    room.other_avatar ??
+    room.other_logo ??
+    room.other_photo ??
+    (myRole === 'buyer'
+      ? (room.office_logo ?? room.office_avatar ?? room.office_photo)
+      : (room.buyer_avatar ?? room.buyer_photo))
+  );
 }
 
 function getInitials(name: string): string {
-  return name.charAt(0).toUpperCase();
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map(w => w.charAt(0).toUpperCase())
+    .join('');
 }
-
-// ── WebSocket event types ─────────────────────────────────────────────────────
-
-interface WsConnectionEvent {
   type: 'connection_established';
   user_id: string;
   role: string;
