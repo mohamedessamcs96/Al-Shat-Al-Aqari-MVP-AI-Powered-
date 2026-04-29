@@ -245,14 +245,9 @@ export function LoginPage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6" dir="rtl">
         <div className="w-full max-w-sm">
           {/* Brand */}
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg">
-              <ShieldCheck className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-lg font-bold text-gray-900 leading-none">الشات العقاري</p>
-              <p className="text-xs text-gray-500">لوحة الإدارة</p>
-            </div>
+          <div className="flex flex-col items-center gap-2 mb-8">
+            <img src="/logo.png" alt="عقار شات" className="h-20 w-auto object-contain" />
+            <p className="text-xs text-gray-500">لوحة الإدارة</p>
           </div>
 
           <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-7 space-y-4">
@@ -335,10 +330,7 @@ export function LoginPage() {
         {/* Brand + headline — always visible */}
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-5 lg:mb-16">
-            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-2xl bg-white/10 backdrop-blur-sm ring-1 ring-white/20 flex items-center justify-center shadow-lg shrink-0">
-              <Building2 className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
-            </div>
-            <span className="text-white text-xl lg:text-2xl font-bold tracking-tight">الشات العقاري</span>
+            <img src="/logo-navy.png" alt="عقار شات" className="h-16 lg:h-20 w-auto object-contain" />
           </div>
 
           <h2 className="text-2xl lg:text-5xl xl:text-5xl font-extrabold text-white leading-tight mb-2 lg:mb-5">
