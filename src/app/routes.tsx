@@ -13,7 +13,6 @@ import { OfficeSubscription } from "./components/OfficeSubscription";
 import { MiniPageEditor } from "./components/MiniPageEditor";import { LinktreeEditor } from './components/LinktreeEditor';import { AdminConsole } from "./components/AdminConsole";
 import { OfficeVisits } from "./components/OfficeVisits";
 import { OfficeNegotiations } from "./components/OfficeNegotiations";
-import { BuyerDashboard } from "./components/BuyerDashboard";
 import { NegotiationView } from "./components/NegotiationView";
 import { LoginPage } from "./components/LoginPage";
 import { DemandForm } from "./components/DemandForm";
@@ -47,10 +46,6 @@ export const router = createBrowserRouter([
   {
     path: "/listings/:id",
     Component: ListingDetail,
-  },
-  {
-    path: "/buyer/dashboard",
-    Component: BuyerDashboard,
   },
   {
     path: "/buyer/negotiations/:id",

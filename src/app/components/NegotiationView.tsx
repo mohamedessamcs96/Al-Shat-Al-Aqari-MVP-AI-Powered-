@@ -34,7 +34,7 @@ export function NegotiationView() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900">التفاوض غير موجود</h2>
-          <Button onClick={() => navigate('/buyer/dashboard')} className="mt-4">
+          <Button onClick={() => navigate('/chat')} className="mt-4">
             العودة
           </Button>
         </div>
@@ -74,7 +74,7 @@ export function NegotiationView() {
       {/* Header */}
       <header className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between" dir="ltr">
-          <Button variant="ghost" onClick={() => navigate('/buyer/dashboard')}>
+          <Button variant="ghost" onClick={() => navigate('/chat')}>
             <ArrowLeft className="w-5 h-5 mr-2" />
             رجوع
           </Button>

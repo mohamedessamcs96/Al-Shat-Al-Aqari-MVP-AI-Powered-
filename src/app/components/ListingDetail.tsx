@@ -75,7 +75,7 @@ export function ListingDetail() {
     try {
       await listingsApi.startNegotiation(id!, Number(offerAmount), offerMessage);
       toast.success('تم إرسال عرضك بنجاح! سيقوم المكتب بمراجعته قريباً.');
-      navigate('/buyer/dashboard');
+      navigate('/chat');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'حدث خطأ');
     }

@@ -26,6 +26,10 @@ function extractRooms(raw: unknown): DirectChatRoom[] {
   const r = raw as Record<string, unknown>;
   if (Array.isArray(r?.data)) return r.data as DirectChatRoom[];
   if (Array.isArray(r?.results)) return r.results as DirectChatRoom[];
+  if (Array.isArray(r?.rooms)) return r.rooms as DirectChatRoom[];
+  // { data: { results: [...] } } shape
+  const d = r?.data as Record<string, unknown> | undefined;
+  if (d && Array.isArray(d?.results)) return d.results as DirectChatRoom[];
   return [];
 }
 
@@ -34,6 +38,11 @@ function extractMessages(raw: unknown): DirectChatMessage[] {
   const r = raw as Record<string, unknown>;
   if (Array.isArray(r?.data)) return r.data as DirectChatMessage[];
   if (Array.isArray(r?.results)) return r.results as DirectChatMessage[];
+  if (Array.isArray(r?.messages)) return r.messages as DirectChatMessage[];
+  // { data: { results: [...] } } or { data: { messages: [...] } } shape
+  const d = r?.data as Record<string, unknown> | undefined;
+  if (d && Array.isArray(d?.results)) return d.results as DirectChatMessage[];
+  if (d && Array.isArray(d?.messages)) return d.messages as DirectChatMessage[];
   return [];
 }
 
@@ -129,6 +138,9 @@ export function DirectChat() {
   const wsRef = useRef<WebSocket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const joinedRooms = useRef<Set<string>>(new Set());
+  // Keep a ref in sync so WS message handler always reads the current roomId
+  const selectedRoomIdRef = useRef<string | null>(null);
+  useEffect(() => { selectedRoomIdRef.current = selectedRoomId; }, [selectedRoomId]);
 
   const selectedRoom = rooms.find(r => r.id === selectedRoomId) ?? null;
 
@@ -144,8 +156,8 @@ export function DirectChat() {
     try {
       const raw = await directChat.listRooms();
       setRooms(extractRooms(raw));
-    } catch {
-      // Silently ignore – rooms will be empty
+    } catch (err) {
+      console.error('[DirectChat] loadRooms failed:', err);
     } finally {
       setIsLoadingRooms(false);
     }
@@ -155,17 +167,21 @@ export function DirectChat() {
 
   // ── Load messages for selected room ─────────────────────────────────────────
   const loadMessages = useCallback(async (roomId: string) => {
+    setMessages([]);           // clear old room's messages immediately
     setIsLoadingMessages(true);
     try {
       const raw = await directChat.listMessages(roomId);
-      setMessages(extractMessages(raw));
+      const msgs = extractMessages(raw);
+      console.log('[DirectChat] loaded messages:', msgs.length, raw);
+      setMessages(msgs);
       // Mark as read
       directChat.markRoomAsRead(roomId).catch(() => {});
       // Update unread badge in room list
       setRooms(prev =>
         prev.map(r => (r.id === roomId ? { ...r, unread_count: 0 } : r))
       );
-    } catch {
+    } catch (err) {
+      console.error('[DirectChat] loadMessages failed:', err);
       toast.error('تعذّر تحميل الرسائل');
     } finally {
       setIsLoadingMessages(false);
@@ -202,11 +218,11 @@ export function DirectChat() {
       if (event.type === 'new_message' || event.type === 'message_sent') {
         const e = event as WsNewMessageEvent;
         const msg = e.message;
-        // Add to messages if this room is selected
+        // Use functional update so we always read the latest selectedRoomId via a ref
         setMessages(prev => {
-          // Avoid duplicates
           if (prev.some(m => m.id === msg.id)) return prev;
-          if (e.room_id !== selectedRoomId) return prev;
+          // selectedRoomIdRef is kept in sync below
+          if (e.room_id !== selectedRoomIdRef.current) return prev;
           return [...prev, msg];
         });
         // Update last message preview in room list
@@ -384,7 +400,7 @@ export function DirectChat() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate(myRole === 'office' ? '/office/dashboard' : '/buyer/dashboard')}
+              onClick={() => navigate(myRole === 'office' ? '/office/dashboard' : '/chat')}
             >
               <ArrowRight className="w-4 h-4" />
             </Button>
@@ -512,7 +528,10 @@ export function DirectChat() {
                         <div className="flex-1 h-px bg-gray-200" />
                       </div>
                       {group.msgs.map(msg => {
-                        const isMe = msg.sender_id === myUser?.id || msg.sender_role === myRole;
+                        // Primary: match by sender_id. Fallback: match by role only when id is unavailable.
+                        const isMe = myUser?.id
+                          ? msg.sender_id === myUser.id
+                          : msg.sender_role === myRole;
                         return (
                           <div
                             key={msg.id}
