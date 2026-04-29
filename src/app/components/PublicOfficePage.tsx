@@ -276,10 +276,10 @@ export function PublicOfficePage() {
       )}
 
       {/* Page scroll container */}
-      <div className="relative flex flex-col items-center min-h-[100dvh] px-4 py-10 sm:py-16">
+      <div className="relative flex flex-col items-center min-h-[100dvh] px-4 py-10 sm:py-16 md:py-20">
 
         {/* Avatar — floats above the card */}
-        <div className="relative z-10 mb-[-44px]">
+        <div className="relative z-10 mb-[-44px] md:mb-[-56px]">
           {/* Glow halo */}
           <div className="absolute inset-[-8px] rounded-full pointer-events-none"
             style={{ background: `radial-gradient(circle, ${appearance.btnColor}55 0%, transparent 70%)`, filter: 'blur(8px)' }} />
@@ -288,7 +288,7 @@ export function PublicOfficePage() {
             style={{ border: `2px solid ${appearance.btnColor}60`, borderRadius: '50%' }} />
           {/* Avatar circle */}
           <div
-            className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden relative flex items-center justify-center"
+            className="w-24 h-24 sm:w-28 sm:h-28 md:w-36 md:h-36 rounded-full overflow-hidden relative flex items-center justify-center"
             style={{
               border: '3px solid rgba(255,255,255,0.35)',
               background: `linear-gradient(145deg, ${appearance.btnColor}33, rgba(255,255,255,0.08))`,
@@ -297,7 +297,7 @@ export function PublicOfficePage() {
           >
             {avatarSrc
               ? <img src={avatarSrc} alt={displayName} className="w-full h-full object-cover" />
-              : <span className="text-3xl sm:text-4xl font-black select-none" style={{ color: textColor }}>
+              : <span className="text-3xl sm:text-4xl md:text-5xl font-black select-none" style={{ color: textColor }}>
                   {displayName?.[0]?.toUpperCase() || '؟'}
                 </span>
             }
@@ -306,7 +306,7 @@ export function PublicOfficePage() {
 
         {/* Glass card */}
         <div
-          className="w-full max-w-sm rounded-3xl overflow-hidden relative"
+          className="w-full max-w-sm md:max-w-lg rounded-3xl overflow-hidden relative"
           style={{
             background: cardBg,
             backdropFilter: 'blur(28px)',
@@ -318,15 +318,15 @@ export function PublicOfficePage() {
           }}
         >
           {/* Card header: name + bio */}
-          <div className="pt-14 pb-6 px-6 text-center">
+          <div className="pt-14 pb-6 px-6 md:pt-20 md:pb-8 md:px-10 text-center">
             <h1
-              className="text-xl sm:text-2xl font-black tracking-tight leading-snug mb-1"
+              className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight leading-snug mb-1"
               style={{ color: textColor }}
             >
               {displayName || 'اسم المكتب'}
             </h1>
             {profile.bio && (
-              <p className="text-xs sm:text-sm leading-relaxed mt-2" style={{ color: subColor }}>
+              <p className="text-xs sm:text-sm md:text-base leading-relaxed mt-2" style={{ color: subColor }}>
                 {profile.bio}
               </p>
             )}
@@ -336,14 +336,14 @@ export function PublicOfficePage() {
           <div style={{ height: 1, background: dividerColor, marginInline: '1rem' }} />
 
           {/* Links */}
-          <div className="p-4 space-y-2.5">
+          <div className="p-4 md:p-6 space-y-2.5 md:space-y-3">
             {activeLinks.map((link, i) => (
               <a
                 key={link.id}
                 href={link.url || '#'}
                 target={link.url ? '_blank' : undefined}
                 rel="noopener noreferrer"
-                className="group w-full flex items-center gap-3 px-4 py-3.5 font-bold text-sm relative overflow-hidden"
+                className="group w-full flex items-center gap-3 px-4 py-3.5 md:px-6 md:py-4 font-bold text-sm md:text-base relative overflow-hidden"
                 style={{
                   ...getBtnStyle(),
                   transition: 'transform 0.15s ease, box-shadow 0.2s ease',
