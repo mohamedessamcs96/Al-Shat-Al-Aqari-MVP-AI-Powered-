@@ -158,56 +158,90 @@ function DraggableLink({
 function Preview({ profile, links, appearance }: { profile: Profile; links: LinkItem[]; appearance: Appearance }) {
   const bg = BG_PRESETS.find(b => b.key === appearance.bg)?.style ?? BG_PRESETS[0].style;
   const isDark = appearance.bg !== 'warm-white';
-  const textColor = isDark ? 'text-white' : 'text-gray-900';
-  const subColor = isDark ? 'text-white/60' : 'text-gray-500';
   const fontFamily = appearance.font === 'cairo' ? 'Cairo, sans-serif' :
     appearance.font === 'tajawal' ? 'Tajawal, sans-serif' : 'Inter, sans-serif';
-
   const btnRadiusVal = BTN_RADII.find(r => r.key === appearance.btnRadius)?.radius ?? '9999px';
+  const textColor = isDark ? '#ffffff' : '#111827';
+  const subColor = isDark ? 'rgba(255,255,255,0.6)' : '#6b7280';
+  const iconBg = isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.07)';
 
   const getBtnStyle = (): React.CSSProperties => {
+    const c = appearance.btnColor;
     switch (appearance.btnStyle) {
-      case 'filled': return { background: appearance.btnColor, color: '#fff', borderRadius: btnRadiusVal, border: 'none' };
-      case 'outline': return { background: 'transparent', color: isDark ? '#fff' : appearance.btnColor, borderRadius: btnRadiusVal, border: `2px solid ${isDark ? 'rgba(255,255,255,0.5)' : appearance.btnColor}` };
-      case 'soft': return { background: `${appearance.btnColor}22`, color: isDark ? '#fff' : appearance.btnColor, borderRadius: btnRadiusVal, border: 'none' };
-      case 'shadow': return { background: '#fff', color: appearance.btnColor, borderRadius: btnRadiusVal, border: 'none', boxShadow: `0 4px 14px ${appearance.btnColor}44` };
+      case 'filled':  return { background: c, color: '#fff', borderRadius: btnRadiusVal, border: 'none', boxShadow: `0 4px 18px ${c}55` };
+      case 'outline': return { background: 'transparent', color: isDark ? '#fff' : c, borderRadius: btnRadiusVal, border: `2px solid ${isDark ? 'rgba(255,255,255,0.4)' : c}` };
+      case 'soft':    return { background: `${c}28`, color: isDark ? '#fff' : c, borderRadius: btnRadiusVal, border: 'none' };
+      case 'shadow':  return { background: isDark ? 'rgba(255,255,255,0.12)' : '#fff', color: isDark ? '#fff' : c, borderRadius: btnRadiusVal, border: 'none', boxShadow: `0 6px 20px ${c}44, 0 1px 0 rgba(255,255,255,0.12) inset` };
     }
   };
 
+  const activeLinks = links.filter(l => l.active);
+
   return (
     <div
-      className="w-full h-full rounded-2xl overflow-y-auto py-10 px-5 flex flex-col items-center"
+      className="w-full h-full overflow-y-auto flex flex-col items-center relative"
       style={{ ...bg, fontFamily, minHeight: '100%' }}
       dir="rtl"
     >
-      {/* Avatar */}
-      <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white/30 shadow-xl mb-3 bg-white/20 flex-shrink-0">
-        {profile.avatar
-          ? <img src={profile.avatar} alt="" className="w-full h-full object-cover" />
-          : <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-white/80">{profile.name?.[0] || '؟'}</div>
-        }
-      </div>
-      <h2 className={`text-lg font-extrabold ${textColor} mb-1`}>{profile.name || 'اسم المكتب'}</h2>
-      {profile.bio && <p className={`text-xs ${subColor} text-center max-w-xs mb-5`}>{profile.bio}</p>}
+      {/* Noise texture overlay */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.035]"
+        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundRepeat: 'repeat', backgroundSize: '128px' }}
+      />
+      {/* Color orbs */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full pointer-events-none"
+        style={{ background: appearance.btnColor, opacity: 0.22, filter: 'blur(60px)' }} />
 
-      {/* Links */}
-      <div className="w-full max-w-xs space-y-3 mt-2">
-        {links.filter(l => l.active).map(link => (
-          <button
-            key={link.id}
-            className="w-full flex items-center gap-3 px-4 py-3 font-semibold text-sm transition-all"
-            style={getBtnStyle()}
-          >
-            <IconForKey iconKey={link.icon} className="w-4 h-4 flex-shrink-0" />
-            <span className="flex-1 text-center">{link.title}</span>
-          </button>
-        ))}
-        {links.filter(l => l.active).length === 0 && (
-          <p className={`text-center text-sm ${subColor} opacity-60`}>أضف روابطك لتظهر هنا</p>
+      <div className="relative flex flex-col items-center w-full px-5 py-10">
+        {/* Avatar */}
+        <div className="mb-5 relative">
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{ boxShadow: `0 0 0 3px rgba(255,255,255,0.25), 0 0 0 7px ${appearance.btnColor}55, 0 12px 40px rgba(0,0,0,0.35)` }}
+          />
+          <div className="w-20 h-20 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center relative z-10"
+            style={{ border: '2px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.15)' }}>
+            {profile.avatar
+              ? <img src={profile.avatar} alt="" className="w-full h-full object-cover" />
+              : <span className="text-2xl font-bold" style={{ color: textColor }}>{profile.name?.[0] || '؟'}</span>
+            }
+          </div>
+        </div>
+
+        <h2 className="text-lg font-extrabold mb-1 tracking-tight" style={{ color: textColor }}>
+          {profile.name || 'اسم المكتب'}
+        </h2>
+        {profile.bio && (
+          <p className="text-[11px] text-center max-w-[220px] mb-6 leading-relaxed" style={{ color: subColor }}>
+            {profile.bio}
+          </p>
         )}
-      </div>
+        {!profile.bio && <div className="mb-6" />}
 
-      <p className={`mt-10 text-[10px] ${subColor} opacity-40`}>الشات العقاري</p>
+        {/* Links */}
+        <div className="w-full space-y-2.5">
+          {activeLinks.map(link => (
+            <div
+              key={link.id}
+              className="w-full flex items-center gap-3 px-4 py-3.5 font-semibold text-sm"
+              style={getBtnStyle()}
+            >
+              <div
+                className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ background: iconBg, color: (getBtnStyle() as any).color }}
+              >
+                <IconForKey iconKey={link.icon} className="w-3.5 h-3.5" />
+              </div>
+              <span className="flex-1 text-center text-sm font-bold">{link.title}</span>
+              <div className="w-7 flex-shrink-0" />
+            </div>
+          ))}
+          {activeLinks.length === 0 && (
+            <p className="text-center text-[11px] py-8" style={{ color: subColor, opacity: 0.55 }}>أضف روابطك لتظهر هنا</p>
+          )}
+        </div>
+
+        <p className="mt-10 text-[9px] tracking-widest uppercase" style={{ color: subColor, opacity: 0.35 }}>الشات العقاري</p>
+      </div>
     </div>
   );
 }

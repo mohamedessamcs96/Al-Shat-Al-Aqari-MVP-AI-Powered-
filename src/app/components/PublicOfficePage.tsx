@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router';
 import {
   QrCode, Download, Copy, Check, Edit3,
   Link2, Instagram, Twitter, Youtube, Facebook,
-  Phone, Globe, MessageCircle, Linkedin,
+  Phone, Globe, MessageCircle, Linkedin, ChevronLeft,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Button } from './ui/button';
@@ -233,31 +233,34 @@ export function PublicOfficePage() {
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ ...bgStyle, fontFamily }} dir="rtl">
 
-      {/* ── Decorative background orbs ── */}
-      <div
-        className="absolute top-0 left-0 w-[500px] h-[500px] rounded-full pointer-events-none"
-        style={{ background: appearance.btnColor, opacity: 0.18, filter: 'blur(130px)', transform: 'translate(-40%, -40%)' }}
-      />
-      <div
-        className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full pointer-events-none"
-        style={{ background: appearance.btnColor, opacity: 0.14, filter: 'blur(110px)', transform: 'translate(40%, 40%)' }}
+      {/* Noise texture for depth */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.04]"
+        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundSize: '160px' }}
       />
 
-      {/* ── Floating action bar — owner only ── */}
+      {/* Decorative orbs */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"
+        style={{ width: 600, height: 600, borderRadius: '50%', background: appearance.btnColor, opacity: 0.18, filter: 'blur(120px)', transform: 'translate(-50%, -55%)' }} />
+      <div className="absolute bottom-0 right-0 pointer-events-none"
+        style={{ width: 400, height: 400, borderRadius: '50%', background: appearance.btnColor, opacity: 0.12, filter: 'blur(100px)', transform: 'translate(35%, 40%)' }} />
+      <div className="absolute bottom-0 left-0 pointer-events-none"
+        style={{ width: 300, height: 300, borderRadius: '50%', background: isDark ? '#ffffff' : '#000000', opacity: 0.04, filter: 'blur(80px)', transform: 'translate(-30%, 30%)' }} />
+
+      {/* Floating owner action bar */}
       {isOwner && (
-        <div className="fixed top-4 right-4 z-50 flex gap-2">
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
           <button
             onClick={() => setQrOpen(true)}
-            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-all hover:scale-110"
-            style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)' }}
+            className="w-10 h-10 rounded-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+            style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.2)', boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}
             title="QR Code"
           >
-            <QrCode className="w-5 h-5" style={{ color: textColor }} />
+            <QrCode className="w-4 h-4" style={{ color: textColor }} />
           </button>
           <button
             onClick={() => navigate('/office/linktree')}
-            className="h-10 px-4 rounded-xl text-xs font-semibold shadow-lg transition-all hover:scale-105 flex items-center gap-1.5"
-            style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)', color: textColor }}
+            className="h-10 px-4 rounded-2xl text-xs font-bold flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95"
+            style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.2)', color: textColor, boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}
           >
             <Edit3 className="w-3.5 h-3.5" />
             تعديل
@@ -265,38 +268,43 @@ export function PublicOfficePage() {
         </div>
       )}
 
-      {/* ── Linktree content ── */}
-      <div className="relative flex flex-col items-center py-16 px-5 min-h-screen">
+      {/* Main content */}
+      <div className="relative flex flex-col items-center min-h-screen px-5">
 
-        {/* Avatar */}
-        <div className="mb-5" style={{ filter: `drop-shadow(0 8px 32px ${appearance.btnColor}66)` }}>
+        {/* Top spacer */}
+        <div className="h-16 sm:h-20" />
+
+        {/* Avatar with layered glow rings */}
+        <div className="relative mb-6 flex-shrink-0">
+          {/* Outer glow ring */}
+          <div className="absolute inset-0 rounded-full"
+            style={{ boxShadow: `0 0 0 2px rgba(255,255,255,0.2), 0 0 0 10px ${appearance.btnColor}35, 0 0 60px ${appearance.btnColor}40`, borderRadius: '50%' }} />
+          {/* Avatar circle */}
           <div
-            className="w-28 h-28 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center"
-            style={{
-              border: '3px solid rgba(255,255,255,0.35)',
-              background: 'rgba(255,255,255,0.15)',
-              boxShadow: `0 0 0 6px ${appearance.btnColor}40, 0 16px 48px rgba(0,0,0,0.35)`,
-            }}
+            className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden relative z-10 flex items-center justify-center"
+            style={{ border: '3px solid rgba(255,255,255,0.3)', background: `linear-gradient(135deg, ${appearance.btnColor}44, rgba(255,255,255,0.1))`, boxShadow: '0 16px 48px rgba(0,0,0,0.3)' }}
           >
             {profile.avatar
               ? <img src={profile.avatar} alt={profile.name} className="w-full h-full object-cover" />
-              : <span className="text-4xl font-bold" style={{ color: textColor }}>{profile.name?.[0] || '؟'}</span>
+              : <span className="text-4xl sm:text-5xl font-black" style={{ color: textColor, textShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>{profile.name?.[0] || '؟'}</span>
             }
           </div>
         </div>
 
         {/* Name */}
-        <h1 className="text-2xl font-extrabold mb-1 tracking-tight" style={{ color: textColor }}>
+        <h1 className="text-2xl sm:text-3xl font-black mb-2 tracking-tight text-center leading-tight"
+          style={{ color: textColor, textShadow: '0 2px 12px rgba(0,0,0,0.25)' }}>
           {profile.name || office.name || 'اسم المكتب'}
         </h1>
 
         {/* Bio */}
-        {profile.bio && (
-          <p className="text-sm text-center max-w-sm mb-8 leading-relaxed" style={{ color: subColor }}>
+        {profile.bio ? (
+          <p className="text-sm sm:text-base text-center max-w-xs sm:max-w-sm mb-10 leading-relaxed" style={{ color: subColor }}>
             {profile.bio}
           </p>
+        ) : (
+          <div className="mb-10" />
         )}
-        {!profile.bio && <div className="mb-8" />}
 
         {/* Links */}
         <div className="w-full max-w-sm space-y-3">
@@ -306,51 +314,56 @@ export function PublicOfficePage() {
               href={link.url || '#'}
               target={link.url ? '_blank' : undefined}
               rel="noopener noreferrer"
-              className="w-full flex items-center gap-3 px-4 py-4 font-semibold text-sm"
+              className="group w-full flex items-center gap-3 px-4 py-4 font-bold text-sm relative overflow-hidden"
               style={{
                 ...getBtnStyle(),
-                transition: 'transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease',
-                animationDelay: `${i * 55}ms`,
+                transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                animationDelay: `${i * 50}ms`,
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.transform = 'translateY(-3px)';
-                e.currentTarget.style.boxShadow = `0 8px 24px ${appearance.btnColor}55`;
+                (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-2px) scale(1.01)';
+                (e.currentTarget as HTMLAnchorElement).style.boxShadow = `0 12px 32px ${appearance.btnColor}60`;
               }}
               onMouseLeave={e => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = (getBtnStyle() as any).boxShadow ?? '';
+                (e.currentTarget as HTMLAnchorElement).style.transform = 'none';
+                (e.currentTarget as HTMLAnchorElement).style.boxShadow = (getBtnStyle() as any).boxShadow ?? '';
               }}
             >
+              {/* Shine sweep on hover */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                style={{ background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%)' }} />
+              {/* Icon badge */}
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{ background: iconBg }}
+                className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 relative z-10"
+                style={{ background: iconBg, color: (getBtnStyle() as any).color }}
               >
                 <LinkIcon iconKey={link.icon} className="w-4 h-4" />
               </div>
-              <span className="flex-1 text-center">{link.title}</span>
-              {/* Invisible spacer to keep text centred over the icon */}
-              <div className="w-8 flex-shrink-0" />
+              {/* Title — centred over the icon using absolute positioning trick */}
+              <span className="flex-1 text-center relative z-10 text-sm font-bold tracking-wide">{link.title}</span>
+              {/* Chevron */}
+              <ChevronLeft className="w-4 h-4 flex-shrink-0 opacity-50 relative z-10 group-hover:opacity-80 transition-opacity" />
             </a>
           ))}
           {activeLinks.length === 0 && (
-            <p className="text-center text-sm py-12" style={{ color: subColor, opacity: 0.55 }}>
+            <p className="text-center text-sm py-16" style={{ color: subColor, opacity: 0.45 }}>
               لم يتم إضافة روابط بعد
             </p>
           )}
         </div>
 
         {/* Footer */}
-        <div className="mt-auto pt-14">
+        <div className="mt-auto pt-14 pb-8">
           <div
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs"
-            style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(6px)', color: subColor, opacity: 0.55, border: '1px solid rgba(255,255,255,0.12)' }}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-medium tracking-wide"
+            style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)', color: subColor, border: '1px solid rgba(255,255,255,0.1)' }}
           >
             مدعوم بـ الشات العقاري
           </div>
         </div>
       </div>
 
-      {/* QR Dialog — owner only */}
+      {/* QR Dialog */}
       {isOwner && (
         <QRDialog
           open={qrOpen}
