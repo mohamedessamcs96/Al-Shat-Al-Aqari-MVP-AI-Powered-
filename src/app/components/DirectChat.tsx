@@ -476,9 +476,7 @@ export function DirectChat() {
                         )}
                       >
                         <Avatar className="w-10 h-10 flex-shrink-0 mt-0.5">
-                          {getRoomAvatar(room, myRole) && (
-                            <AvatarImage src={getRoomAvatar(room, myRole) as string} alt={name} className="object-cover" />
-                          )}
+                          <AvatarImage src={getRoomAvatar(room, myRole) ?? ''} alt={name} className="object-cover" />
                           <AvatarFallback className="bg-blue-100 text-blue-700 font-bold text-sm">
                             {getInitials(name)}
                           </AvatarFallback>
@@ -521,9 +519,7 @@ export function DirectChat() {
             {/* Chat header */}
             <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-3 shadow-sm">
               <Avatar className="w-10 h-10 flex-shrink-0">
-                {getRoomAvatar(selectedRoom, myRole) && (
-                  <AvatarImage src={getRoomAvatar(selectedRoom, myRole) as string} alt={getRoomDisplayName(selectedRoom, myRole)} className="object-cover" />
-                )}
+                <AvatarImage src={getRoomAvatar(selectedRoom, myRole) ?? ''} alt={getRoomDisplayName(selectedRoom, myRole)} className="object-cover" />
                 <AvatarFallback className="bg-blue-100 text-blue-700 font-bold">
                   {getInitials(getRoomDisplayName(selectedRoom, myRole))}
                 </AvatarFallback>

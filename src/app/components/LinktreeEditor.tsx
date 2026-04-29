@@ -251,17 +251,37 @@ export function LinktreeEditor() {
 
   useEffect(() => {
     if (!officeId) return;
-    officesApi.getById(officeId)
-      .then((d: any) => { if (d?.slug) setOfficeSlug(d.slug); })
-      .catch(() => {});
-    officesApi.getLinktree(officeId)
+
+    // Load office profile first to use as fallback for name/logo
+    const officeProfilePromise = officesApi.getById(officeId)
       .then((data: any) => {
-        // Unwrap API envelope: { success, data: {...} } or flat
         const d = data?.data ?? data;
-        if (d.profile) setProfile({ name: d.profile.name ?? '', bio: d.profile.bio ?? '', avatar: d.profile.avatar ?? '' });
-        if (d.links && Array.isArray(d.links)) setLinks(d.links);
-        if (d.appearance) {
-          // Map API field names → internal state
+        if (d?.slug) setOfficeSlug(d.slug);
+        return d;
+      })
+      .catch(() => null);
+
+    officesApi.getLinktree(officeId)
+      .then(async (data: any) => {
+        const d = data?.data ?? data;
+        const hasProfile = d?.profile && (d.profile.name || d.profile.avatar);
+
+        if (hasProfile) {
+          setProfile({ name: d.profile.name ?? '', bio: d.profile.bio ?? '', avatar: d.profile.avatar ?? '' });
+        } else {
+          // First-time setup: seed from office profile
+          const office = await officeProfilePromise;
+          if (office) {
+            setProfile(prev => ({
+              name: office.name ?? prev.name,
+              bio: office.bio ?? prev.bio,
+              avatar: office.logo_url ?? office.logo ?? office.avatar ?? prev.avatar,
+            }));
+          }
+        }
+
+        if (d?.links && Array.isArray(d.links)) setLinks(d.links);
+        if (d?.appearance) {
           const a = d.appearance;
           setAppearance(prev => ({
             ...prev,
@@ -273,7 +293,18 @@ export function LinktreeEditor() {
           }));
         }
       })
-      .catch((_err) => { console.warn('[linktree] load error', _err); });
+      .catch(async (_err) => {
+        console.warn('[linktree] load error', _err);
+        // No linktree yet — still seed name/logo from office profile
+        const office = await officeProfilePromise;
+        if (office) {
+          setProfile(prev => ({
+            name: office.name ?? prev.name,
+            bio: office.bio ?? prev.bio,
+            avatar: office.logo_url ?? office.logo ?? office.avatar ?? prev.avatar,
+          }));
+        }
+      });
   }, [officeId]);
 
   const selectedLink = links.find(l => l.id === selectedLinkId) ?? null;

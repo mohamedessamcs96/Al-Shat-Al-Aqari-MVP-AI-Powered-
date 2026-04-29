@@ -545,9 +545,13 @@ export interface DirectChatRoom {
   office_id: string;
   listing_id?: string | null;
   last_message?: {
+    id?: string;
     content: string;
+    sender_id?: string;
     sender_role: 'buyer' | 'office';
+    message_type?: number;
     created_at: string;
+    is_read?: boolean;
   } | null;
   unread_count: number;
   updated_at: string;
