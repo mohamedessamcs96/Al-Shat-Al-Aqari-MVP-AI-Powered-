@@ -217,18 +217,18 @@ export function LoginPage() {
   const roles = [
     {
       id: 'buyer' as Role,
-      icon: <User className="w-6 h-6 text-blue-600" />,
+      icon: <User className="w-6 h-6 text-[#168E80]" />,
       iconBg: 'bg-blue-50',
       title: 'دخول العملاء',
       desc: 'ابحث عن عقارك المثالي',
-      hoverBorder: 'hover:border-blue-400',
-      hoverBg: 'hover:bg-blue-50/40',
-      activeBorder: 'border-blue-400',
-      activeBg: 'bg-blue-50/40',
+      hoverBorder: 'hover:border-[#36DAC8]',
+      hoverBg: 'hover:bg-[#E8FBF8]/60',
+      activeBorder: 'border-[#36DAC8]',
+      activeBg: 'bg-[#E8FBF8]/60',
     },
     {
       id: 'office' as Role,
-      icon: <Building2 className="w-6 h-6 text-indigo-600" />,
+      icon: <Building2 className="w-6 h-6 text-[#17254B]" />,
       iconBg: 'bg-indigo-50',
       title: 'المكاتب العقارية',
       desc: 'إدارة وتسويق عقاراتك',
@@ -325,11 +325,11 @@ export function LoginPage() {
         className="relative overflow-hidden flex flex-col justify-between
                    px-6 pt-12 pb-0 min-h-[260px]
                    lg:min-h-screen lg:w-1/2 xl:w-[58%] lg:p-12 xl:p-16"
-        style={{ background: 'linear-gradient(145deg,#0a0f1e 0%,#0e2057 45%,#1a1060 100%)' }}
+        style={{ background: 'linear-gradient(145deg,#070D22 0%,#17254B 55%,#0F1A38 100%)' }}
       >
         {/* Decorative blobs */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-600/10 rounded-full translate-y-1/2 -translate-x-1/3 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#36DAC8]/10 rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#36DAC8]/8 rounded-full translate-y-1/2 -translate-x-1/3 pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-purple-700/10 rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
 
         {/* Brand + headline — always visible */}
@@ -462,8 +462,8 @@ export function LoginPage() {
             <FormCard>
               <BackButton onClick={() => setActiveRole(null)} />
               <FormHeader
-                icon={<User className="w-6 h-6 text-blue-600" />}
-                bg="bg-blue-50"
+                icon={<User className="w-6 h-6 text-[#168E80]" />}
+                bg="bg-[#E8FBF8]"
                 title="دخول العملاء"
                 desc="ابدأ رحلة البحث عن عقارك"
               />
@@ -634,7 +634,7 @@ export function LoginPage() {
             <FormCard>
               <BackButton onClick={() => setActiveRole(null)} />
               <FormHeader
-                icon={<Building2 className="w-6 h-6 text-indigo-600" />}
+                icon={<Building2 className="w-6 h-6 text-[#17254B]" />}
                 bg="bg-indigo-50"
                 title="المكاتب العقارية"
                 desc="دخول وإدارة مكتبك"

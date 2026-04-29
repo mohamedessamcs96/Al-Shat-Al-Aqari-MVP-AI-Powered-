@@ -456,17 +456,17 @@ export function ChatInterface() {
           ${sidebarOpen ? 'translate-x-0 w-72 lg:w-64' : 'translate-x-full lg:translate-x-0 lg:w-0'}
           overflow-hidden transition-all duration-300 flex-shrink-0 flex flex-col
         `}
-        style={{ background: 'linear-gradient(145deg,#0a0f1e 0%,#0e2057 45%,#1a1060 100%)' }}
+        style={{ background: 'linear-gradient(145deg,#070D22 0%,#17254B 50%,#0F1A38 100%)' }}
       >
         {/* Decorative blobs — same as login hero */}
-        <div className="absolute top-0 right-0 w-48 h-48 bg-blue-600/10 rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-40 h-40 bg-indigo-600/10 rounded-full translate-y-1/2 -translate-x-1/3 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-48 h-48 bg-teal-500/10 rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-40 h-40 bg-teal-600/10 rounded-full translate-y-1/2 -translate-x-1/3 pointer-events-none" />
 
         {/* User header */}
         <div className="relative z-10 flex items-center gap-3 px-4 py-4 border-b border-white/10 flex-shrink-0">
           {isLoggedIn ? (
             <>
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-lg shadow-blue-900/40 ring-1 ring-white/20 overflow-hidden">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#36DAC8] to-[#168E80] flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-lg shadow-blue-900/40 ring-1 ring-white/20 overflow-hidden">
                 {buyerProfile?.logo_url
                   ? <img src={buyerProfile.logo_url} alt={user?.name ?? ''} className="w-full h-full object-cover" />
                   : (user?.name ?? 'م')[0]
@@ -574,7 +574,7 @@ export function ChatInterface() {
             <div className="flex items-center gap-2 min-w-0">
               <div
                 className="w-8 h-8 rounded-xl flex items-center justify-center shadow-md shadow-blue-900/30 ring-1 ring-white/20 flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg,#0e2057,#1a1060)' }}
+                style={{ background: 'linear-gradient(135deg,#17254B,#0F1A38)' }}
               >
                 <Building2 className="w-4 h-4 text-white" />
               </div>
@@ -626,7 +626,7 @@ export function ChatInterface() {
               <div className="text-center pt-8 pb-2">
                 <div
                   className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 shadow-lg shadow-indigo-900/30 ring-1 ring-white/10 overflow-hidden"
-                  style={{ background: 'linear-gradient(135deg,#0e2057,#1a1060)' }}
+                  style={{ background: 'linear-gradient(135deg,#17254B,#0F1A38)' }}
                 >
                   <img src="/favicon.svg" alt="سارة" className="w-full h-full object-cover" />
                 </div>
@@ -657,7 +657,7 @@ export function ChatInterface() {
                 {message.role === 'assistant' && (
                   <div
                     className="w-8 h-8 rounded-xl flex-shrink-0 shadow-md shadow-indigo-900/30 mt-0.5 ring-1 ring-white/10 overflow-hidden"
-                    style={{ background: 'linear-gradient(135deg,#0e2057,#1a1060)' }}
+                    style={{ background: 'linear-gradient(135deg,#17254B,#0F1A38)' }}
                   >
                     <img src="/favicon.svg" alt="سارة" className="w-full h-full object-cover" />
                   </div>
@@ -668,10 +668,10 @@ export function ChatInterface() {
                   <div
                     className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                       message.role === 'user'
-                        ? 'text-white rounded-tr-sm shadow-md shadow-indigo-900/30'
-                        : 'bg-white border border-slate-100 text-slate-800 rounded-tl-sm shadow-sm'
+                        ? 'text-[#17254B] font-medium rounded-tr-sm shadow-md'
+                        : 'bg-white border border-[#C8CEDF] text-[#0B1226] rounded-tl-sm shadow-sm'
                     }`}
-                    style={message.role === 'user' ? { background: 'linear-gradient(135deg,#0e2057,#1a1060)' } : {}}
+                    style={message.role === 'user' ? { background: '#36DAC8' } : {}}
                     dir="rtl"
                   >
                     {message.listings && message.listings.length > 0
@@ -904,7 +904,7 @@ export function ChatInterface() {
 
                 {/* User avatar */}
                 {message.role === 'user' && (
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 mt-0.5 text-white font-bold text-sm shadow-md shadow-indigo-900/30 ring-1 ring-white/20 overflow-hidden">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#36DAC8] to-[#168E80] flex items-center justify-center flex-shrink-0 mt-0.5 text-white font-bold text-sm shadow-md shadow-[#0F1A38]/30 ring-1 ring-white/20 overflow-hidden">
                     {buyerProfile?.logo_url
                       ? <img src={buyerProfile.logo_url} alt={user?.name ?? ''} className="w-full h-full object-cover" />
                       : (buyerProfile?.name ?? user?.name ?? 'م')[0]
@@ -919,7 +919,7 @@ export function ChatInterface() {
               <div dir="ltr" className="flex gap-3 items-start">
                 <div
                   className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-white font-bold text-sm ring-1 ring-white/10"
-                  style={{ background: 'linear-gradient(135deg,#0e2057,#1a1060)' }}
+                  style={{ background: 'linear-gradient(135deg,#17254B,#0F1A38)' }}
                 >
                   س
                 </div>
@@ -966,7 +966,7 @@ export function ChatInterface() {
                 onClick={() => handleSend()}
                 disabled={!inputValue.trim()}
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0 disabled:opacity-40 transition-all hover:scale-105 shadow-md shadow-indigo-900/30"
-                style={{ background: 'linear-gradient(135deg,#0e2057,#1a1060)' }}
+                style={{ background: 'linear-gradient(135deg,#17254B,#0F1A38)' }}
               >
                 <Send className="w-4 h-4" />
               </button>

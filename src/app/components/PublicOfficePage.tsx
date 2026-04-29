@@ -13,7 +13,7 @@ import { getUser } from '../lib/auth';
 
 // ─── Linktree rendering constants (mirrored from LinktreeEditor) ──────────────
 const BG_PRESETS: { key: string; style: React.CSSProperties }[] = [
-  { key: 'indigo-dark', style: { background: 'linear-gradient(135deg,#0e2057 0%,#312e81 100%)' } },
+  { key: 'indigo-dark', style: { background: 'linear-gradient(135deg,#17254B 0%,#0F1A38 100%)' } },
   { key: 'emerald',     style: { background: 'linear-gradient(135deg,#064e3b 0%,#065f46 100%)' } },
   { key: 'rose',        style: { background: 'linear-gradient(135deg,#881337 0%,#be185d 100%)' } },
   { key: 'amber',       style: { background: 'linear-gradient(135deg,#78350f 0%,#b45309 100%)' } },
@@ -90,7 +90,7 @@ function QRDialog({ open, onClose, url, officeName, logoUrl }: {
             <p className="text-xs text-gray-500 mt-0.5 break-all">{url}</p>
           </div>
           <div className="flex gap-2 w-full">
-            <Button className="flex-1 gap-2 bg-blue-600 hover:bg-blue-700" onClick={handleDownload}>
+            <Button className="flex-1 gap-2 bg-[#36DAC8] hover:bg-[#1FB7A6] text-[#17254B]" onClick={handleDownload}>
               <Download className="w-4 h-4" /> تحميل PNG
             </Button>
             <Button variant="outline" className="flex-1 gap-2" onClick={handleCopy}>

@@ -346,7 +346,7 @@ export function OfficeDashboard() {
   };
 
   const stats = [
-    { label: 'إجمالي العقارات', value: officeListings.length, delta: '+3 هذا الشهر', positive: true, sparkColor: '#3b82f6', sparkData: [1,1,2,2,2,2,3,2,3,3,2,3,3,2,3], icon: <Building2 className="w-5 h-5" />, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'إجمالي العقارات', value: officeListings.length, delta: '+3 هذا الشهر', positive: true, sparkColor: '#36DAC8', sparkData: [1,1,2,2,2,2,3,2,3,3,2,3,3,2,3], icon: <Building2 className="w-5 h-5" />, color: 'text-[#1FB7A6]', bg: 'bg-[#E8FBF8]' },
     { label: 'المشاهدات', value: totalViews.toLocaleString(), delta: apiAnalytics ? '' : '—', positive: true, sparkColor: '#8b5cf6', sparkData: trendPoints.length ? trendPoints : [], icon: <Eye className="w-5 h-5" />, color: 'text-purple-600', bg: 'bg-purple-50' },
     { label: 'العملاء المحتملون', value: totalLeads, delta: '', positive: true, sparkColor: '#10b981', sparkData: [], icon: <Users className="w-5 h-5" />, color: 'text-green-600', bg: 'bg-green-50' },
     { label: 'معدل التحويل', value: conversionRate ? `${conversionRate}%` : '—', delta: '', positive: true, sparkColor: '#f97316', sparkData: [], icon: <TrendingUp className="w-5 h-5" />, color: 'text-orange-600', bg: 'bg-orange-50' },
@@ -358,7 +358,7 @@ export function OfficeDashboard() {
       <header className="bg-white border-b sticky top-0 z-20 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#17254B] to-[#36DAC8] flex items-center justify-center">
               <Building2 className="w-4 h-4 text-white" />
             </div>
             <span className="font-bold text-gray-900 hidden sm:block">الشات العقاري</span>
@@ -367,7 +367,7 @@ export function OfficeDashboard() {
             <button
               title="المحادثات المباشرة"
               onClick={() => navigate('/office/direct-chat')}
-              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-50 transition-colors text-blue-600 relative"
+              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#E8FBF8] transition-colors text-[#1FB7A6] relative"
             >
               <MessageSquare className="w-4 h-4" />
               {unreadDirectCount > 0 && (
@@ -403,7 +403,7 @@ export function OfficeDashboard() {
                     onError={() => setLogoImgError(true)}
                   />
                 ) : (
-                  <span className="text-blue-600 text-2xl sm:text-3xl font-bold select-none">
+                  <span className="text-[#1FB7A6] text-2xl sm:text-3xl font-bold select-none">
                     {office.name.charAt(0).toUpperCase()}
                   </span>
                 )}
@@ -414,7 +414,7 @@ export function OfficeDashboard() {
                 <div className="flex flex-wrap items-center gap-2 mb-1.5">
                   <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{office.name}</h1>
                   {office.verified && (
-                    <span className="flex items-center gap-1 text-xs text-blue-600 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full font-medium">
+                    <span className="flex items-center gap-1 text-xs text-[#1FB7A6] bg-[#E8FBF8] border border-[#36DAC8]/30 px-2 py-0.5 rounded-full font-medium">
                       <CheckCircle2 className="w-3 h-3" />
                       موثق
                     </span>
@@ -445,7 +445,7 @@ export function OfficeDashboard() {
                   <Link2 className="w-3.5 h-3.5" />
                   صفحة الروابط
                 </Button>
-                <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-700" onClick={() => navigate('/office/listings')}>
+                <Button size="sm" className="gap-1.5 bg-[#36DAC8] hover:bg-[#1FB7A6] text-[#17254B]" onClick={() => navigate('/office/listings')}>
                   <Plus className="w-3.5 h-3.5" />
                   إضافة عقار
                 </Button>
@@ -470,7 +470,7 @@ export function OfficeDashboard() {
                 onClick={() => setActiveTab(item.tab)}
                 className={`flex items-center gap-2 px-4 py-3.5 text-sm font-medium border-b-2 whitespace-nowrap transition-all ${
                   activeTab === item.tab
-                    ? 'border-blue-600 text-blue-600'
+                    ? 'border-[#36DAC8] text-[#1FB7A6]'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
@@ -478,7 +478,7 @@ export function OfficeDashboard() {
                 {item.label}
                 {item.badge > 0 && (
                   <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
-                    activeTab === item.tab ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'
+                    activeTab === item.tab ? 'bg-[#E8FBF8] text-[#1FB7A6]' : 'bg-gray-100 text-gray-500'
                   }`}>{item.badge}</span>
                 )}
               </button>
@@ -527,7 +527,7 @@ export function OfficeDashboard() {
                 <div className="flex items-center justify-between mb-4" dir="rtl">
                   <h3 className="font-semibold text-gray-900">أحدث العملاء المحتملين</h3>
                   <button
-                    className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                    className="text-sm text-[#1FB7A6] hover:underline flex items-center gap-1"
                     onClick={() => setActiveTab('leads')}
                   >
                     <ChevronRight className="w-3.5 h-3.5" /> عرض الكل
@@ -540,7 +540,7 @@ export function OfficeDashboard() {
                       className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#36DAC8] to-[#17254B] flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
                           {demand.buyer_name.charAt(0)}
                         </div>
                         <div>
@@ -559,7 +559,7 @@ export function OfficeDashboard() {
                             ? 'bg-red-100 text-red-700 border-red-200 text-xs'
                             : demand.intent_level === 'serious'
                             ? 'bg-orange-100 text-orange-700 border-orange-200 text-xs'
-                            : 'bg-blue-100 text-blue-700 border-blue-200 text-xs'
+                            : 'bg-[#E8FBF8] text-[#168E80] border-[#36DAC8]/30 text-xs'
                         }
                       >
                         {demand.intent_level === 'urgent' ? 'عاجل' : demand.intent_level === 'serious' ? 'جاد' : 'تصفح'}
@@ -576,13 +576,13 @@ export function OfficeDashboard() {
               <h3 className="font-semibold text-gray-900 mb-4 text-right">إجراءات سريعة</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
-                  { icon: <Plus className="w-5 h-5 text-blue-600" />, label: 'إضافة عقار جديد', bg: 'bg-blue-50', onClick: () => setActiveTab('listings') },
+                  { icon: <Plus className="w-5 h-5 text-[#1FB7A6]" />, label: 'إضافة عقار جديد', bg: 'bg-[#E8FBF8]', onClick: () => setActiveTab('listings') },
                   { icon: <MessageSquare className="w-5 h-5 text-green-600" />, label: 'الرد على العملاء', bg: 'bg-green-50', onClick: () => setActiveTab('leads') },
                 ].map(action => (
                   <button
                     key={action.label}
                     onClick={action.onClick}
-                    className="flex items-center justify-end gap-3 p-4 rounded-xl border-2 border-dashed border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all"
+                    className="flex items-center justify-end gap-3 p-4 rounded-xl border-2 border-dashed border-gray-200 hover:border-[#36DAC8]/50 hover:bg-[#E8FBF8]/50 transition-all"
                     dir="rtl"
                   >
                     <span className="font-medium text-gray-700 text-sm">{action.label}</span>
@@ -632,7 +632,7 @@ export function OfficeDashboard() {
                 {/* Info + actions */}
                 <div className="flex-1 text-center sm:text-right">
                   <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
-                    <QrCode className="w-4 h-4 text-blue-600" />
+                    <QrCode className="w-4 h-4 text-[#1FB7A6]" />
                     <h3 className="font-semibold text-gray-900">رمز QR لصفحة المكتب</h3>
                   </div>
                   <p className="text-sm text-gray-500 mb-1">
@@ -641,7 +641,7 @@ export function OfficeDashboard() {
                   <p className="text-xs text-gray-400 mb-4 break-all">{pageUrl}</p>
 
                   <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
-                    <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-700" onClick={handleQrDownload}>
+                    <Button size="sm" className="gap-1.5 bg-[#36DAC8] hover:bg-[#1FB7A6] text-[#17254B]" onClick={handleQrDownload}>
                       <Download className="w-3.5 h-3.5" />
                       تحميل PNG
                     </Button>
@@ -663,7 +663,7 @@ export function OfficeDashboard() {
           <TabsContent value="listings" className="mt-0">
             <div className="flex items-center justify-between mb-4" dir="rtl">
               <h3 className="font-semibold text-gray-900">عقاراتي ({officeListings.length})</h3>
-              <Button size="sm" className="gap-1 bg-blue-600 hover:bg-blue-700" onClick={() => navigate('/office/listings')}>
+              <Button size="sm" className="gap-1 bg-[#36DAC8] hover:bg-[#1FB7A6] text-[#17254B]" onClick={() => navigate('/office/listings')}>
                 <Plus className="w-4 h-4" /> إضافة عقار
               </Button>
             </div>
@@ -722,7 +722,7 @@ export function OfficeDashboard() {
                     {/* Quality score */}
                     <div className="mb-4">
                       <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                        <span className="font-medium text-blue-600">{listing.quality_score ?? 0}%</span>
+                        <span className="font-medium text-[#1FB7A6]">{listing.quality_score ?? 0}%</span>
                         <span>جودة الإعلان</span>
                       </div>
                       <Progress value={listing.quality_score ?? 0} className="h-1.5" />
@@ -731,7 +731,7 @@ export function OfficeDashboard() {
                     <div className="flex gap-2">
                       <Button
                         size="sm"
-                        className="flex-1 text-xs bg-blue-600 hover:bg-blue-700 rounded-lg"
+                        className="flex-1 text-xs bg-[#36DAC8] hover:bg-[#1FB7A6] text-[#17254B] rounded-lg"
                         onClick={() => navigate(`/listings/${listing.id}`)}
                       >
                         عرض
@@ -749,7 +749,7 @@ export function OfficeDashboard() {
             {/* Page builder analytics */}
             <div>
               <h3 className="font-semibold text-gray-900 mb-3 text-sm flex items-center gap-2" dir="rtl">
-                <BarChart3 className="w-4 h-4 text-blue-600" />
+                <BarChart3 className="w-4 h-4 text-[#1FB7A6]" />
                 تحليلات صفحة المكتب العامة
               </h3>
               <PageAnalyticsDashboard officeId={officeId} />
@@ -764,7 +764,7 @@ export function OfficeDashboard() {
               ].map(m => (
                 <Card key={m.label} className="p-4 border-0 shadow-sm">
                   <p className="text-xs text-gray-500 mb-1">{m.label}</p>
-                  <p className={`text-3xl font-bold mb-1 ${m.blue ? 'text-blue-600' : 'text-gray-900'}`}>{m.value}</p>
+                  <p className={`text-3xl font-bold mb-1 ${m.blue ? 'text-[#1FB7A6]' : 'text-gray-900'}`}>{m.value}</p>
                   <p className={`text-xs ${m.green ? 'text-green-600' : 'text-gray-500'}`}>{m.delta}</p>
                 </Card>
               ))}
@@ -777,7 +777,7 @@ export function OfficeDashboard() {
                 <div className="flex items-center justify-center mb-6">
                   <div
                     className="relative w-36 h-36 rounded-full flex items-center justify-center"
-                    style={{ background: 'conic-gradient(#3b82f6 0deg 126deg, #8b5cf6 126deg 252deg, #10b981 252deg 360deg)', padding: '8px' }}
+                    style={{ background: 'conic-gradient(#36DAC8 0deg 126deg, #8b5cf6 126deg 252deg, #10b981 252deg 360deg)', padding: '8px' }}
                   >
                     <div className="w-full h-full rounded-full bg-white flex flex-col items-center justify-center shadow-inner">
                       <p className="text-xs text-gray-500">نسبة التحويل</p>
@@ -787,7 +787,7 @@ export function OfficeDashboard() {
                 </div>
                 <div className="space-y-2.5 text-sm">
                   {[
-                    { color: '#3b82f6', label: 'المشاهدات', value: totalViews ? totalViews.toLocaleString() : '—' },
+                    { color: '#36DAC8', label: 'المشاهدات', value: totalViews ? totalViews.toLocaleString() : '—' },
                     { color: '#8b5cf6', label: 'الاستفسارات', value: inquiries ? String(inquiries) : '—' },
                     { color: '#10b981', label: 'الزيارات', value: visits ? String(visits) : '—' },
                   ].map(row => (
@@ -810,8 +810,8 @@ export function OfficeDashboard() {
                     <svg width="100%" height="100%" viewBox="0 0 300 120" preserveAspectRatio="none">
                       <defs>
                         <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.25" />
-                          <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+                          <stop offset="0%" stopColor="#36DAC8" stopOpacity="0.25" />
+                          <stop offset="100%" stopColor="#36DAC8" stopOpacity="0" />
                         </linearGradient>
                       </defs>
                       {(() => {
@@ -828,8 +828,8 @@ export function OfficeDashboard() {
                         return (
                           <>
                             <polygon points={areaStr} fill="url(#areaGrad)" />
-                            <polyline points={lineStr} fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
-                            {pts.map(([cx, cy], i) => <circle key={i} cx={cx} cy={cy} r="3.5" fill="white" stroke="#3b82f6" strokeWidth="2" />)}
+                            <polyline points={lineStr} fill="none" stroke="#36DAC8" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+                            {pts.map(([cx, cy], i) => <circle key={i} cx={cx} cy={cy} r="3.5" fill="white" stroke="#36DAC8" strokeWidth="2" />)}
                           </>
                         );
                       })()}
@@ -972,7 +972,7 @@ export function OfficeDashboard() {
                   key={tab.value}
                   onClick={() => setLeadsSubTab(tab.value)}
                   className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-                    leadsSubTab === tab.value ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    leadsSubTab === tab.value ? 'bg-[#17254B] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
                   {tab.label}
@@ -998,7 +998,7 @@ export function OfficeDashboard() {
                           <Badge className={
                             lead.intent_level === 'urgent' ? 'bg-red-100 text-red-700 border-red-200 text-xs' :
                             lead.intent_level === 'serious' ? 'bg-orange-100 text-orange-700 border-orange-200 text-xs' :
-                            'bg-blue-100 text-blue-700 border-blue-200 text-xs'
+                            'bg-[#E8FBF8] text-[#168E80] border-[#36DAC8]/30 text-xs'
                           }>
                             {lead.intent_level === 'urgent' ? 'عاجل' : lead.intent_level === 'serious' ? 'جاد' : 'تصفح'}
                           </Badge>
@@ -1009,7 +1009,7 @@ export function OfficeDashboard() {
                           <div><p className="text-gray-500">الميزانية</p><p className="font-medium text-gray-900">{formatPrice(lead.budget_min)} – {formatPrice(lead.budget_max)}</p></div>
                           <div><p className="text-gray-500">الغرف</p><p className="font-medium text-gray-900">{lead.bedrooms_min}+ غرف</p></div>
                         </div>
-                        {lead.notes && <div className="bg-blue-50 p-3 rounded-xl text-sm text-gray-700 mb-3">{lead.notes}</div>}
+                        {lead.notes && <div className="bg-[#E8FBF8] p-3 rounded-xl text-sm text-gray-700 mb-3">{lead.notes}</div>}
                         <p className="text-xs text-gray-400 flex items-center gap-1"><Clock className="w-3 h-3" />{new Date(lead.created_at).toLocaleDateString('ar-SA')}</p>
                       </div>
                       <div className="flex flex-col gap-2 mr-4 shrink-0">
@@ -1060,7 +1060,7 @@ export function OfficeDashboard() {
               <h3 className="font-semibold text-gray-900">الحملات التسويقية</h3>
               <Dialog open={isCampaignDialogOpen} onOpenChange={setIsCampaignDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-700">
+                  <Button size="sm" className="gap-1.5 bg-[#36DAC8] hover:bg-[#1FB7A6] text-[#17254B]">
                     <Plus className="w-4 h-4" />
                     حملة جديدة
                   </Button>
@@ -1087,7 +1087,7 @@ export function OfficeDashboard() {
                       <Label>استهداف الجمهور</Label>
                       <Textarea value={audienceFilter} onChange={(e) => setAudienceFilter(e.target.value)} placeholder="مثال: ميزانية 1-2 مليون، مدينة الرياض، 3+ غرف" className="mt-1" rows={3} />
                     </div>
-                    <div className="bg-blue-50 p-3 rounded-xl text-sm text-blue-700">
+                    <div className="bg-[#E8FBF8] p-3 rounded-xl text-sm text-[#168E80]">
                       سيتم إرسال الحملة تلقائياً للعملاء المحتملين المطابقين للمعايير
                     </div>
                     <Button onClick={handleCreateCampaign} className="w-full">إنشاء الحملة</Button>
@@ -1133,7 +1133,7 @@ export function OfficeDashboard() {
                           <Badge className={
                             campaign.status === 'active' ? 'bg-green-100 text-green-700 border-green-200 text-xs' :
                             campaign.status === 'paused' ? 'bg-yellow-100 text-yellow-700 border-yellow-200 text-xs' :
-                            campaign.status === 'completed' ? 'bg-blue-100 text-blue-700 border-blue-200 text-xs' :
+                            campaign.status === 'completed' ? 'bg-[#E8FBF8] text-[#168E80] border-[#36DAC8]/30 text-xs' :
                             'bg-gray-100 text-gray-700 border-gray-200 text-xs'
                           }>
                             {campaign.status === 'active' ? 'نشط' : campaign.status === 'paused' ? 'متوقف' : campaign.status === 'completed' ? 'مكتمل' : 'مسودة'}
@@ -1161,7 +1161,7 @@ export function OfficeDashboard() {
                             <Progress value={conversionRate} className="h-1.5" />
                           </div>
                           <div className="grid grid-cols-3 gap-1.5 text-center text-xs">
-                            <div className="p-2 bg-blue-50 rounded-lg"><p className="text-gray-500">إرسال</p><p className="font-semibold text-blue-600">{campaign.sent_count}</p></div>
+                            <div className="p-2 bg-[#E8FBF8] rounded-lg"><p className="text-gray-500">إرسال</p><p className="font-semibold text-[#1FB7A6]">{campaign.sent_count}</p></div>
                             <div className="p-2 bg-purple-50 rounded-lg"><p className="text-gray-500">نقرات</p><p className="font-semibold text-purple-600">{campaign.click_count}</p></div>
                             <div className="p-2 bg-green-50 rounded-lg"><p className="text-gray-500">عملاء</p><p className="font-semibold text-green-600">{campaign.lead_count}</p></div>
                           </div>
@@ -1204,7 +1204,7 @@ export function OfficeDashboard() {
                       <p className="text-xs text-gray-500">الخطة</p>
                       <p className="text-2xl font-bold text-gray-900">{subPlans.find(p => p.id === currentPlan)?.name}</p>
                     </div>
-                    <Badge className="bg-blue-100 text-blue-700 border-blue-200">نشطة</Badge>
+                    <Badge className="bg-[#E8FBF8] text-[#168E80] border-[#36DAC8]/30">نشطة</Badge>
                   </div>
                   <div className="grid grid-cols-3 gap-3">
                     {[
@@ -1267,12 +1267,12 @@ export function OfficeDashboard() {
                     <div
                       key={plan.id}
                       className={`relative bg-white rounded-2xl p-5 flex flex-col ${
-                        plan.popular ? 'border-2 border-blue-500 shadow-xl shadow-blue-100' : 'border border-gray-200 shadow-sm'
+                        plan.popular ? 'border-2 border-[#36DAC8] shadow-xl shadow-[#C9F4ED]' : 'border border-gray-200 shadow-sm'
                       }`}
                     >
                       {plan.popular && (
                         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                          <span className="bg-blue-600 text-white text-xs font-bold px-4 py-1 rounded-full shadow">الأكثر شيوعاً</span>
+                          <span className="bg-[#36DAC8] text-[#17254B] text-xs font-bold px-4 py-1 rounded-full shadow">الأكثر شيوعاً</span>
                         </div>
                       )}
                       <div className="text-right mb-4">
@@ -1288,7 +1288,7 @@ export function OfficeDashboard() {
                       <Button
                         onClick={() => handleUpgradePlan(plan.id)}
                         className={`w-full mb-4 h-10 rounded-xl font-semibold ${
-                          isActive ? 'bg-green-600 hover:bg-green-700' : plan.popular ? 'bg-blue-600 hover:bg-blue-700' : ''
+                          isActive ? 'bg-green-600 hover:bg-green-700' : plan.popular ? 'bg-[#36DAC8] hover:bg-[#1FB7A6] text-[#17254B]' : ''
                         }`}
                         variant={isActive || plan.popular ? 'default' : 'outline'}
                       >
@@ -1453,7 +1453,7 @@ export function OfficeDashboard() {
                   <Button
                     onClick={handleSaveProfile}
                     disabled={isSavingProfile}
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className="bg-[#36DAC8] hover:bg-[#1FB7A6] text-[#17254B]"
                   >
                     {isSavingProfile ? 'جاري الحفظ...' : 'حفظ التغييرات'}
                   </Button>

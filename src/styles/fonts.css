@@ -1,0 +1,36 @@
+/* ─── عقار شات Brand Fonts ──────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --font-ar: 'Noto Kufi Arabic', 'Cairo', sans-serif;
+  --font-en: 'Inter', system-ui, sans-serif;
+
+  /* ─── brand palette ─── */
+  --teal:        #36DAC8;
+  --teal-50:     #E8FBF8;
+  --teal-100:    #C9F4ED;
+  --teal-300:    #9CE9DC;
+  --teal-500:    #36DAC8;
+  --teal-600:    #1FB7A6;
+  --teal-700:    #168E80;
+  --teal-800:    #0F6A60;
+
+  --navy:        #17254B;
+  --navy-100:    #EEF1F8;
+  --navy-200:    #DDE3F0;
+  --navy-500:    #3D4D7C;
+  --navy-700:    #17254B;
+  --navy-800:    #0F1A38;
+  --navy-900:    #070D22;
+
+  --ink:         #0B1226;
+  --slate-700:   #3B4660;
+  --slate-500:   #6B7390;
+  --slate-300:   #C8CEDF;
+  --slate-100:   #ECEEF5;
+  --paper:       #F7F8FB;
+
+  --success:     #22C58B;
+  --warning:     #F4B740;
+  --danger:      #EF5B5B;
+}

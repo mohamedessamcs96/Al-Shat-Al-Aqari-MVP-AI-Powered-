@@ -42,7 +42,7 @@ interface Appearance {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const BG_PRESETS: { key: string; label: string; style: React.CSSProperties }[] = [
-  { key: 'indigo-dark', label: 'نيلي', style: { background: 'linear-gradient(135deg,#0e2057 0%,#312e81 100%)' } },
+  { key: 'indigo-dark', label: 'نيلي', style: { background: 'linear-gradient(135deg,#17254B 0%,#0F1A38 100%)' } },
   { key: 'emerald', label: 'أخضر', style: { background: 'linear-gradient(135deg,#064e3b 0%,#065f46 100%)' } },
   { key: 'rose', label: 'وردي', style: { background: 'linear-gradient(135deg,#881337 0%,#be185d 100%)' } },
   { key: 'amber', label: 'ذهبي', style: { background: 'linear-gradient(135deg,#78350f 0%,#b45309 100%)' } },
@@ -84,7 +84,7 @@ const FONTS: { key: Appearance['font']; label: string }[] = [
   { key: 'inter', label: 'Inter' },
 ];
 
-const COLOR_SWATCHES = ['#3b82f6','#6366f1','#8b5cf6','#ec4899','#f97316','#10b981','#f59e0b','#ef4444','#1e293b','#ffffff'];
+const COLOR_SWATCHES = ['#3b82f6','#36DAC8','#8b5cf6','#ec4899','#f97316','#10b981','#f59e0b','#ef4444','#1e293b','#ffffff'];
 
 const DRAG_TYPE = 'LINK_ROW';
 
@@ -123,9 +123,9 @@ function DraggableLink({
       onClick={onSelect}
       className={`group flex items-center gap-3 px-3 py-2.5 rounded-2xl border-2 transition-all cursor-pointer ${
         selected
-          ? 'border-indigo-400 bg-indigo-50/80 shadow-md shadow-indigo-100'
+          ? 'border-[#36DAC8] bg-[#E8FBF8]/80 shadow-md shadow-[#C9F4ED]'
           : isOver
-          ? 'border-indigo-200 bg-indigo-50/40'
+          ? 'border-[#36DAC8]/30 bg-[#E8FBF8]/40'
           : 'border-transparent bg-white hover:border-slate-200 hover:shadow-sm'
       } ${!link.active ? 'opacity-40' : ''}`}
     >
@@ -134,7 +134,7 @@ function DraggableLink({
       </span>
       <div
         className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
-        style={{ background: selected ? '#6366f1' : '#f1f5f9' }}
+        style={{ background: selected ? '#36DAC8' : '#f1f5f9' }}
       >
         <IconForKey iconKey={link.icon} className={`w-4 h-4 ${selected ? 'text-white' : 'text-slate-500'}`} />
       </div>
@@ -279,7 +279,7 @@ export function LinktreeEditor() {
     bg: 'indigo-dark',
     btnStyle: 'filled',
     btnRadius: 'lg',
-    btnColor: '#6366f1',
+    btnColor: '#36DAC8',
     font: 'cairo',
   });
   const [selectedLinkId, setSelectedLinkId] = useState<string | null>(null);
@@ -405,7 +405,7 @@ export function LinktreeEditor() {
               </Button>
               <div className="w-px h-5 bg-slate-200" />
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-sm">
+                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#17254B] to-[#36DAC8] flex items-center justify-center shadow-sm">
                   <Link2 className="w-3.5 h-3.5 text-white" />
                 </div>
                 <h1 className="font-bold text-slate-900 text-sm tracking-tight">صفحة الروابط</h1>
@@ -427,7 +427,7 @@ export function LinktreeEditor() {
                 <span className="hidden sm:inline">معاينة</span>
               </Button>
               <Button size="sm"
-                className="gap-1.5 h-8 text-xs bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white shadow-sm shadow-indigo-200 border-0"
+                className="gap-1.5 h-8 text-xs bg-gradient-to-r from-[#17254B] to-[#36DAC8] hover:from-[#0F1A38] hover:to-[#1FB7A6] text-white shadow-sm shadow-[#C9F4ED] border-0"
                 onClick={async () => {
                   if (!officeId) { navigate('/login'); return; }
                   try {
@@ -476,7 +476,7 @@ export function LinktreeEditor() {
                     onClick={() => setLeftTab(t.key)}
                     className={`flex-1 flex items-center justify-center gap-1 py-2 text-xs font-semibold rounded-lg transition-all ${
                       leftTab === t.key
-                        ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200'
+                        ? 'bg-white text-[#1FB7A6] shadow-sm ring-1 ring-slate-200'
                         : 'text-slate-500 hover:text-slate-700'
                     }`}
                   >
@@ -504,13 +504,13 @@ export function LinktreeEditor() {
 
                   {/* Expanded editor */}
                   {selectedLink && (
-                    <div className="mt-2 p-4 bg-gradient-to-br from-indigo-50 to-violet-50/50 rounded-2xl border-2 border-indigo-200/70 space-y-3.5">
+                    <div className="mt-2 p-4 bg-gradient-to-br from-[#E8FBF8] to-[#C9F4ED]/50 rounded-2xl border-2 border-[#36DAC8]/30 space-y-3.5">
                       <div className="flex items-center gap-2 mb-1">
-                        <div className="w-1 h-4 bg-indigo-500 rounded-full" />
-                        <p className="text-xs font-bold text-indigo-700 tracking-wide">تعديل الرابط</p>
+                        <div className="w-1 h-4 bg-[#36DAC8] rounded-full" />
+                        <p className="text-xs font-bold text-[#168E80] tracking-wide">تعديل الرابط</p>
                         <button
                           onClick={() => setSelectedLinkId(null)}
-                          className="mr-auto w-6 h-6 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-400 hover:text-indigo-600 flex items-center justify-center transition-colors"
+                          className="mr-auto w-6 h-6 rounded-lg bg-[#E8FBF8] hover:bg-[#C9F4ED] text-[#36DAC8]/70 hover:text-[#1FB7A6] flex items-center justify-center transition-colors"
                         >
                           <XIcon className="w-3 h-3" />
                         </button>
@@ -518,7 +518,7 @@ export function LinktreeEditor() {
                       <div>
                         <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">العنوان</Label>
                         <Input
-                          className="mt-1.5 text-sm h-9 bg-white border-slate-200 focus:border-indigo-400"
+                          className="mt-1.5 text-sm h-9 bg-white border-slate-200 focus:border-[#36DAC8]"
                           value={selectedLink.title}
                           onChange={e => updateLink(selectedLink.id, { title: e.target.value })}
                           placeholder="مثال: واتساب"
@@ -528,7 +528,7 @@ export function LinktreeEditor() {
                       <div>
                         <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">الرابط</Label>
                         <Input
-                          className="mt-1.5 text-sm h-9 bg-white border-slate-200 focus:border-indigo-400"
+                          className="mt-1.5 text-sm h-9 bg-white border-slate-200 focus:border-[#36DAC8]"
                           value={selectedLink.url}
                           onChange={e => updateLink(selectedLink.id, { url: e.target.value })}
                           placeholder="https://..."
@@ -544,8 +544,8 @@ export function LinktreeEditor() {
                               onClick={() => updateLink(selectedLink.id, { icon: opt.key })}
                               className={`flex items-center gap-1.5 px-2 py-2 rounded-xl border text-xs font-medium transition-all ${
                                 selectedLink.icon === opt.key
-                                  ? 'border-indigo-400 bg-indigo-600 text-white shadow-sm'
-                                  : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-300 hover:bg-indigo-50'
+                                  ? 'border-[#36DAC8] bg-[#17254B] text-white shadow-sm'
+                                  : 'border-slate-200 bg-white text-slate-600 hover:border-[#36DAC8]/50 hover:bg-[#E8FBF8]'
                               }`}
                             >
                               <opt.Icon className="w-3.5 h-3.5 flex-shrink-0" />
@@ -554,11 +554,11 @@ export function LinktreeEditor() {
                           ))}
                         </div>
                       </div>
-                      <div className="flex items-center justify-between pt-1 border-t border-indigo-200/50">
+                      <div className="flex items-center justify-between pt-1 border-t border-[#36DAC8]/20">
                         <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">إظهار الرابط</Label>
                         <button
                           onClick={() => updateLink(selectedLink.id, { active: !selectedLink.active })}
-                          className={`w-10 h-6 rounded-full relative transition-colors ${selectedLink.active ? 'bg-indigo-500' : 'bg-slate-200'}`}
+                          className={`w-10 h-6 rounded-full relative transition-colors ${selectedLink.active ? 'bg-[#36DAC8]' : 'bg-slate-200'}`}
                         >
                           <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${selectedLink.active ? 'right-1' : 'left-1'}`} />
                         </button>
@@ -570,7 +570,7 @@ export function LinktreeEditor() {
                 <div className="p-3 border-t border-slate-100 flex-shrink-0">
                   <button
                     onClick={addLink}
-                    className="w-full py-2.5 rounded-xl border-2 border-dashed border-slate-200 text-sm text-slate-400 hover:border-indigo-400 hover:text-indigo-500 hover:bg-indigo-50/50 transition-all flex items-center justify-center gap-2 font-medium"
+                    className="w-full py-2.5 rounded-xl border-2 border-dashed border-slate-200 text-sm text-slate-400 hover:border-[#36DAC8] hover:text-[#36DAC8] hover:bg-[#E8FBF8]/50 transition-all flex items-center justify-center gap-2 font-medium"
                   >
                     <Plus className="w-4 h-4" />
                     إضافة رابط جديد
@@ -585,17 +585,17 @@ export function LinktreeEditor() {
                 {/* Avatar */}
                 <div className="flex flex-col items-center gap-3 pt-2">
                   <div className="relative">
-                    <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-indigo-200 flex items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-50 to-violet-50 shadow-inner">
+                    <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-[#36DAC8]/30 flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#E8FBF8] to-[#C9F4ED] shadow-inner">
                       {profile.avatar
                         ? <img src={profile.avatar} alt="" className="w-full h-full object-cover" />
-                        : <User className="w-8 h-8 text-indigo-200" />
+                        : <User className="w-8 h-8 text-[#36DAC8]/40" />
                       }
                     </div>
                     <button
                       type="button"
                       disabled={isUploadingAvatar || !officeId}
                       onClick={() => avatarUploadRef.current?.click()}
-                      className="absolute -bottom-2 -left-2 w-8 h-8 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center shadow-md shadow-indigo-200 transition-colors disabled:opacity-50"
+                      className="absolute -bottom-2 -left-2 w-8 h-8 rounded-xl bg-[#17254B] hover:bg-[#0F1A38] text-white flex items-center justify-center shadow-md shadow-[#C9F4ED] transition-colors disabled:opacity-50"
                       title="رفع صورة"
                     >
                       <Upload className="w-3.5 h-3.5" />
@@ -607,7 +607,7 @@ export function LinktreeEditor() {
                       حذف الصورة
                     </button>
                   )}
-                  {isUploadingAvatar && <p className="text-xs text-indigo-500 animate-pulse">جاري الرفع...</p>}
+                  {isUploadingAvatar && <p className="text-xs text-[#36DAC8] animate-pulse">جاري الرفع...</p>}
                 </div>
                 <input
                   ref={avatarUploadRef}
@@ -634,7 +634,7 @@ export function LinktreeEditor() {
                 <div className="space-y-1.5">
                   <Label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">اسم المكتب</Label>
                   <Input
-                    className="text-sm h-10 bg-slate-50 border-slate-200 focus:bg-white focus:border-indigo-400"
+                    className="text-sm h-10 bg-slate-50 border-slate-200 focus:bg-white focus:border-[#36DAC8]"
                     value={profile.name}
                     onChange={e => setProf({ name: e.target.value })}
                     dir="rtl"
@@ -644,7 +644,7 @@ export function LinktreeEditor() {
                 <div className="space-y-1.5">
                   <Label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">نبذة قصيرة</Label>
                   <Textarea
-                    className="text-sm resize-none bg-slate-50 border-slate-200 focus:bg-white focus:border-indigo-400"
+                    className="text-sm resize-none bg-slate-50 border-slate-200 focus:bg-white focus:border-[#36DAC8]"
                     value={profile.bio}
                     onChange={e => setProf({ bio: e.target.value })}
                     rows={3}
@@ -671,7 +671,7 @@ export function LinktreeEditor() {
                         onClick={() => setApp({ bg: bg.key })}
                         className={`h-14 rounded-2xl transition-all relative overflow-hidden ${
                           appearance.bg === bg.key
-                            ? 'ring-2 ring-indigo-500 ring-offset-2 scale-95'
+                            ? 'ring-2 ring-[#36DAC8] ring-offset-2 scale-95'
                             : 'hover:scale-95 opacity-80 hover:opacity-100'
                         }`}
                         style={bg.style}
@@ -697,7 +697,7 @@ export function LinktreeEditor() {
                         key={c}
                         onClick={() => setApp({ btnColor: c })}
                         className={`w-8 h-8 rounded-full border-2 transition-all ${
-                          appearance.btnColor === c ? 'border-indigo-600 scale-110 shadow-md' : 'border-white shadow hover:scale-110'
+                          appearance.btnColor === c ? 'border-[#36DAC8] scale-110 shadow-md' : 'border-white shadow hover:scale-110'
                         }`}
                         style={{ background: c }}
                       />
@@ -709,7 +709,7 @@ export function LinktreeEditor() {
                       type="text"
                       value={appearance.btnColor}
                       onChange={e => setApp({ btnColor: e.target.value })}
-                      className="text-xs border border-slate-200 rounded-xl px-3 py-2 w-28 font-mono bg-slate-50 focus:outline-none focus:border-indigo-400"
+                      className="text-xs border border-slate-200 rounded-xl px-3 py-2 w-28 font-mono bg-slate-50 focus:outline-none focus:border-[#36DAC8]"
                       dir="ltr"
                     />
                   </div>
@@ -726,7 +726,7 @@ export function LinktreeEditor() {
                         onClick={() => setApp({ btnStyle: s.key })}
                         className={`py-2.5 rounded-xl border-2 text-xs font-semibold transition-all ${
                           appearance.btnStyle === s.key
-                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700 shadow-sm'
+                            ? 'border-[#36DAC8] bg-[#E8FBF8] text-[#168E80] shadow-sm'
                             : 'border-slate-200 text-slate-500 hover:border-slate-300 bg-white'
                         }`}
                       >
@@ -745,7 +745,7 @@ export function LinktreeEditor() {
                         onClick={() => setApp({ btnRadius: r.key })}
                         className={`py-2.5 border-2 text-xs font-semibold transition-all ${
                           appearance.btnRadius === r.key
-                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                            ? 'border-[#36DAC8] bg-[#E8FBF8] text-[#168E80]'
                             : 'border-slate-200 text-slate-500 hover:border-slate-300 bg-white'
                         }`}
                         style={{ borderRadius: r.radius }}
@@ -767,7 +767,7 @@ export function LinktreeEditor() {
                         onClick={() => setApp({ font: f.key })}
                         className={`py-2.5 rounded-xl border-2 text-xs font-semibold transition-all ${
                           appearance.font === f.key
-                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                            ? 'border-[#36DAC8] bg-[#E8FBF8] text-[#168E80]'
                             : 'border-slate-200 text-slate-500 hover:border-slate-300 bg-white'
                         }`}
                         style={{ fontFamily: f.key === 'cairo' ? 'Cairo' : f.key === 'tajawal' ? 'Tajawal' : 'Inter' }}
