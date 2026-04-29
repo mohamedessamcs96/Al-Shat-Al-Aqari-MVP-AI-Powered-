@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
-import { Avatar, AvatarFallback } from './ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { ScrollArea } from './ui/scroll-area';
 import { directChat, type DirectChatRoom, type DirectChatMessage } from '../lib/api-client';
 import { getToken, getUser, getRole } from '../lib/auth';
@@ -476,7 +476,10 @@ export function DirectChat() {
                         )}
                       >
                         <Avatar className="w-10 h-10 flex-shrink-0 mt-0.5">
-                          <AvatarFallback className="bg-blue-100 text-blue-700 font-bold">
+                          {getRoomAvatar(room, myRole) && (
+                            <AvatarImage src={getRoomAvatar(room, myRole) as string} alt={name} className="object-cover" />
+                          )}
+                          <AvatarFallback className="bg-blue-100 text-blue-700 font-bold text-sm">
                             {getInitials(name)}
                           </AvatarFallback>
                         </Avatar>
@@ -517,7 +520,10 @@ export function DirectChat() {
           <>
             {/* Chat header */}
             <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-3 shadow-sm">
-              <Avatar className="w-9 h-9">
+              <Avatar className="w-10 h-10 flex-shrink-0">
+                {getRoomAvatar(selectedRoom, myRole) && (
+                  <AvatarImage src={getRoomAvatar(selectedRoom, myRole) as string} alt={getRoomDisplayName(selectedRoom, myRole)} className="object-cover" />
+                )}
                 <AvatarFallback className="bg-blue-100 text-blue-700 font-bold">
                   {getInitials(getRoomDisplayName(selectedRoom, myRole))}
                 </AvatarFallback>
