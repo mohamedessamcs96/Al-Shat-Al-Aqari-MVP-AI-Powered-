@@ -15,7 +15,9 @@ import { getToken, getUser, getRole } from '../lib/auth';
 import { cn } from './ui/utils';
 
 // ── WebSocket URL ─────────────────────────────────────────────────────────────
-const WS_BASE = 'ws://79.72.4.1:8000';
+// Use wss:// when the page is served over HTTPS to avoid mixed-content errors.
+const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss' : 'ws';
+const WS_BASE = `${WS_PROTOCOL}://79.72.4.1:8000`;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
