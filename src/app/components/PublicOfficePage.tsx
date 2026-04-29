@@ -228,31 +228,38 @@ export function PublicOfficePage() {
 
   const activeLinks = links.filter(l => l.active);
 
+  // ── Resolved display values — office logo/name as fallback when linktree profile is empty ──
+  const avatarSrc = profile.avatar || office?.logo_url || office?.logo || office?.avatar || '';
+  const displayName = profile.name || office?.name || '';
+
   const iconBg = isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.07)';
+  const cardBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.72)';
+  const cardBorder = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.06)';
+  const dividerColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ ...bgStyle, fontFamily }} dir="rtl">
+    <div className="min-h-[100dvh] relative overflow-hidden" style={{ ...bgStyle, fontFamily }} dir="rtl">
 
-      {/* Noise texture for depth */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.04]"
-        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundSize: '160px' }}
+      {/* Noise texture */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.035]"
+        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundSize: '200px' }}
       />
 
-      {/* Decorative orbs */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"
-        style={{ width: 600, height: 600, borderRadius: '50%', background: appearance.btnColor, opacity: 0.18, filter: 'blur(120px)', transform: 'translate(-50%, -55%)' }} />
-      <div className="absolute bottom-0 right-0 pointer-events-none"
-        style={{ width: 400, height: 400, borderRadius: '50%', background: appearance.btnColor, opacity: 0.12, filter: 'blur(100px)', transform: 'translate(35%, 40%)' }} />
-      <div className="absolute bottom-0 left-0 pointer-events-none"
-        style={{ width: 300, height: 300, borderRadius: '50%', background: isDark ? '#ffffff' : '#000000', opacity: 0.04, filter: 'blur(80px)', transform: 'translate(-30%, 30%)' }} />
+      {/* Background orbs */}
+      <div className="absolute pointer-events-none"
+        style={{ top: '-20%', left: '50%', width: 700, height: 700, borderRadius: '50%', background: appearance.btnColor, opacity: 0.22, filter: 'blur(130px)', transform: 'translateX(-50%)' }} />
+      <div className="absolute pointer-events-none"
+        style={{ bottom: '-15%', right: '-10%', width: 500, height: 500, borderRadius: '50%', background: appearance.btnColor, opacity: 0.14, filter: 'blur(110px)' }} />
+      <div className="absolute pointer-events-none"
+        style={{ bottom: '-10%', left: '-10%', width: 350, height: 350, borderRadius: '50%', background: isDark ? '#fff' : '#000', opacity: 0.04, filter: 'blur(90px)' }} />
 
-      {/* Floating owner action bar */}
+      {/* Owner controls */}
       {isOwner && (
         <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
           <button
             onClick={() => setQrOpen(true)}
             className="w-10 h-10 rounded-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
-            style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.2)', boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}
+            style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.25)', boxShadow: '0 4px 20px rgba(0,0,0,0.25)' }}
             title="QR Code"
           >
             <QrCode className="w-4 h-4" style={{ color: textColor }} />
@@ -260,7 +267,7 @@ export function PublicOfficePage() {
           <button
             onClick={() => navigate('/office/linktree')}
             className="h-10 px-4 rounded-2xl text-xs font-bold flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95"
-            style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.2)', color: textColor, boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}
+            style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.25)', color: textColor, boxShadow: '0 4px 20px rgba(0,0,0,0.25)' }}
           >
             <Edit3 className="w-3.5 h-3.5" />
             تعديل
@@ -268,99 +275,126 @@ export function PublicOfficePage() {
         </div>
       )}
 
-      {/* Main content */}
-      <div className="relative flex flex-col items-center min-h-screen px-5">
+      {/* Page scroll container */}
+      <div className="relative flex flex-col items-center min-h-[100dvh] px-4 py-10 sm:py-16">
 
-        {/* Top spacer */}
-        <div className="h-16 sm:h-20" />
-
-        {/* Avatar with layered glow rings */}
-        <div className="relative mb-6 flex-shrink-0">
-          {/* Outer glow ring */}
-          <div className="absolute inset-0 rounded-full"
-            style={{ boxShadow: `0 0 0 2px rgba(255,255,255,0.2), 0 0 0 10px ${appearance.btnColor}35, 0 0 60px ${appearance.btnColor}40`, borderRadius: '50%' }} />
+        {/* Avatar — floats above the card */}
+        <div className="relative z-10 mb-[-44px]">
+          {/* Glow halo */}
+          <div className="absolute inset-[-8px] rounded-full pointer-events-none"
+            style={{ background: `radial-gradient(circle, ${appearance.btnColor}55 0%, transparent 70%)`, filter: 'blur(8px)' }} />
+          {/* Ring border */}
+          <div className="absolute inset-[-4px] rounded-full pointer-events-none"
+            style={{ border: `2px solid ${appearance.btnColor}60`, borderRadius: '50%' }} />
           {/* Avatar circle */}
           <div
-            className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden relative z-10 flex items-center justify-center"
-            style={{ border: '3px solid rgba(255,255,255,0.3)', background: `linear-gradient(135deg, ${appearance.btnColor}44, rgba(255,255,255,0.1))`, boxShadow: '0 16px 48px rgba(0,0,0,0.3)' }}
+            className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden relative flex items-center justify-center"
+            style={{
+              border: '3px solid rgba(255,255,255,0.35)',
+              background: `linear-gradient(145deg, ${appearance.btnColor}33, rgba(255,255,255,0.08))`,
+              boxShadow: `0 8px 32px rgba(0,0,0,0.35), 0 0 0 6px ${appearance.btnColor}20`,
+            }}
           >
-            {profile.avatar
-              ? <img src={profile.avatar} alt={profile.name} className="w-full h-full object-cover" />
-              : <span className="text-4xl sm:text-5xl font-black" style={{ color: textColor, textShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>{profile.name?.[0] || '؟'}</span>
+            {avatarSrc
+              ? <img src={avatarSrc} alt={displayName} className="w-full h-full object-cover" />
+              : <span className="text-3xl sm:text-4xl font-black select-none" style={{ color: textColor }}>
+                  {displayName?.[0]?.toUpperCase() || '؟'}
+                </span>
             }
           </div>
         </div>
 
-        {/* Name */}
-        <h1 className="text-2xl sm:text-3xl font-black mb-2 tracking-tight text-center leading-tight"
-          style={{ color: textColor, textShadow: '0 2px 12px rgba(0,0,0,0.25)' }}>
-          {profile.name || office.name || 'اسم المكتب'}
-        </h1>
-
-        {/* Bio */}
-        {profile.bio ? (
-          <p className="text-sm sm:text-base text-center max-w-xs sm:max-w-sm mb-10 leading-relaxed" style={{ color: subColor }}>
-            {profile.bio}
-          </p>
-        ) : (
-          <div className="mb-10" />
-        )}
-
-        {/* Links */}
-        <div className="w-full max-w-sm space-y-3">
-          {activeLinks.map((link, i) => (
-            <a
-              key={link.id}
-              href={link.url || '#'}
-              target={link.url ? '_blank' : undefined}
-              rel="noopener noreferrer"
-              className="group w-full flex items-center gap-3 px-4 py-4 font-bold text-sm relative overflow-hidden"
-              style={{
-                ...getBtnStyle(),
-                transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-                animationDelay: `${i * 50}ms`,
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-2px) scale(1.01)';
-                (e.currentTarget as HTMLAnchorElement).style.boxShadow = `0 12px 32px ${appearance.btnColor}60`;
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLAnchorElement).style.transform = 'none';
-                (e.currentTarget as HTMLAnchorElement).style.boxShadow = (getBtnStyle() as any).boxShadow ?? '';
-              }}
+        {/* Glass card */}
+        <div
+          className="w-full max-w-sm rounded-3xl overflow-hidden relative"
+          style={{
+            background: cardBg,
+            backdropFilter: 'blur(28px)',
+            WebkitBackdropFilter: 'blur(28px)',
+            border: `1px solid ${cardBorder}`,
+            boxShadow: isDark
+              ? '0 24px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.12)'
+              : '0 24px 80px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.9)',
+          }}
+        >
+          {/* Card header: name + bio */}
+          <div className="pt-14 pb-6 px-6 text-center">
+            <h1
+              className="text-xl sm:text-2xl font-black tracking-tight leading-snug mb-1"
+              style={{ color: textColor }}
             >
-              {/* Shine sweep on hover */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                style={{ background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%)' }} />
-              {/* Icon badge */}
-              <div
-                className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 relative z-10"
-                style={{ background: iconBg, color: (getBtnStyle() as any).color }}
-              >
-                <LinkIcon iconKey={link.icon} className="w-4 h-4" />
-              </div>
-              {/* Title — centred over the icon using absolute positioning trick */}
-              <span className="flex-1 text-center relative z-10 text-sm font-bold tracking-wide">{link.title}</span>
-              {/* Chevron */}
-              <ChevronLeft className="w-4 h-4 flex-shrink-0 opacity-50 relative z-10 group-hover:opacity-80 transition-opacity" />
-            </a>
-          ))}
-          {activeLinks.length === 0 && (
-            <p className="text-center text-sm py-16" style={{ color: subColor, opacity: 0.45 }}>
-              لم يتم إضافة روابط بعد
-            </p>
-          )}
-        </div>
+              {displayName || 'اسم المكتب'}
+            </h1>
+            {profile.bio && (
+              <p className="text-xs sm:text-sm leading-relaxed mt-2" style={{ color: subColor }}>
+                {profile.bio}
+              </p>
+            )}
+          </div>
 
-        {/* Footer */}
-        <div className="mt-auto pt-14 pb-8">
-          <div
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-medium tracking-wide"
-            style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)', color: subColor, border: '1px solid rgba(255,255,255,0.1)' }}
-          >
-            مدعوم بـ الشات العقاري
+          {/* Divider */}
+          <div style={{ height: 1, background: dividerColor, marginInline: '1rem' }} />
+
+          {/* Links */}
+          <div className="p-4 space-y-2.5">
+            {activeLinks.map((link, i) => (
+              <a
+                key={link.id}
+                href={link.url || '#'}
+                target={link.url ? '_blank' : undefined}
+                rel="noopener noreferrer"
+                className="group w-full flex items-center gap-3 px-4 py-3.5 font-bold text-sm relative overflow-hidden"
+                style={{
+                  ...getBtnStyle(),
+                  transition: 'transform 0.15s ease, box-shadow 0.2s ease',
+                  animationDelay: `${i * 60}ms`,
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-2px) scale(1.015)';
+                  (e.currentTarget as HTMLAnchorElement).style.boxShadow = `0 10px 28px ${appearance.btnColor}55`;
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLAnchorElement).style.transform = '';
+                  (e.currentTarget as HTMLAnchorElement).style.boxShadow = (getBtnStyle() as any).boxShadow ?? '';
+                }}
+              >
+                {/* Shine on hover */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                  style={{ background: 'linear-gradient(110deg, transparent 38%, rgba(255,255,255,0.12) 50%, transparent 62%)' }} />
+                {/* Icon */}
+                <div
+                  className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 relative z-10"
+                  style={{ background: iconBg, color: (getBtnStyle() as any).color }}
+                >
+                  <LinkIcon iconKey={link.icon} className="w-4 h-4" />
+                </div>
+                {/* Title */}
+                <span className="flex-1 text-center relative z-10 font-bold tracking-wide">{link.title}</span>
+                {/* Chevron */}
+                <ChevronLeft className="w-4 h-4 flex-shrink-0 opacity-40 relative z-10 group-hover:opacity-70 transition-opacity" />
+              </a>
+            ))}
+            {activeLinks.length === 0 && (
+              <p className="text-center text-sm py-12" style={{ color: subColor, opacity: 0.5 }}>
+                لم يتم إضافة روابط بعد
+              </p>
+            )}
+          </div>
+
+          {/* Card footer */}
+          <div style={{ height: 1, background: dividerColor, margin: '0 1rem' }} />
+          <div className="py-4 text-center">
+            <span
+              className="text-[10px] font-medium tracking-widest uppercase"
+              style={{ color: subColor, opacity: 0.55 }}
+            >
+              الشات العقاري
+            </span>
           </div>
         </div>
+
+        {/* Bottom spacer */}
+        <div className="h-10" />
       </div>
 
       {/* QR Dialog */}
@@ -369,8 +403,8 @@ export function PublicOfficePage() {
           open={qrOpen}
           onClose={() => setQrOpen(false)}
           url={pageUrl}
-          officeName={profile.name || office.name || ''}
-          logoUrl={office.logo_url}
+          officeName={displayName || office?.name || ''}
+          logoUrl={avatarSrc || office?.logo_url}
         />
       )}
     </div>
