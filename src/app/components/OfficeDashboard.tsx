@@ -349,6 +349,13 @@ export function OfficeDashboard() {
             <span className="font-bold text-gray-900 hidden sm:block">الشات العقاري</span>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              title="المحادثات المباشرة"
+              onClick={() => navigate('/office/direct-chat')}
+              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-50 transition-colors text-blue-600"
+            >
+              <MessageSquare className="w-4 h-4" />
+            </button>
             <button className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors relative">
               <Bell className="w-4 h-4 text-gray-600" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />

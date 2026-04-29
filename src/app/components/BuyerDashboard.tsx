@@ -84,10 +84,15 @@ export function BuyerDashboard() {
             رجوع
           </Button>
           <h1 className="text-xl font-bold text-gray-900" dir="rtl">لوحة التحكم</h1>
-          <Button variant="ghost" size="sm" onClick={() => { authLogout(); navigate('/'); }}>
-            <LogOut className="w-4 h-4 mr-2" />
-            خروج
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" title="المحادثات المباشرة" onClick={() => navigate('/direct-chat')}>
+              <MessageSquare className="w-4 h-4 text-blue-600" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => { authLogout(); navigate('/'); }}>
+              <LogOut className="w-4 h-4 mr-2" />
+              خروج
+            </Button>
+          </div>
         </div>
       </header>
 
