@@ -121,25 +121,32 @@ function DraggableLink({
     <div
       ref={ref}
       onClick={onSelect}
-      className={`group flex items-center gap-3 px-3 py-3 rounded-2xl border transition-all cursor-pointer ${
-        selected ? 'border-indigo-400 bg-indigo-50 shadow-sm' :
-        isOver ? 'border-indigo-200 bg-indigo-50/40' :
-        'border-gray-100 bg-white hover:border-gray-200 hover:bg-gray-50'
-      } ${!link.active ? 'opacity-50' : ''}`}
+      className={`group flex items-center gap-3 px-3 py-2.5 rounded-2xl border-2 transition-all cursor-pointer ${
+        selected
+          ? 'border-indigo-400 bg-indigo-50/80 shadow-md shadow-indigo-100'
+          : isOver
+          ? 'border-indigo-200 bg-indigo-50/40'
+          : 'border-transparent bg-white hover:border-slate-200 hover:shadow-sm'
+      } ${!link.active ? 'opacity-40' : ''}`}
     >
-      <span className="text-gray-300 hover:text-gray-500 cursor-grab flex-shrink-0">
+      <span className="text-slate-200 hover:text-slate-400 cursor-grab active:cursor-grabbing flex-shrink-0 transition-colors">
         <GripVertical className="w-4 h-4" />
       </span>
-      <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-        <IconForKey iconKey={link.icon} className="w-3.5 h-3.5 text-gray-600" />
+      <div
+        className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
+        style={{ background: selected ? '#6366f1' : '#f1f5f9' }}
+      >
+        <IconForKey iconKey={link.icon} className={`w-4 h-4 ${selected ? 'text-white' : 'text-slate-500'}`} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-gray-800 truncate">{link.title || 'رابط بدون عنوان'}</p>
-        <p className="text-xs text-gray-400 truncate">{link.url || 'أضف الرابط...'}</p>
+        <p className="text-sm font-semibold text-slate-800 truncate leading-tight">
+          {link.title || <span className="text-slate-300 font-normal">بدون عنوان</span>}
+        </p>
+        <p className="text-[11px] text-slate-400 truncate mt-0.5">{link.url || 'أضف الرابط...'}</p>
       </div>
       <button
         onClick={e => { e.stopPropagation(); onDelete(); }}
-        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-red-50 text-red-400 flex-shrink-0"
+        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-red-50 text-red-400 hover:text-red-600 flex-shrink-0"
       >
         <Trash2 className="w-3.5 h-3.5" />
       </button>
@@ -350,59 +357,65 @@ export function LinktreeEditor() {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="min-h-screen bg-gray-100 flex flex-col" style={{ fontFamily: 'Cairo, sans-serif' }}>
+      <div className="min-h-screen bg-slate-50 flex flex-col" style={{ fontFamily: 'Cairo, sans-serif' }}>
 
         {/* ── Top bar ── */}
-        <header className="bg-white border-b shadow-sm z-20 flex-shrink-0">
-          <div className="flex items-center justify-between px-4 py-3" dir="rtl">
+        <header className="bg-white border-b border-slate-200 shadow-sm z-20 flex-shrink-0 h-14">
+          <div className="flex items-center justify-between h-full px-4" dir="rtl">
+            {/* Brand */}
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={() => navigate('/office/dashboard')}>
-                <ArrowLeft className="w-4 h-4 ml-1" />
+              <Button variant="ghost" size="sm" onClick={() => navigate('/office/dashboard')}
+                className="text-slate-500 hover:text-slate-800 gap-1.5 h-8 px-2">
+                <ArrowLeft className="w-4 h-4" />
                 رجوع
               </Button>
-              <div className="h-5 w-px bg-gray-200" />
+              <div className="w-px h-5 bg-slate-200" />
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                  <Link2 className="w-3 h-3 text-white" />
+                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-sm">
+                  <Link2 className="w-3.5 h-3.5 text-white" />
                 </div>
-                <h1 className="font-bold text-gray-900 text-sm">صفحة الروابط</h1>
+                <h1 className="font-bold text-slate-900 text-sm tracking-tight">صفحة الروابط</h1>
               </div>
-              {isDirty && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium border border-amber-200">غير محفوظ</span>}
+              {isDirty && (
+                <span className="text-[11px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-semibold border border-amber-200 leading-none py-1">
+                  ● غير محفوظ
+                </span>
+              )}
             </div>
+            {/* Actions */}
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => {
-                const slug = officeSlug || officeId;
-                if (slug) {
-                  window.open(`https://al-shat-al-aqari-mvp.vercel.app/office/${slug}?preview=1`, '_blank');
-                }
-              }}>
+              <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs border-slate-200 text-slate-600"
+                onClick={() => {
+                  const slug = officeSlug || officeId;
+                  if (slug) window.open(`https://al-shat-al-aqari-mvp.vercel.app/office/${slug}?preview=1`, '_blank');
+                }}>
                 <Eye className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">معاينة</span>
               </Button>
-              <Button size="sm" className="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white" onClick={async () => {
-                if (!officeId) { navigate('/login'); return; }
-                try {
-                  // Map internal state → API field names
-                  const apiAppearance = {
-                    background: appearance.bg,
-                    buttonStyle: appearance.btnStyle,
-                    buttonRadius: appearance.btnRadius,
-                    buttonColor: appearance.btnColor,
-                    font: appearance.font,
-                  };
-                  await officesApi.saveLinktree(officeId, { profile, links, appearance: apiAppearance });
-                  setIsDirty(false);
-                  toast.success('تم حفظ التغييرات!');
-                } catch (err) {
-                  const msg = err instanceof Error ? err.message : 'فشل الحفظ';
-                  // 405 means the backend endpoint isn't implemented yet
-                  if (msg.includes('405') || msg.includes('Method Not Allowed') || msg.includes('غير مسموح')) {
-                    toast.error('الخادم لا يدعم هذه العملية بعد — يرجى التواصل مع فريق التطوير');
-                  } else {
-                    toast.error(msg);
+              <Button size="sm"
+                className="gap-1.5 h-8 text-xs bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white shadow-sm shadow-indigo-200 border-0"
+                onClick={async () => {
+                  if (!officeId) { navigate('/login'); return; }
+                  try {
+                    const apiAppearance = {
+                      background: appearance.bg,
+                      buttonStyle: appearance.btnStyle,
+                      buttonRadius: appearance.btnRadius,
+                      buttonColor: appearance.btnColor,
+                      font: appearance.font,
+                    };
+                    await officesApi.saveLinktree(officeId, { profile, links, appearance: apiAppearance });
+                    setIsDirty(false);
+                    toast.success('تم حفظ التغييرات!');
+                  } catch (err) {
+                    const msg = err instanceof Error ? err.message : 'فشل الحفظ';
+                    if (msg.includes('405') || msg.includes('Method Not Allowed') || msg.includes('غير مسموح')) {
+                      toast.error('الخادم لا يدعم هذه العملية بعد');
+                    } else {
+                      toast.error(msg);
+                    }
                   }
-                }
-              }}>
+                }}>
                 <Save className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">حفظ</span>
               </Button>
@@ -410,35 +423,39 @@ export function LinktreeEditor() {
           </div>
         </header>
 
-        {/* ── Main 2-panel layout ── */}
+        {/* ── Main layout ── */}
         <div className="flex flex-1 overflow-hidden">
 
           {/* ═══ LEFT PANEL ═══ */}
-          <aside className="w-80 border-l bg-white flex flex-col flex-shrink-0 overflow-hidden" dir="rtl">
+          <aside className="w-[310px] bg-white border-l border-slate-200 flex flex-col flex-shrink-0 overflow-hidden shadow-[-2px_0_8px_rgba(0,0,0,0.04)]" dir="rtl">
 
-            {/* Tab pills */}
-            <div className="flex border-b flex-shrink-0">
-              {([
-                { key: 'links' as const, icon: <Link2 className="w-3.5 h-3.5" />, label: 'الروابط' },
-                { key: 'profile' as const, icon: <User className="w-3.5 h-3.5" />, label: 'الملف' },
-                { key: 'appearance' as const, icon: <Palette className="w-3.5 h-3.5" />, label: 'المظهر' },
-              ]).map(t => (
-                <button
-                  key={t.key}
-                  onClick={() => setLeftTab(t.key)}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-xs font-semibold border-b-2 transition-all ${
-                    leftTab === t.key ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-400 hover:text-gray-600'
-                  }`}
-                >
-                  {t.icon}{t.label}
-                </button>
-              ))}
+            {/* Pill tabs */}
+            <div className="p-3 border-b border-slate-100 flex-shrink-0">
+              <div className="flex bg-slate-100 rounded-xl p-1 gap-1">
+                {([
+                  { key: 'links' as const, icon: <Link2 className="w-3.5 h-3.5" />, label: 'الروابط' },
+                  { key: 'profile' as const, icon: <User className="w-3.5 h-3.5" />, label: 'الملف' },
+                  { key: 'appearance' as const, icon: <Palette className="w-3.5 h-3.5" />, label: 'المظهر' },
+                ]).map(t => (
+                  <button
+                    key={t.key}
+                    onClick={() => setLeftTab(t.key)}
+                    className={`flex-1 flex items-center justify-center gap-1 py-2 text-xs font-semibold rounded-lg transition-all ${
+                      leftTab === t.key
+                        ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200'
+                        : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    {t.icon}{t.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* ── Links tab ── */}
             {leftTab === 'links' && (
               <div className="flex flex-col flex-1 overflow-hidden">
-                <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
                   {links.map((link, index) => (
                     <DraggableLink
                       key={link.id}
@@ -453,11 +470,21 @@ export function LinktreeEditor() {
 
                   {/* Expanded editor */}
                   {selectedLink && (
-                    <div className="mt-2 p-4 bg-indigo-50 rounded-2xl border border-indigo-200 space-y-3">
+                    <div className="mt-2 p-4 bg-gradient-to-br from-indigo-50 to-violet-50/50 rounded-2xl border-2 border-indigo-200/70 space-y-3.5">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="w-1 h-4 bg-indigo-500 rounded-full" />
+                        <p className="text-xs font-bold text-indigo-700 tracking-wide">تعديل الرابط</p>
+                        <button
+                          onClick={() => setSelectedLinkId(null)}
+                          className="mr-auto w-6 h-6 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-400 hover:text-indigo-600 flex items-center justify-center transition-colors"
+                        >
+                          <XIcon className="w-3 h-3" />
+                        </button>
+                      </div>
                       <div>
-                        <Label className="text-xs font-semibold text-gray-600">العنوان</Label>
+                        <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">العنوان</Label>
                         <Input
-                          className="mt-1 text-sm"
+                          className="mt-1.5 text-sm h-9 bg-white border-slate-200 focus:border-indigo-400"
                           value={selectedLink.title}
                           onChange={e => updateLink(selectedLink.id, { title: e.target.value })}
                           placeholder="مثال: واتساب"
@@ -465,9 +492,9 @@ export function LinktreeEditor() {
                         />
                       </div>
                       <div>
-                        <Label className="text-xs font-semibold text-gray-600">الرابط</Label>
+                        <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">الرابط</Label>
                         <Input
-                          className="mt-1 text-sm"
+                          className="mt-1.5 text-sm h-9 bg-white border-slate-200 focus:border-indigo-400"
                           value={selectedLink.url}
                           onChange={e => updateLink(selectedLink.id, { url: e.target.value })}
                           placeholder="https://..."
@@ -475,29 +502,29 @@ export function LinktreeEditor() {
                         />
                       </div>
                       <div>
-                        <Label className="text-xs font-semibold text-gray-600 mb-2 block">الأيقونة</Label>
+                        <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">الأيقونة</Label>
                         <div className="grid grid-cols-3 gap-1.5">
                           {ICON_OPTIONS.map(opt => (
                             <button
                               key={opt.key}
                               onClick={() => updateLink(selectedLink.id, { icon: opt.key })}
-                              className={`flex items-center gap-1.5 px-2 py-1.5 rounded-xl border text-xs transition-all ${
+                              className={`flex items-center gap-1.5 px-2 py-2 rounded-xl border text-xs font-medium transition-all ${
                                 selectedLink.icon === opt.key
-                                  ? 'border-indigo-400 bg-indigo-100 text-indigo-700 font-semibold'
-                                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                                  ? 'border-indigo-400 bg-indigo-600 text-white shadow-sm'
+                                  : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-300 hover:bg-indigo-50'
                               }`}
                             >
-                              <opt.Icon className="w-3 h-3 flex-shrink-0" />
+                              <opt.Icon className="w-3.5 h-3.5 flex-shrink-0" />
                               {opt.label}
                             </button>
                           ))}
                         </div>
                       </div>
-                      <div className="flex items-center justify-between pt-1">
-                        <Label className="text-xs font-semibold text-gray-600">إظهار</Label>
+                      <div className="flex items-center justify-between pt-1 border-t border-indigo-200/50">
+                        <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">إظهار الرابط</Label>
                         <button
                           onClick={() => updateLink(selectedLink.id, { active: !selectedLink.active })}
-                          className={`w-10 h-6 rounded-full relative transition-colors ${selectedLink.active ? 'bg-indigo-500' : 'bg-gray-200'}`}
+                          className={`w-10 h-6 rounded-full relative transition-colors ${selectedLink.active ? 'bg-indigo-500' : 'bg-slate-200'}`}
                         >
                           <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${selectedLink.active ? 'right-1' : 'left-1'}`} />
                         </button>
@@ -506,13 +533,13 @@ export function LinktreeEditor() {
                   )}
                 </div>
 
-                <div className="p-3 border-t flex-shrink-0">
+                <div className="p-3 border-t border-slate-100 flex-shrink-0">
                   <button
                     onClick={addLink}
-                    className="w-full py-2.5 rounded-xl border-2 border-dashed border-gray-200 text-sm text-gray-400 hover:border-indigo-400 hover:text-indigo-500 transition-colors flex items-center justify-center gap-2"
+                    className="w-full py-2.5 rounded-xl border-2 border-dashed border-slate-200 text-sm text-slate-400 hover:border-indigo-400 hover:text-indigo-500 hover:bg-indigo-50/50 transition-all flex items-center justify-center gap-2 font-medium"
                   >
                     <Plus className="w-4 h-4" />
-                    إضافة رابط
+                    إضافة رابط جديد
                   </button>
                 </div>
               </div>
@@ -520,81 +547,79 @@ export function LinktreeEditor() {
 
             {/* ── Profile tab ── */}
             {leftTab === 'profile' && (
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                <div>
-                  <Label className="text-xs font-semibold text-gray-600">صورة المكتب</Label>
-                  <div className="mt-2 flex items-center gap-3">
-                    <div className="w-14 h-14 rounded-full border-2 border-dashed border-indigo-200 flex items-center justify-center overflow-hidden flex-shrink-0 bg-indigo-50">
+              <div className="flex-1 overflow-y-auto p-4 space-y-5">
+                {/* Avatar */}
+                <div className="flex flex-col items-center gap-3 pt-2">
+                  <div className="relative">
+                    <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-indigo-200 flex items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-50 to-violet-50 shadow-inner">
                       {profile.avatar
                         ? <img src={profile.avatar} alt="" className="w-full h-full object-cover" />
-                        : <User className="w-6 h-6 text-indigo-300" />
+                        : <User className="w-8 h-8 text-indigo-200" />
                       }
                     </div>
-                    <div className="flex flex-col gap-1.5 flex-1">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={isUploadingAvatar || !officeId}
-                        onClick={() => avatarUploadRef.current?.click()}
-                        className="gap-2 text-xs h-8"
-                      >
-                        <Upload className="w-3.5 h-3.5" />
-                        {isUploadingAvatar ? 'جاري الرفع...' : 'رفع صورة'}
-                      </Button>
-                      {profile.avatar && (
-                        <button
-                          type="button"
-                          onClick={() => setProf({ avatar: '' })}
-                          className="text-xs text-red-400 hover:text-red-600 text-right"
-                        >
-                          حذف الصورة
-                        </button>
-                      )}
-                    </div>
+                    <button
+                      type="button"
+                      disabled={isUploadingAvatar || !officeId}
+                      onClick={() => avatarUploadRef.current?.click()}
+                      className="absolute -bottom-2 -left-2 w-8 h-8 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center shadow-md shadow-indigo-200 transition-colors disabled:opacity-50"
+                      title="رفع صورة"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                    </button>
                   </div>
-                  <input
-                    ref={avatarUploadRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    className="hidden"
-                    onChange={async e => {
-                      const file = e.target.files?.[0];
-                      if (!file || !officeId) return;
-                      setIsUploadingAvatar(true);
-                      try {
-                        const url = await officesApi.uploadLinktreeAvatar(officeId, file);
-                        setProf({ avatar: url });
-                        toast.success('تم رفع الصورة بنجاح');
-                      } catch (err: any) {
-                        toast.error(err?.message ?? 'فشل رفع الصورة');
-                      } finally {
-                        setIsUploadingAvatar(false);
-                        e.target.value = '';
-                      }
-                    }}
-                  />
+                  {profile.avatar && (
+                    <button type="button" onClick={() => setProf({ avatar: '' })}
+                      className="text-xs text-red-400 hover:text-red-600 transition-colors">
+                      حذف الصورة
+                    </button>
+                  )}
+                  {isUploadingAvatar && <p className="text-xs text-indigo-500 animate-pulse">جاري الرفع...</p>}
                 </div>
-                <div>
-                  <Label className="text-xs font-semibold text-gray-600">اسم المكتب</Label>
+                <input
+                  ref={avatarUploadRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={async e => {
+                    const file = e.target.files?.[0];
+                    if (!file || !officeId) return;
+                    setIsUploadingAvatar(true);
+                    try {
+                      const url = await officesApi.uploadLinktreeAvatar(officeId, file);
+                      setProf({ avatar: url });
+                      toast.success('تم رفع الصورة بنجاح');
+                    } catch (err: any) {
+                      toast.error(err?.message ?? 'فشل رفع الصورة');
+                    } finally {
+                      setIsUploadingAvatar(false);
+                      e.target.value = '';
+                    }
+                  }}
+                />
+
+                <div className="space-y-1.5">
+                  <Label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">اسم المكتب</Label>
                   <Input
-                    className="mt-1 text-sm"
+                    className="text-sm h-10 bg-slate-50 border-slate-200 focus:bg-white focus:border-indigo-400"
                     value={profile.name}
                     onChange={e => setProf({ name: e.target.value })}
                     dir="rtl"
+                    placeholder="اسم مكتبك العقاري"
                   />
                 </div>
-                <div>
-                  <Label className="text-xs font-semibold text-gray-600">نبذة قصيرة</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">نبذة قصيرة</Label>
                   <Textarea
-                    className="mt-1 text-sm resize-none"
+                    className="text-sm resize-none bg-slate-50 border-slate-200 focus:bg-white focus:border-indigo-400"
                     value={profile.bio}
                     onChange={e => setProf({ bio: e.target.value })}
                     rows={3}
                     dir="rtl"
                     placeholder="أضف وصفاً مختصراً لمكتبك..."
                   />
-                  <p className="text-xs text-gray-400 mt-1">{profile.bio.length}/100 حرف</p>
+                  <div className="flex justify-between">
+                    <p className="text-[11px] text-slate-400">{profile.bio.length}/100 حرف</p>
+                  </div>
                 </div>
               </div>
             )}
@@ -602,23 +627,25 @@ export function LinktreeEditor() {
             {/* ── Appearance tab ── */}
             {leftTab === 'appearance' && (
               <div className="flex-1 overflow-y-auto p-4 space-y-5">
-                {/* Background */}
-                <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">الخلفية</p>
+
+                <div className="space-y-2.5">
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">الخلفية</p>
                   <div className="grid grid-cols-4 gap-2">
                     {BG_PRESETS.map(bg => (
                       <button
                         key={bg.key}
                         onClick={() => setApp({ bg: bg.key })}
-                        className={`h-12 rounded-xl border-2 transition-all relative ${
-                          appearance.bg === bg.key ? 'border-indigo-500 scale-95' : 'border-transparent hover:scale-95'
+                        className={`h-14 rounded-2xl transition-all relative overflow-hidden ${
+                          appearance.bg === bg.key
+                            ? 'ring-2 ring-indigo-500 ring-offset-2 scale-95'
+                            : 'hover:scale-95 opacity-80 hover:opacity-100'
                         }`}
                         style={bg.style}
                         title={bg.label}
                       >
                         {appearance.bg === bg.key && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <Check className="w-4 h-4 text-white drop-shadow" />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                            <Check className="w-4 h-4 text-white drop-shadow-md" />
                           </div>
                         )}
                       </button>
@@ -626,45 +653,47 @@ export function LinktreeEditor() {
                   </div>
                 </div>
 
-                {/* Button color */}
-                <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">لون الأزرار</p>
+                <div className="w-full h-px bg-slate-100" />
+
+                <div className="space-y-2.5">
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">لون الأزرار</p>
                   <div className="flex flex-wrap gap-2">
                     {COLOR_SWATCHES.map(c => (
                       <button
                         key={c}
                         onClick={() => setApp({ btnColor: c })}
-                        className={`w-7 h-7 rounded-full border-2 transition-all ${
-                          appearance.btnColor === c ? 'border-gray-800 scale-110' : 'border-white shadow'
+                        className={`w-8 h-8 rounded-full border-2 transition-all ${
+                          appearance.btnColor === c ? 'border-indigo-600 scale-110 shadow-md' : 'border-white shadow hover:scale-110'
                         }`}
                         style={{ background: c }}
                       />
                     ))}
                   </div>
-                  <div className="flex items-center gap-2 mt-2">
-                    <div className="w-7 h-7 rounded-full border shadow" style={{ background: appearance.btnColor }} />
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full border-2 border-white shadow-md" style={{ background: appearance.btnColor }} />
                     <input
                       type="text"
                       value={appearance.btnColor}
                       onChange={e => setApp({ btnColor: e.target.value })}
-                      className="text-xs border rounded-lg px-2 py-1 w-28 font-mono"
+                      className="text-xs border border-slate-200 rounded-xl px-3 py-2 w-28 font-mono bg-slate-50 focus:outline-none focus:border-indigo-400"
                       dir="ltr"
                     />
                   </div>
                 </div>
 
-                {/* Button style */}
-                <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">شكل الأزرار</p>
+                <div className="w-full h-px bg-slate-100" />
+
+                <div className="space-y-2.5">
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">شكل الأزرار</p>
                   <div className="grid grid-cols-2 gap-2">
                     {BTN_STYLES.map(s => (
                       <button
                         key={s.key}
                         onClick={() => setApp({ btnStyle: s.key })}
-                        className={`py-2 rounded-xl border text-xs font-semibold transition-all ${
+                        className={`py-2.5 rounded-xl border-2 text-xs font-semibold transition-all ${
                           appearance.btnStyle === s.key
-                            ? 'border-indigo-400 bg-indigo-50 text-indigo-700'
-                            : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700 shadow-sm'
+                            : 'border-slate-200 text-slate-500 hover:border-slate-300 bg-white'
                         }`}
                       >
                         {s.label}
@@ -673,18 +702,17 @@ export function LinktreeEditor() {
                   </div>
                 </div>
 
-                {/* Button radius */}
-                <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">حواف الأزرار</p>
+                <div className="space-y-2.5">
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">حواف الأزرار</p>
                   <div className="grid grid-cols-4 gap-2">
                     {BTN_RADII.map(r => (
                       <button
                         key={r.key}
                         onClick={() => setApp({ btnRadius: r.key })}
-                        className={`py-2.5 border text-xs font-semibold transition-all ${
+                        className={`py-2.5 border-2 text-xs font-semibold transition-all ${
                           appearance.btnRadius === r.key
-                            ? 'border-indigo-400 bg-indigo-50 text-indigo-700'
-                            : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                            : 'border-slate-200 text-slate-500 hover:border-slate-300 bg-white'
                         }`}
                         style={{ borderRadius: r.radius }}
                       >
@@ -694,18 +722,19 @@ export function LinktreeEditor() {
                   </div>
                 </div>
 
-                {/* Font */}
-                <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">الخط</p>
+                <div className="w-full h-px bg-slate-100" />
+
+                <div className="space-y-2.5">
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">الخط</p>
                   <div className="grid grid-cols-3 gap-2">
                     {FONTS.map(f => (
                       <button
                         key={f.key}
                         onClick={() => setApp({ font: f.key })}
-                        className={`py-2 rounded-xl border text-xs font-semibold transition-all ${
+                        className={`py-2.5 rounded-xl border-2 text-xs font-semibold transition-all ${
                           appearance.font === f.key
-                            ? 'border-indigo-400 bg-indigo-50 text-indigo-700'
-                            : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                            : 'border-slate-200 text-slate-500 hover:border-slate-300 bg-white'
                         }`}
                         style={{ fontFamily: f.key === 'cairo' ? 'Cairo' : f.key === 'tajawal' ? 'Tajawal' : 'Inter' }}
                       >
@@ -719,10 +748,36 @@ export function LinktreeEditor() {
           </aside>
 
           {/* ═══ CENTER PREVIEW ═══ */}
-          <main className="flex-1 bg-gray-200 overflow-auto flex flex-col items-center justify-start py-8 px-4">
-            <p className="text-xs text-gray-400 font-medium mb-3 tracking-wide uppercase">معاينة مباشرة</p>
-            <div className="w-[375px] max-w-full rounded-3xl overflow-hidden shadow-2xl ring-4 ring-gray-300/60" style={{ minHeight: '680px' }}>
-              <Preview profile={profile} links={links} appearance={appearance} />
+          <main
+            className="flex-1 overflow-auto flex flex-col items-center justify-start py-8 px-4"
+            style={{
+              background: '#eef0f5',
+              backgroundImage: 'radial-gradient(circle, #c7d2e8 1px, transparent 1px)',
+              backgroundSize: '24px 24px',
+            }}
+          >
+            <p className="text-xs text-slate-400 font-semibold mb-4 tracking-widest uppercase">معاينة مباشرة</p>
+
+            {/* Phone mockup */}
+            <div className="relative">
+              {/* Outer shell */}
+              <div className="bg-slate-900 rounded-[3rem] p-2.5 shadow-2xl ring-1 ring-slate-700">
+                {/* Status bar notch */}
+                <div className="flex justify-center mb-1">
+                  <div className="w-20 h-5 bg-slate-800 rounded-full flex items-center justify-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-slate-600" />
+                    <div className="w-8 h-1.5 rounded-full bg-slate-700" />
+                  </div>
+                </div>
+                {/* Screen */}
+                <div className="w-[360px] rounded-[2.25rem] overflow-hidden" style={{ height: '680px' }}>
+                  <Preview profile={profile} links={links} appearance={appearance} />
+                </div>
+              </div>
+              {/* Side buttons */}
+              <div className="absolute top-20 -right-1 w-1 h-10 bg-slate-700 rounded-l-full" />
+              <div className="absolute top-36 -left-1 w-1 h-8 bg-slate-700 rounded-r-full" />
+              <div className="absolute top-48 -left-1 w-1 h-8 bg-slate-700 rounded-r-full" />
             </div>
           </main>
 
@@ -735,30 +790,21 @@ export function LinktreeEditor() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
           onClick={() => setPreviewOpen(false)}
         >
-          <div
-            className="relative flex flex-col items-center"
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Close button */}
+          <div className="relative flex flex-col items-center" onClick={e => e.stopPropagation()}>
             <button
               onClick={() => setPreviewOpen(false)}
               className="absolute -top-4 -left-4 z-10 w-9 h-9 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
             >
               <XIcon className="w-4 h-4" />
             </button>
-
-            {/* Phone frame */}
             <div className="bg-gray-900 rounded-[3rem] p-3 shadow-2xl ring-4 ring-gray-700">
-              {/* Notch */}
               <div className="flex justify-center mb-1.5">
                 <div className="w-24 h-5 bg-gray-800 rounded-full" />
               </div>
-              {/* Screen */}
               <div className="w-[360px] rounded-[2.25rem] overflow-hidden" style={{ height: '680px' }}>
                 <Preview profile={profile} links={links} appearance={appearance} />
               </div>
             </div>
-
             <p className="text-white/50 text-xs mt-4">انقر خارج الإطار للإغلاق</p>
           </div>
         </div>
